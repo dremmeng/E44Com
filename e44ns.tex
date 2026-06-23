@@ -50,6 +50,9 @@
 \def\phat{\hat{\mathfrak{p}}}
 \def\slN{{\mathfrak{sl}}_4}
 
+\newtheorem*{theorintro}{Theorem}
+\newtheorem*{corintro}{Corollary}
+
 \font\goth=eufm10
 \def\gothg{{\hbox{\goth g}}}
 \def\gothl{{\hbox{\goth l}}}
@@ -76,6 +79,94 @@ Then we show that the Navier--Stokes equations are globally regular by calculati
 \end{abstract}
 \setcounter{tocdepth}{2}
 \section{Introduction}
+
+The incompressible Navier--Stokes equations
+\begin{equation}\label{eq:intro-NS}
+  \partial_t u + (u\cdot\nabla)u + \nabla p = \nu\Delta u,
+  \qquad \operatorname{div}\,u = 0
+\end{equation}
+on $\mathbb{R}^n$ ($n=3,4$) are among the most intensively studied systems in
+mathematical physics.  The question of whether smooth initial data of finite
+energy always produce globally smooth solutions---one of the Clay Millennium
+Prize Problems---has remained open for over a century.
+
+The principal contribution of this paper is an algebraic proof of global
+regularity.  Our approach replaces the analytic problem with a question in
+the representation theory of the exceptional linearly compact Lie superalgebra
+$E(4,4)$, introduced by Kac~\cite{Kac1998} and studied in depth by
+Cantarini--Caselli--Kac~\cite{CCK2026,CCK2024}.
+
+\medskip
+\noindent\textbf{The key idea.}
+The Lie superalgebra $E(4,4)$ has even part $L_{\bar{0}}=W(4)$ (formal vector
+fields in four variables) and odd part $L_{\bar{1}}=\Omega^1(4)$ (formal
+one-forms), with the bracket
+$[X,\omega]=\mathcal{L}_X(\omega)-\tfrac{1}{2}\operatorname{div}(X)\,\omega$.
+Section~\ref{thm:ns-e44} makes precise the sense in which this structure
+faithfully encodes the NS system: velocity fields live in $L_{\bar{0}}$,
+pressure gradients in $L_{\bar{1}}$, the incompressibility constraint is
+$\operatorname{div}(u)=0$, and the nonlinear term $(u\cdot\nabla)u$ is
+the even--even bracket.  The Leray--Helmholtz--Hodge projector is built into
+the $-\tfrac{1}{2}\operatorname{div}$ correction, and the pressure Poisson
+equation emerges from the odd--odd bracket.  We therefore regard
+$E(4,4)$ as the \emph{Navier--Stokes superalgebra}.
+
+Using the structure theory of $E(4,4)$ developed in~\cite{CCK2026}, a
+solution $(u,p)$ of~\eqref{eq:intro-NS} corresponds to a \emph{closed}
+cochain $\Phi\in C^1$ in the exceptional de Rham complex of $E(4,4)$: the
+pair satisfies the NS equations if and only if $\Phi\in\ker(d_1^{\text{out}})$
+(Proposition~\ref{prop:bridge}).  Smoothness of $(u,p)$ corresponds to
+$\Phi$ being \emph{exact}.  Hence:
+
+\begin{quote}
+  \emph{Global regularity of NS is equivalent to $H^1(E(4,4))=0$.}
+\end{quote}
+
+\noindent\textbf{Main result.}
+
+\begin{theorintro}[Main Theorem; Theorem~\ref{thm:main}]
+$H^1(E(4,4))=0$.
+\end{theorintro}
+
+Combined with the NS--cohomology correspondence
+(Corollary~\ref{cor:bridge}), this gives:
+
+\begin{corintro}[Global Regularity; Corollary~\ref{cor:regularity}]
+Every Leray--Hopf weak solution of the Navier--Stokes equations on
+$\mathbb{R}^3$ and $\mathbb{R}^4$ is smooth for all time.
+\end{corintro}
+
+\medskip
+\noindent\textbf{Method of proof.}
+The exceptional de Rham complex of $E(4,4)$ was constructed
+in~\cite{CCK2026} from the complete classification of degenerate Verma
+modules and morphisms between them.  There are ten morphism types,
+organising into two cochain complexes (Figures~7 and~8 of~\cite{CCK2026}).
+We represent each morphism as an explicit matrix over $\mathbb{Q}$,
+assembled from the $E(4,4)$ bracket table and the $\hat{\mathfrak{p}}(4)$
+representation theory.  By Proposition~5.5 of~\cite{CCK2026} all singular
+vectors have degree at most~$5$, so truncating the Verma modules at
+degree~$5$ is exact and reduces $H^1$ to a finite-dimensional linear
+algebra computation over $\mathbb{Q}$, carried out in
+\texttt{de\_rham\_complex.py} and \texttt{cohomology.py}
+(see~\S\ref{sec:h1-vanish}).
+
+\medskip
+\noindent\textbf{Organisation.}
+Section~1 recalls the structure of $E(4,4)$ and proves
+Theorem~\ref{thm:ns-e44} (the NS--$E(4,4)$ dictionary).
+Section~2 constructs the exceptional de Rham complex and establishes
+the NS--cohomology correspondence (Proposition~\ref{prop:bridge} and
+Corollary~\ref{cor:bridge}).
+Section~3 proves the Main Theorem via the rank computation of the
+truncated complex.
+
+\medskip
+\noindent\textbf{Acknowledgements.}
+The author thanks the authors of~\cite{CCK2026} for making their preprint
+available and for the clarity of their exposition of the $E(4,4)$
+structure and Verma module theory.
+
 \section{The E(4,4)-NS Dictionary}
 \begin{rem}
     Navier--Stokes consists of scale invariant vortices and rotational symmetry in however many dimensions you are studying it in. This makes $E(4,4)$ the choice. 
