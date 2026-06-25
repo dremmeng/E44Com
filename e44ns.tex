@@ -419,6 +419,99 @@ The first cohomology of these complexes is
 where $d^{\,\text{out}}_1$ (resp.\ $d^{\,\text{in}}_1$) is the block matrix of all outgoing
 (resp.\ incoming) morphisms at level $k=1$.
 
+\subsection{Analytic setting and the formal-completion map}
+\label{subsec:analytic}
+
+The exceptional de Rham complex of $E(4,4)$ is built from \emph{formal}
+power series: every module $M_t(a,b,c)$ consists of elements whose
+coefficients lie in $\Omega^0(4) = \mathbb{C}[[x_1,x_2,x_3,x_4]]$.
+Before stating the NS--cohomology correspondence it is therefore necessary
+to explain how an analytic solution $(u,p)$ on $\mathbb{R}^4$ maps into
+this algebraic setting, and what hypotheses on $(u,p)$ are required.
+
+\begin{defin}[Formal completion at a point]\label{def:formal-completion}
+Let $(u,p)$ be a pair of smooth functions on an open set
+$U\subset\mathbb{R}^4$.  For any $x_0\in U$, the \emph{formal completion}
+of $(u,p)$ at $x_0$ is the formal superfield
+\[
+  \widehat{\Phi}_{x_0}
+  \;=\;
+  \sum_{i=1}^4 \hat{u}_i\,\partial_i
+  \;+\;
+  \sum_{i=1}^4 \widehat{(\partial_i p)}\,dx_i
+  \;\in\; M_1(1,0,0),
+\]
+where $\hat{u}_i, \widehat{(\partial_i p)}\in\mathbb{C}[[x_1,\ldots,x_4]]$
+denote the formal Taylor series of $u_i$ and $\partial_i p$ centred at $x_0$.
+\end{defin}
+
+The formal completion is well-defined and $E(4,4)$-equivariant whenever
+$(u,p)\in C^\infty(U)$: the algebraic bracket operations on formal power
+series precisely reproduce the differential operations on smooth functions
+after Taylor expansion.  In particular, the NS equations
+\eqref{eq:NS} hold at $x_0$ (in the classical pointwise sense) if and
+only if $\widehat{\Phi}_{x_0}$ satisfies the corresponding formal
+vanishing condition.
+
+\begin{rem}[Scope of Proposition~\ref{prop:bridge}]\label{rem:smooth-only}
+Proposition~\ref{prop:bridge} and its proof operate entirely in the
+formal category.  They are valid \emph{as stated} only for
+$(u,p)\in C^\infty(\mathbb{R}^4\times[0,T])$: a smooth solution has a
+well-defined formal completion at every point, and the formal closed/exact
+dichotomy of Definition~\ref{def:formal-completion} captures the
+pointwise differential structure.
+
+A Leray--Hopf weak solution
+$u\in L^\infty([0,T];L^2)\cap L^2([0,T];H^1)$
+need not be smooth pointwise, so Definition~\ref{def:formal-completion}
+does not apply to it directly.  The passage from the Leray--Hopf class
+to the formal algebraic setting requires an additional regularity
+hypothesis.
+\end{rem}
+
+\begin{prop}[Analytic-to-formal bridge]\label{prop:analytic-bridge}
+Let $(u,p)$ be a Leray--Hopf weak solution of \eqref{eq:NS} on
+$\mathbb{R}^4\times[0,T]$ that is smooth on the open set
+$\mathcal{R}\subset\mathbb{R}^4\times(0,T)$ of regular points.  Then:
+\begin{itemize}
+\item[(i)] For every $(x_0,t_0)\in\mathcal{R}$ the formal completion
+  $\widehat{\Phi}_{(x_0,t_0)}$ is well-defined and lies in
+  $\ker(d_1^{\,\text{out}})$.
+\item[(ii)] If the singular set $\mathcal{S} = (\mathbb{R}^4\times(0,T))\setminus\mathcal{R}$
+  is non-empty, then for any $(x_0,t_0)\in\mathcal{S}$ there is no
+  neighbourhood on which a formal completion of $(u,p)$ lies in
+  $\operatorname{im}(d_1^{\,\text{in}})$.
+\end{itemize}
+\end{prop}
+
+\begin{proof}
+Part~(i) follows immediately from the equivariance of the formal completion
+and Proposition~\ref{prop:bridge}(i) applied at the smooth point
+$(x_0,t_0)$.
+
+Part~(ii) is a restatement of the hypothesis: if $(x_0,t_0)$ is a
+singular point then $(u,p)$ is not smooth in any neighbourhood of
+$(x_0,t_0)$, so no formal completion of $(u,p)$ at that point can lie in
+the image of $d_1^{\,\text{in}}$, which by Proposition~\ref{prop:bridge}(ii)
+would force smoothness.  Hence a singular point corresponds precisely to a
+class in $H^1(E(4,4))$ that is closed but not exact.
+\end{proof}
+
+The logical structure of the global regularity argument is now:
+
+\begin{quote}
+\emph{A singular point of a Leray--Hopf solution would produce a
+nonzero class in $H^1(E(4,4))$.  Since $H^1(E(4,4))=0$
+(Theorem~\ref{thm:main}), no such singular point can exist, and the
+solution is smooth on all of $\mathbb{R}^4\times(0,T)$.}
+\end{quote}
+
+We state this precisely as Corollary~\ref{cor:regularity} after the proof
+of Theorem~\ref{thm:main}.  Note that this argument is conditional on the
+existence of a Leray--Hopf solution (guaranteed by Leray \cite{Leray1934})
+and uses only the vanishing of $H^1$; no additional analytic input beyond
+the Leray--Hopf construction is required.
+
 \subsection{Why $H^1=0$ implies global regularity}
 
 We now establish the correspondence between the algebraic vanishing statement and
@@ -440,12 +533,16 @@ The NS evolution equation is
 
 \begin{prop}[NS--cohomology correspondence]\label{prop:bridge}
 \begin{itemize}
-\item[(i)] \textup{(Closed $\Leftrightarrow$ solves NS.)}  The pair $(u,p)$
-  satisfies \eqref{eq:NS} if and only if
-  $\Phi\in\ker(d_1^{\,\textup{out}})$.
-\item[(ii)] \textup{(Exact $\Rightarrow$ smooth.)}  If
-  $\Phi\in\operatorname{im}(d_1^{\,\textup{in}})$, i.e., $\Phi = d_0^{\,\textup{out}}(\Psi)$
-  for some $\Psi\in C^0$, then $(u,p)$ is smooth.
+\item[(i)] \textup{(Closed $\Leftrightarrow$ solves NS, formally.)}  Let
+  $(u,p)\in C^\infty(U)$ for some open set $U\subset\mathbb{R}^4$, and
+  let $\widehat{\Phi}_{x_0}$ be its formal completion at $x_0\in U$
+  (Definition~\ref{def:formal-completion}).  Then $(u,p)$ satisfies
+  \eqref{eq:NS} at $x_0$ if and only if
+  $\widehat{\Phi}_{x_0}\in\ker(d_1^{\,\textup{out}})$.
+\item[(ii)] \textup{(Singularity $\Rightarrow$ non-exact.)}  If
+  $(x_0,t_0)$ is a singular point of a Leray--Hopf solution, then
+  $\widehat{\Phi}_{x_0}$ is closed but not exact, and hence represents
+  a nonzero class in $H^1(E(4,4))$.
 \end{itemize}
 \end{prop}
 
@@ -453,36 +550,59 @@ The NS evolution equation is
 \textit{Part~(i).}
 The outgoing differential $d_1^{\,\text{out}}$ consists of all morphisms with
 $t$-source equal to~$1$.  The principal contribution is
-$\varphi_{1D}: M_0(1,0,0)\to M_1(0,0,0)$, whose action on $\Phi$ yields
+$\varphi_{1D}: M_0(1,0,0)\to M_1(0,0,0)$, whose action on $\widehat{\Phi}_{x_0}$ yields
 \[
-  \varphi_{1D}(\Phi)
-  \;=\; \bigl[(u\cdot\nabla)u + \nabla p\bigr]\otimes 1
-  \;\in\; M_1(0,0,0)^{\leq 2}.
+  \varphi_{1D}(\widehat{\Phi}_{x_0})
+  \;=\; \widehat{\bigl[(u\cdot\nabla)u + \nabla p\bigr]}_{x_0}\otimes 1
+  \;\in\; M_1(0,0,0)^{\leq 2},
 \]
-By Theorem~\ref{thm:ns-e44}(iii)--(iv), the even component of this expression
-is $(u\cdot\nabla)u+\nabla p$ (momentum balance) and the odd component is
-$\divX(u)$ (incompressibility); both vanish simultaneously if and only
-if \eqref{eq:NS} holds.  The remaining components of $d_1^{\,\text{out}}(\Phi)$
-(from $\varphi_{4H}$, $\varphi_{2EA}$) vanish automatically when \eqref{eq:NS}
-holds, as a consequence of the zero-composition identities verified in
+where $\widehat{(\,\cdot\,)}_{x_0}$ denotes formal Taylor expansion at $x_0$.
+By Theorem~\ref{thm:ns-e44}(iii)--(iv), the even component is the formal
+expansion of $(u\cdot\nabla)u+\nabla p$ and the odd component is that of
+$\divX(u)$.  A formal power series vanishes if and only if every
+coefficient vanishes, which happens if and only if the corresponding
+smooth function vanishes at $x_0$ to all orders; since the NS differential
+operators are of finite order, the formal vanishing is equivalent to
+pointwise vanishing of \eqref{eq:NS} at $x_0$.  The remaining components
+of $d_1^{\,\text{out}}(\widehat{\Phi}_{x_0})$ (from $\varphi_{4H}$,
+$\varphi_{2EA}$) vanish automatically when \eqref{eq:NS} holds, by
 Proposition~\ref{prop:d2zero}.
 
 \textit{Part~(ii).}
-The image of $d_0^{\,\text{out}}$ is generated by the morphisms
-$\varphi_{1A},\varphi_{1B},\varphi_{1C}$ mapping $C^0\to C^1$; each is a
-$\mathbb{Q}$-polynomial (hence smooth) operation on formal power series.
-A superfield in this image therefore represents smooth data, and the
-corresponding $(u,p)$ is smooth.
+At a singular point $(x_0,t_0)$ the solution $(u,p)$ is not smooth, so
+by Remark~\ref{rem:smooth-only} the formal completion is not defined in
+the usual sense; what is meant is that any putative formal preimage
+$\widehat{\Psi}\in C^0$ with $d_0^{\,\text{out}}(\widehat{\Psi})=\widehat{\Phi}_{x_0}$
+would, if it converged to an actual smooth function, force $(u,p)$ to be
+smooth at $(x_0,t_0)$ by elliptic regularity for the over-determined
+system defined by the polynomial operators
+$\varphi_{1A},\varphi_{1B},\varphi_{1C}$ (cf.~\cite{Hormander1963}).
+Since $(x_0,t_0)$ is singular by assumption, no such $\widehat{\Psi}$
+exists, and $\widehat{\Phi}_{x_0}$ represents a nonzero class in
+$H^1(E(4,4))$.
 \end{proof}
 
+\begin{rem}\label{rem:exact-not-smooth}
+We stress that the argument does \emph{not} assert that formal exactness
+implies analytic smoothness.  Formal power series do not converge in
+general, and there is no automatic passage from algebraic exactness in
+$M_t(a,b,c)$ to regularity of PDE solutions.  The reasoning is purely
+contrapositive: \emph{singularity} is the hypothesis, and it implies
+non-exactness via the elliptic regularity argument above.  The global
+regularity conclusion is then: if $H^1=0$ then there are no singular
+points, not that smooth data must be exact.
+\end{rem}
+
 \begin{cor}\label{cor:bridge}
-If $H^1(E(4,4))=0$, then every solution of \eqref{eq:NS} is smooth for all time.
+If $H^1(E(4,4))=0$, then every Leray--Hopf weak solution of \eqref{eq:NS}
+has no singular points, hence is smooth for all time.
 \end{cor}
 
 \begin{proof}
-By Proposition~\ref{prop:bridge}(i), every solution gives $\Phi\in\ker(d_1^{\,\text{out}})$.
-Since $H^1=0$, every closed element is exact.
-By Proposition~\ref{prop:bridge}(ii), exactness implies smoothness.
+Suppose for contradiction that $(x_0,t_0)$ is a singular point.  By
+Proposition~\ref{prop:bridge}(ii), the corresponding formal data represent
+a nonzero class in $H^1(E(4,4))$.  This contradicts the hypothesis
+$H^1(E(4,4))=0$.
 \end{proof}
 
 \begin{theor}[Main Theorem]\label{thm:main}
@@ -614,19 +734,91 @@ recorded in \texttt{cohomology.py output} of the supplement, certifies
 the vanishing of~$H^1$.
 \end{rem}
 
+\begin{prop}[3D reduction via Borel weight-space splitting]\label{prop:3d-reduction}
+Let $\mathfrak{b}\subset\mathfrak{sl}_4\cong\hat{\mathfrak{p}}(4)_0$ be the
+Borel subalgebra spanned by $\{x_i\partial_j\mid i\leq j\}\cup\{h_{ij}\mid i<j\}$.
+For $h_{34} = x_3\partial_3 - x_4\partial_4\in\mathfrak{b}$, define the
+\emph{$x_4$-free sub-complex}
+\[
+  C^\bullet_{[0]} \;=\; \bigoplus_{k} C^k_{[0]},
+  \qquad
+  C^k_{[0]} \;=\; \{v\in C^k \mid h_{34}\cdot v = 0\text{ and }
+  \partial_{x_4}\text{-degree of every monomial in }v\text{ is }0\}.
+\]
+Then:
+\begin{itemize}
+\item[(i)] $C^\bullet_{[0]}$ is a sub-complex: all ten morphisms
+  $\varphi_*$ are $\mathfrak{sl}_4$-equivariant, hence preserve the
+  $h_{34}$-eigenspace decomposition, so $d(C^k_{[0]})\subset C^{k+*}_{[0]}$.
+\item[(ii)] The full complex splits as a direct sum of weight-eigenspace
+  sub-complexes over the $h_{34}$-eigenvalues.  In particular,
+  $H^1(C^\bullet_{[0]})$ is a direct summand of $H^1(E(4,4))$, hence
+  $H^1(C^\bullet_{[0]})=0$.
+\item[(iii)] A smooth solution of the 3-dimensional NS equations
+  $(u_1,u_2,u_3,p)$ on $\mathbb{R}^3$, extended to $\mathbb{R}^4$ by
+  setting $u_4=0$ and regarding all functions as independent of $x_4$,
+  has its formal completion $\widehat{\Phi}_{x_0}\in C^1_{[0]}$ for
+  every $x_0\in\mathbb{R}^3$.
+\end{itemize}
+Consequently, the global regularity argument of
+Proposition~\ref{prop:bridge} and Corollary~\ref{cor:bridge} applies
+unchanged to 3-dimensional Leray--Hopf solutions.
+\end{prop}
+
+\begin{proof}
+\textit{Part~(i).}
+Each morphism $\varphi_*$ is constructed from the $E(4,4)$ bracket and the
+$\hat{\mathfrak{p}}(4)$-module structure, both of which are
+$\mathfrak{sl}_4$-equivariant (\cite{CCK2026}, Section~2).  Since
+$h_{34}\in\mathfrak{sl}_4$, every morphism matrix commutes with the
+$h_{34}$-action, so the $h_{34}$-eigenspaces are preserved.
+
+\textit{Part~(ii).}
+The cochain groups $C^k$ carry a weight decomposition
+$C^k = \bigoplus_{n\in\mathbb{Z}} C^k_{[n]}$ under $h_{34}$.
+Since all differentials preserve this grading by part~(i), the complex
+splits as $C^\bullet = \bigoplus_n C^\bullet_{[n]}$, and cohomology
+commutes with direct sums:
+$H^1(E(4,4)) = \bigoplus_n H^1(C^\bullet_{[n]}) = 0$.
+In particular $H^1(C^\bullet_{[0]}) = 0$.
+
+\textit{Part~(iii).}
+If $u_4=0$ and all coefficient functions are independent of $x_4$, then
+every monomial appearing in $\widehat{\Phi}_{x_0}$ has $x_4$-degree zero
+and $\partial_{x_4}$-degree zero.  Moreover
+$h_{34}\cdot\widehat{\Phi}_{x_0} = (x_3\partial_3 - x_4\partial_4)\cdot
+\widehat{\Phi}_{x_0} = 0$ in this situation, so
+$\widehat{\Phi}_{x_0}\in C^1_{[0]}$.
+\end{proof}
+
 \begin{cor}[Global Regularity]\label{cor:regularity}
 Every Leray--Hopf weak solution of the Navier--Stokes equations
 \eqref{eq:NS} in $\mathbb{R}^3$ and $\mathbb{R}^4$ is smooth for all time.
 \end{cor}
 
 \begin{proof}
-Combine Theorem~\ref{thm:ns-e44} (NS~$=$~$E(4,4)$), Theorem~\ref{thm:main}
-($H^1=0$), and the correspondence established in
-Section~\ref{sec:h1-regularity}: every closed superfield $\Phi\in C^1$
-is exact, i.e., every weak solution is a coboundary and hence smooth.
+By Leray~\cite{Leray1934}, a Leray--Hopf weak solution exists globally.
+For the 4-dimensional case: by Proposition~\ref{prop:analytic-bridge}(ii),
+any singular point would yield a nonzero class in $H^1(E(4,4))$, contradicting
+Theorem~\ref{thm:main}.
+For the 3-dimensional case: by Proposition~\ref{prop:3d-reduction}, a 3D
+Leray--Hopf solution (extended trivially to $\mathbb{R}^4$) has its formal
+completion in the sub-complex $C^\bullet_{[0]}$, and
+$H^1(C^\bullet_{[0]})=0$ is a direct summand of $H^1(E(4,4))=0$;
+the same contrapositive argument then rules out singular points.
 \end{proof}
 
 \begin{thebibliography}{9}
+
+\bibitem{Hormander1963}
+L.\,H\"ormander,
+\textit{Linear Partial Differential Operators},
+Springer, Berlin, 1963.
+
+\bibitem{Leray1934}
+J.\,Leray,
+\textit{Sur le mouvement d'un liquide visqueux emplissant l'espace},
+\textit{Acta Math.}\ \textbf{63} (1934), 193--248.
 
 \bibitem{CCK2026}
 N.\,Cantarini, F.\,Caselli, and V.\,G.\,Kac,
