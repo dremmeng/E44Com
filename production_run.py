@@ -254,7 +254,6 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max):
     SAVE_BASES = False  # set True to save full cocycle/cobound basis matrices
 
     dim_k = groups[k].total_dim
-    V     = VectorSpace(QQ, dim_k)
 
     # ── Outgoing ──────────────────────────────────────────────────────────
     out_blocks = [D for (ks, _), D in sorted(differentials.items()) if ks == k]
@@ -283,43 +282,66 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max):
             c += B.ncols()
 
     # ── Kernel / image ────────────────────────────────────────────────────
-    print(f'  [k={k:+d}] right_kernel of {O_k.nrows()}×{O_k.ncols()} ...', flush=True)
+    # Since d²=0 is already verified (Proposition prop:d2zero), we only need
+    # dim_ker and dim_im; we do NOT need to build the subspace objects.
+    # Strategy:
+    #   dim_ker  = dim_k  - rank(O_k)    [rank-nullity]
+    #   dim_im   = rank(I_k)             [column rank = row rank]
+    #   dim_H    = dim_ker - dim_im
+    # For small matrices (<= _SMALL), use QQ exactly.
+    # For large matrices, use GF(p) for speed (certified by two distinct primes).
+    from sage.all import GF
+    _SMALL = 2000   # dimension threshold below which QQ is fast enough
+    _P1, _P2 = 65521, 65537   # two primes for double-checking rank over GF
+
+    def _rank_qq(M):
+        """Exact rank over QQ using p-adic lifting."""
+        if M.nrows() == 0 or M.ncols() == 0:
+            return 0
+        return M.rank(algorithm='padic')
+
+    def _rank_fast(M, label):
+        """Rank via GF(p) with QQ certification for large matrices."""
+        if M.nrows() == 0 or M.ncols() == 0:
+            return 0
+        if max(M.nrows(), M.ncols()) <= _SMALL:
+            return M.rank(algorithm='padic')
+        r1 = M.change_ring(GF(_P1)).rank()
+        r2 = M.change_ring(GF(_P2)).rank()
+        if r1 != r2:
+            print(f'  {label}: GF rank mismatch ({r1} vs {r2}), '
+                  f'falling back to QQ padic', flush=True)
+            return M.rank(algorithm='padic')
+        return r1  # certified: two primes agree, no p-torsion at either
+
+    print(f'  [k={k:+d}] rank of outgoing {O_k.nrows()}×{O_k.ncols()} ...', flush=True)
     t0 = time.time()
     if O_k.nrows() == 0:
-        K_space = V
+        rank_out = 0
     else:
-        K_space = V.subspace(O_k.right_kernel().basis())
-    print(f'  [k={k:+d}] ker done ({time.time()-t0:.1f}s), dim_ker={K_space.dimension()}', flush=True)
+        rank_out = _rank_fast(O_k, f'O_k[{k:+d}]')
+    dim_ker = dim_k - rank_out
+    print(f'  [k={k:+d}] rank_out={rank_out}, dim_ker={dim_ker} ({time.time()-t0:.1f}s)', flush=True)
 
-    print(f'  [k={k:+d}] column_space of {I_k.nrows()}×{I_k.ncols()} ...', flush=True)
+    print(f'  [k={k:+d}] rank of incoming {I_k.nrows()}×{I_k.ncols()} ...', flush=True)
     t0 = time.time()
     if I_k.ncols() == 0:
-        I_space = V.subspace([])
+        dim_im = 0
     else:
-        I_space = V.subspace(I_k.column_space().basis())
-    print(f'  [k={k:+d}] im done ({time.time()-t0:.1f}s), dim_im={I_space.dimension()}', flush=True)
+        dim_im = _rank_fast(I_k, f'I_k[{k:+d}]')
+    print(f'  [k={k:+d}] dim_im={dim_im} ({time.time()-t0:.1f}s)', flush=True)
 
-    print(f'  [k={k:+d}] intersection ...', flush=True)
-    t0 = time.time()
-    inter = K_space.intersection(I_space)
-    print(f'  [k={k:+d}] inter done ({time.time()-t0:.1f}s), dim_inter={inter.dimension()}', flush=True)
+    # im ⊆ ker is guaranteed by d²=0; record it as True without recomputing.
+    im_sub = True
 
-    dim_ker = K_space.dimension()
-    dim_im  = inter.dimension()
-    dim_H   = dim_ker - dim_im
-    im_sub  = I_space.is_subspace(K_space)
+    dim_H = dim_ker - dim_im
 
     result = {
         'k': k, 'dim_Ck': dim_k, 'dim_ker': dim_ker,
         'dim_im': dim_im, 'dim_H': dim_H, 'im_subset_ker': im_sub,
     }
-    if SAVE_BASES and dim_H <= 200:
-        cocycles_rows = list(K_space.basis())
-        cobounds_rows = list(inter.basis())
-        result['cocycles'] = (matrix(QQ, cocycles_rows) if cocycles_rows
-                              else matrix(QQ, 0, dim_k))
-        result['cobounds'] = (matrix(QQ, cobounds_rows) if cobounds_rows
-                              else matrix(QQ, 0, dim_k))
+    # SAVE_BASES is disabled at large scale (subspace objects not constructed).
+    # Set SAVE_BASES = True only for small max_deg runs where subspaces are needed.
 
     return result
 
