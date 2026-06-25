@@ -405,7 +405,7 @@ def _check_s21(verbose=True):
 #
 # PBW monomials at degree d: pairs (\alpha, S) with
 #   \alpha = (a_0,a_1,a_2,a_3) \in Z_{>=0}^4  (even; no restriction on powers)
-#   S ⊆ {0,1,2,3}                   (odd; each appears at most once)
+#   S \subseteq {0,1,2,3}                   (odd; each appears at most once)
 #   \Sigma\alpha_i + |S| = d
 #
 # Dimension of U(L_{-1})_d = \Sigma_{k=0}^{min(d,4)} C(d-k+3,3) \cdot C(4,k)
@@ -440,7 +440,7 @@ def _pbw_basis_at_degree(d):
 
     Each monomial is a pair  (alpha, S)  where:
       alpha = (a0,a1,a2,a3) — tuple of non-negative ints, \Sigma\alpha_i = d - |S|
-      S     = frozenset ⊆ {0,1,2,3}   (chosen odd generators)
+      S     = frozenset \subseteq {0,1,2,3}   (chosen odd generators)
       \Sigma\alpha_i + |S| = d
 
     Ordering: by (|S|, S, alpha)  for a canonical PBW enumeration.
@@ -580,6 +580,68 @@ class VermaModule:
             f"max_deg={self.max_deg}; dims=[{dims}])"
         )
 
+    # --- Spatial differentiation D_i: M[d] → M[d-1] ----------------------
+    #
+    # U(L_{-1}) is a polynomial superalgebra: polynomial in the even generators
+    # e_0,...,e_3 and exterior in the odd generators d_0,...,d_3.
+    # (L_{-1} is abelian since [L_{-1}, L_{-1}] \subseteq L_{-2} = 0 in the depth-1
+    # principal grading of E(4,4).)
+    #
+    # The derivation D_i acts on PBW monomials (\alpha, S) \otimes w by:
+    #   D_i((\alpha, S) \otimes w) = \alpha_i · (\alpha - \epsilon_i, S) \otimes w
+    # where \epsilon_i = (0,...,1,...,0) in slot i.  This is independent of the fiber
+    # and encodes \partial/\partialx_i on formal Taylor-series coefficients.
+    # ---------------------------------------------------------------------------
+
+    def action_of_ei(self, i, d):
+        """
+        Matrix of D_i = \partial/\partiale_i acting on M[d] → M[d-1].
+
+        D_i is the PBW derivation that removes one factor of the even generator
+        e_i from each monomial:
+            D_i((\alpha, S) \otimes w) = \alpha_i · (\alpha - \epsilon_i, S) \otimes w.
+
+        Parameters
+        ----------
+        i : int in {0, 1, 2, 3}
+            Index of the even L_{-1} generator.
+        d : int
+            Source degree.  Must satisfy 1 ≤ d ≤ max_deg.
+
+        Returns
+        -------
+        A  dim(d-1) \times dim(d)  matrix over QQ.
+        """
+        if d < 1 or d > self.max_deg:
+            raise ValueError(f"d={d} out of range [1, {self.max_deg}]")
+        rows = self.dim(d - 1)
+        cols = self.dim(d)
+        if rows == 0 or cols == 0:
+            return matrix(QQ, rows, cols)
+
+        mat = matrix(QQ, rows, cols)
+        pbw_d   = self.pbw[d]
+        pbw_dm1 = self.pbw[d - 1]
+        pbw_dm1_idx = {mon: j for j, mon in enumerate(pbw_dm1)}
+        dim_W   = self.dim_W
+
+        for j, (alpha, S) in enumerate(pbw_d):
+            ai = alpha[i]
+            if ai == 0:
+                continue
+            # Target monomial: decrement \alpha[i] by 1
+            new_alpha = list(alpha)
+            new_alpha[i] = ai - 1
+            new_mon = (tuple(new_alpha), S)
+            if new_mon not in pbw_dm1_idx:
+                continue
+            new_j = pbw_dm1_idx[new_mon]
+            coeff = QQ(ai)
+            for k in range(dim_W):
+                mat[new_j * dim_W + k, j * dim_W + k] += coeff
+
+        return mat
+
 
 # --- Public constructor -----------------------------------------------------
 
@@ -608,14 +670,74 @@ def M_verma(t, a, b, c, max_deg=4, e44_data=None):
 
 
 # ===========================================================================
+# Step 4 — Laplacian operator on M
+# ===========================================================================
+#
+# The formal spatial Laplacian is  \Delta = \Sigma_i D_i^2  where
+#   D_i = \partial/\partiale_i : M[d] → M[d-1]   (action_of_ei above).
+#
+# It maps  M[d] → M[d-2]  and has matrix:
+#   B(d) = \Sigma_i A_i(d-1) · A_i(d)
+# where  A_i(d) = M.action_of_ei(i, d).
+#
+# B(d) is a  dim(d-2) \times dim(d)  rational matrix.
+# ===========================================================================
+
+def laplacian_matrix(M, d):
+    """
+    Matrix of the formal Laplacian  \Delta = \Sigma_i D_i^2  on  M[d] → M[d-2].
+
+    Computes B(d) = \Sigma_i A_i(d-1) · A_i(d)  where A_i(k) = M.action_of_ei(i, k).
+
+    Parameters
+    ----------
+    M : VermaModule
+    d : int — source degree (must satisfy d >= 2)
+
+    Returns
+    -------
+    A  dim(d-2) \times dim(d)  matrix over QQ.
+    """
+    if d < 2:
+        raise ValueError(f"d={d}: Laplacian requires d >= 2")
+    if d > M.max_deg:
+        raise ValueError(f"d={d} exceeds max_deg={M.max_deg}")
+
+    rows = M.dim(d - 2)
+    cols = M.dim(d)
+    if rows == 0 or cols == 0:
+        return matrix(QQ, rows, cols)
+
+    B = matrix(QQ, rows, cols)
+    for i in range(4):
+        Ai_d    = M.action_of_ei(i, d)       # dim(d-1) \times dim(d)
+        Ai_dm1  = M.action_of_ei(i, d - 1)   # dim(d-2) \times dim(d-1)
+        B += Ai_dm1 * Ai_d
+    return B
+
+
+def laplacian_matrices(M):
+    """
+    Return a list  [None, None, B(2), B(3), ..., B(max_deg)]
+    where  B(d) = laplacian_matrix(M, d).
+
+    B(0) and B(1) are set to None (undefined / trivially zero).
+    """
+    result = [None, None]
+    for d in range(2, M.max_deg + 1):
+        result.append(laplacian_matrix(M, d))
+    return result
+
+
+# ===========================================================================
 # s2.3 — L_{<0}-action on M and commutator verification
 # ===========================================================================
 #
 # The Verma module M = U(L_{-1}) \otimes W is an E(4,4)-module.  The action of
 # L_{<0} = L_{-1} on a PBW basis element  (\alpha,S) \otimes w  at degree d is:
 #
-#   e_i \cdot ((\alpha,S) \otimes w)  =  (\alpha + ε_i, S) \otimes w      (even generator; polynomial mult)
-#   d_i \cdot ((\alpha,S) \otimes w)  =  sgn \cdot (\alpha, S∪{i}) \otimes w  (odd; ε if i ∉ S)
+#   e_i \cdot ((\alpha,S) \otimes w)  =  (\alpha + \epsilon_i, S) \otimes w      (even generator; polynomial mult)
+#   d_i \cdot ((\alpha,S) \otimes w)  =  sgn \cdot (\alpha, S\cup{i}) \otimes w  (odd; \epsilon if i ∉ S)
 #                         0                       (if i \in S)
 #
 # where sgn = (-1)^{|S ∩ {0,...,i-1}|} from the super-commutation rule.
@@ -627,7 +749,7 @@ def M_verma(t, a, b, c, max_deg=4, e44_data=None):
 #
 # The L_1 action maps M[d] \to M[d-1] via the same Leibniz rule:
 #   Y \cdot (u \otimes w) = (Y\cdotu) \otimes w + u \otimes (Y\cdotw)
-# where Y \cdot u lands in L_0 (via [L_1, L_{-1}] ⊆ L_0), and Y \cdot w = 0
+# where Y \cdot u lands in L_0 (via [L_1, L_{-1}] \subseteq L_0), and Y \cdot w = 0
 # because L_{>0} acts trivially on W (Verma module construction).
 # Then (L_0-element) acts on the remaining PBW part via another Leibniz step.
 #
@@ -681,7 +803,7 @@ def _pbw_apply_even(alpha, S, gen_idx):
 def _pbw_apply_odd(alpha, S, gen_idx):
     """
     Apply odd generator d_i (gen_idx) to PBW monomial (alpha, S).
-    Returns (alpha, S∪{i}, sign) or None if i \in S.
+    Returns (alpha, S\cup{i}, sign) or None if i \in S.
 
     Sign from super-commutation:
         d_i \cdot (dⱼ_1 ∧ ... ∧ dⱼ_k) = sgn \cdot d_i ∧ dⱼ_1 ∧ ... ∧ dⱼ_k
@@ -825,9 +947,9 @@ def _w_action_from_l0_idx(W, L0_idx):
             W_mat = e[...]  (Chevalley raising matrix)
       • Diagonal col = row = r:
             x_r \partial_r = -E_{rr}^{code} + (1/4)C,  so
-            action = εᵣ + t/4,  where
-              ε_1 = (3h_1+2h_2+h_3)/4,  ε_2 = (-h_1+2h_2+h_3)/4,
-              ε_3 = (-h_1-2h_2+h_3)/4,  ε_4 = (-h_1-2h_2-3h_3)/4.
+            action = \epsilonᵣ + t/4,  where
+              \epsilon_1 = (3h_1+2h_2+h_3)/4,  \epsilon_2 = (-h_1+2h_2+h_3)/4,
+              \epsilon_3 = (-h_1-2h_2+h_3)/4,  \epsilon_4 = (-h_1-2h_2-3h_3)/4.
             This gives:
               r=1: (3h_1+2h_2+h_3+t)/4,    r=2: (-h_1+2h_2+h_3+t)/4,
               r=3: (-h_1-2h_2+h_3+t)/4,    r=4: (-h_1-2h_2-3h_3+t)/4.
@@ -853,7 +975,7 @@ def _w_action_from_l0_idx(W, L0_idx):
     # Action on W: +e_{row,col}^{crystal}  (see derivation in docstring).
 
     if row == col:
-        # Diagonal: x_r \partial_r = -E_{rr}^{code} + (1/4)C, acts as (ε_r + t/4).
+        # Diagonal: x_r \partial_r = -E_{rr}^{code} + (1/4)C, acts as (\epsilon_r + t/4).
         r = row
         if r == 1:
             return (3 * h[1] + 2 * h[2] + h[3] + t * Id) / 4
@@ -1234,7 +1356,7 @@ def l1_action_matrix(M, L1_idx, e44_data):
                             inner_w = row_inner % M.dim_W
                             inner_alpha, inner_S_after = pbw_after[inner_j]
                             # Assemble the full result monomial:
-                            #   outer alpha + inner alpha, S_before ∪ inner_S_after
+                            #   outer alpha + inner alpha, S_before \cup inner_S_after
                             new_alpha = tuple(alpha[i] + inner_alpha[i] for i in range(4))
                             new_S = S_before | inner_S_after
                             # Validity: S_before and inner_S_after must be disjoint
@@ -1784,7 +1906,7 @@ def _check_leibniz(verbose=True):
                             res_j = row_a // dim_W
                             res_w = row_a % dim_W
                             res_alpha_a, res_S_a = M.pbw[deg_after][res_j]
-                            # Combine: alpha (even from original) + S_before ∪ res_S_a
+                            # Combine: alpha (even from original) + S_before \cup res_S_a
                             new_alpha = tuple(alpha[i] + res_alpha_a[i]
                                               for i in range(4))
                             new_S = S_before | res_S_a
