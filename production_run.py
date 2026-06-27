@@ -191,22 +191,19 @@ def phase_build(cx_type, t_min, t_max, a_max, max_deg, e44_data):
         print(f'[{ts()}] Nothing to do for Complex {cx_type}.')
         return
 
-    # Build all CochainGroups.
-    # This constructs Verma modules (phat4 for nodes in FIBER_TYPE) and caches them.
-    print(f'[{ts()}] Building CochainGroups ...')
-    t0 = time.time()
-    groups = build_groups(cx_type, t_min, t_max, a_max, max_deg, e44_data)
-    print(f'[{ts()}] Groups built in {time.time()-t0:.1f}s.  Dimensions:')
-    for k in sorted(groups):
-        g = groups[k]
-        print(f'  k={k:+d}: {len(g.nodes):2d} nodes, dim={g.total_dim:7d}')
-
-    # Compute each missing differential.
+    # Compute each missing differential, building CochainGroups lazily one
+    # pair at a time.  Do NOT call build_groups() upfront: at max_deg=5 and
+    # a_max=4 the Phat4Module action matrices alone consume ~5 GB per large
+    # node, and loading all 13 levels simultaneously exhausts all RAM.
     n_total = len(todo)
     for idx, (k, k_tar) in enumerate(todo):
         out_path = diff_path(cx_type, k, k_tar)
-        g_src = groups[k]
-        g_tar = groups[k_tar]
+
+        # Build only the two groups needed for this one differential.
+        nodes_k    = window_nodes(k,     morphisms, t_min, t_max, a_max)
+        nodes_ktar = window_nodes(k_tar, morphisms, t_min, t_max, a_max)
+        g_src = CochainGroup(k,     nodes_k,    max_deg=max_deg, e44_data=e44_data)
+        g_tar = CochainGroup(k_tar, nodes_ktar, max_deg=max_deg, e44_data=e44_data)
 
         print(f'[{ts()}] ({idx+1}/{n_total}) D_{cx_type}[{k:+d}→{k_tar:+d}]  '
               f'src_dim={g_src.total_dim}  tar_dim={g_tar.total_dim} ...',
@@ -233,6 +230,12 @@ def phase_build(cx_type, t_min, t_max, a_max, max_deg, e44_data):
         kb = os.path.getsize(out_path) // 1024
         print(f'[{ts()}]   → {D.nrows()}×{D.ncols()}, {nnz} nnz, '
               f'{kb} KB on disk, {elapsed:.1f}s', flush=True)
+
+        # Free memory: drop the groups and flush the Verma cache before
+        # constructing the next pair.  Without this, Phat4Module action
+        # matrices accumulate across all levels and exhaust RAM.
+        del g_src, g_tar, D
+        _VERMA_CACHE.clear()
 
     print(f'[{ts()}] Complex {cx_type} build phase complete.')
 

@@ -1164,7 +1164,9 @@ def l0_action_matrix(M, L0_idx, e44_data):
         # to the correct sl_4/gl_4 crystal action on the fiber W for any rep.
         # Odd L_0 generators act as zero on the sl_4 crystal fiber,
         # but nontrivially on the full \hat{p}(4) fiber (Phat4Module).
-        if hasattr(M.W, 'action_mats'):
+        if hasattr(M.W, '_get_action_mat'):
+            W_mat = M.W._get_action_mat(L0_idx)
+        elif hasattr(M.W, 'action_mats'):
             W_mat = M.W.action_mats[L0_idx]
         else:
             W_mat = _w_action_from_l0_idx(M.W, L0_idx)

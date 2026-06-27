@@ -116,18 +116,21 @@ class KacModule:
         self._sl4_cache = {}       # L0_even_idx -> matrix
         self._b_a_cache = {}       # (bi, bj, ai, aj) -> matrix
 
-        # Build action matrices for all 32 L_0 generators
-        self.action_mats = {}
-        self._build_all_actions()
+        # Action matrices are built lazily on first access via _get_action_mat().
+        # Do NOT pre-build all 32 here: for large reps (e.g. a=4, dim=2240) each
+        # matrix is ~5 GB dense and building all 32 at construction time is
+        # catastrophic when many Phat4Modules are live simultaneously.
+        self.action_mats = {}   # {L0_idx: dim x dim QQ matrix} — populated lazily
+
+    def _get_action_mat(self, L0_idx):
+        """Return the action matrix for L0_idx, building it lazily if needed."""
+        if L0_idx not in self.action_mats:
+            self.action_mats[L0_idx] = self._build_action(L0_idx)
+        return self.action_mats[L0_idx]
 
     def _flat_idx(self, subset_pos, v_idx):
         """Flat index for basis element (subset_pos, v_idx)."""
         return subset_pos * self.dim_V + v_idx
-
-    def _build_all_actions(self):
-        """Build action matrices for all 32 L_0 generators."""
-        for L0_idx in range(32):
-            self.action_mats[L0_idx] = self._build_action(L0_idx)
 
     def _build_action(self, L0_idx):
         """
