@@ -826,9 +826,18 @@ def l_minus1_action_matrix(M, gen_idx, parity):
     (gen_idx \in {0,1,2,3}, parity \in {0,1}) on M[d] \to M[d+1],
     for d = 0 ... max_deg-1.
 
-    Returns a list  mats  where  mats[d]  is a
+    Results are cached on M._lm1_cache to avoid redundant recomputation:
+    _phi_at_degree calls this once per generator per PBW monomial, so
+    without caching it is rebuilt O(n_monomials * generators) times.
+
+    Returns a list  mats  where  mats[d]  is a sparse
         dim(d+1) \times dim(d) QQ-matrix.
     """
+    if not hasattr(M, '_lm1_cache'):
+        M._lm1_cache = {}
+    key = (gen_idx, parity)
+    if key in M._lm1_cache:
+        return M._lm1_cache[key]
     mats = []
     for d in range(M.max_deg):
         rows = M.dim(d + 1)
@@ -860,6 +869,7 @@ def l_minus1_action_matrix(M, gen_idx, parity):
                 col = j * M.dim_W + k
                 mat[row, col] += sign
         mats.append(mat)
+    M._lm1_cache[key] = mats
     return mats
 
 
@@ -1011,29 +1021,40 @@ def _w_action_from_l0_idx(W, L0_idx):
             return matrix(QQ, n, n)
 
 
-def l0_action_matrix(M, L0_idx, e44_data):
+def l0_action_matrix(M, L0_idx, e44_data, max_d=None):
     """
     Build the matrix of the L_0 action of the L0_idx-th L_0 basis element
-    on M[d] \to M[d], for d = 0 ... max_deg.
+    on M[d] \to M[d], for d = 0 ... max_d (default: M.max_deg).
 
     Returns a list  mats  where  mats[d]  is a dim(d)\timesdim(d) QQ-matrix.
 
-    Requires e44_data loaded from the E44 pickle.
-
-    The L_0 element is identified with one of the 32 basis elements of L_0:
-    indices 0..15 = even (sl_4 generators); indices 16..31 = odd.
-    The sl_4 action on W_hat uses the Chevalley matrices; the central
-    element C (identified as the trace element) is handled separately.
+    Parameters
+    ----------
+    max_d : int or None
+        If given, only build matrices up to degree max_d.  This avoids
+        constructing large matrices at high degrees when only a low-degree
+        slice is needed (e.g. _compute_phi0 only needs degree sv_deg).
+        Cache is keyed by (L0_idx, max_d_actual) so partial builds are
+        stored separately from full builds.
 
     Results are memoised on M._l0_cache to avoid redundant recomputation
-    when the same L0_idx is queried many times (e.g. during L_1 annihilator
-    checks that loop over all 80 L_1 generators).
+    when the same (L0_idx, max_d) is queried many times.
     """
-    # --- Memo cache ---
+    max_d_actual = M.max_deg if max_d is None else min(max_d, M.max_deg)
+    # --- Memo cache (keyed by (L0_idx, max_d_actual)) ---
     if not hasattr(M, '_l0_cache'):
         M._l0_cache = {}
-    if L0_idx in M._l0_cache:
-        return M._l0_cache[L0_idx]
+    cache_key = (L0_idx, max_d_actual)
+    if cache_key in M._l0_cache:
+        return M._l0_cache[cache_key]
+    # Also accept a full-range result if one exists and covers our range.
+    full_key = (L0_idx, M.max_deg)
+    if full_key in M._l0_cache:
+        full = M._l0_cache[full_key]
+        if max_d_actual == M.max_deg:
+            return full
+        # Return a prefix view (no copy needed; caller only indexes [d])
+        return full
 
     L0   = e44_data['E44'][0]
     Lm1  = e44_data['E44'][-1]
@@ -1061,7 +1082,7 @@ def l0_action_matrix(M, L0_idx, e44_data):
     # the adjoint table on the degree-0 piece (which is just the W-action).
 
     mats = []
-    for d in range(M.max_deg + 1):
+    for d in range(max_d_actual + 1):
         dim_d = M.dim(d)
         if dim_d == 0:
             mats.append(matrix(QQ, 0, 0))
@@ -1185,7 +1206,7 @@ def l0_action_matrix(M, L0_idx, e44_data):
 
         mats.append(mat)
 
-    M._l0_cache[L0_idx] = mats
+    M._l0_cache[cache_key] = mats
     return mats
 
 

@@ -353,7 +353,7 @@ def w1C(t, e44_data):
     # (2) HW condition: ker(f_1) ∩ ker(f_3)
     Kw = matrix(QQ, wt_vecs)
     for f_idx in [_SL4_LOWER_L0[1], _SL4_LOWER_L0[3]]:
-        f_mat = l0_action_matrix(M, f_idx, e44_data)[1]
+        f_mat = l0_action_matrix(M, f_idx, e44_data, max_d=1)[1]
         images = Kw * f_mat.transpose()
         null = images.left_kernel().basis()
         if not null:
@@ -1442,7 +1442,7 @@ def _compute_phi0(w, M_target, sv_deg, W_source, e44_data):
     # Precompute L_0 action on M_target[sv_deg]
     l0_M = {}
     for h_idx in gen_indices:
-        l0_M[h_idx] = l0_action_matrix(M_target, h_idx, e44_data)[sv_deg]
+        l0_M[h_idx] = l0_action_matrix(M_target, h_idx, e44_data, max_d=sv_deg)[sv_deg]
 
     # Phase 1: BFS with sole-unknown heuristic.
     # For \hat{p}(4) fibers, use ONLY even generators (sl_4 part): these
@@ -1583,7 +1583,9 @@ def _phi_at_degree(M_source, M_target, sv_deg, phi0_vecs, source_deg):
     n_src = M_source.dim(source_deg)
     dim_W_src = M_source.dim_W
 
-    result = matrix(QQ, n_tar, n_src)
+    # Build as a sparse dict then construct once — avoids O(n_tar * n_src)
+    # individual QQ assignments which are catastrophically slow at large n.
+    entries = {}
     pbw_src = M_source.pbw[source_deg]
 
     for j, (alpha, S) in enumerate(pbw_src):
@@ -1592,9 +1594,13 @@ def _phi_at_degree(M_source, M_target, sv_deg, phi0_vecs, source_deg):
                 M_target, phi0_vecs[k], sv_deg, alpha, S
             )
             flat_src = j * dim_W_src + k
-            for idx in range(n_tar):
-                result[idx, flat_src] = img[idx]
-    return result
+            # img.nonzero_positions() is O(nonzeros), not O(n_tar)
+            for idx in img.nonzero_positions():
+                val = img[idx]
+                key = (idx, flat_src)
+                prev = entries.get(key)
+                entries[key] = val if prev is None else prev + val
+    return matrix(QQ, n_tar, n_src, entries, sparse=True)
 
 
 # --- Morphism constructors --------------------------------------------------
@@ -1698,7 +1704,7 @@ def phi_1C(t, e44_data, max_source_deg=1, src_e44_data=None):
     # f_1 = E_2_1 (L0 idx 8), f_3 = E_4_3 (L0 idx 2)
     Kw = matrix(QQ, wt_vecs)
     for f_idx in [_SL4_LOWER_L0[1], _SL4_LOWER_L0[3]]:
-        f_mat = l0_action_matrix(M_tar, f_idx, e44_data)[1]
+        f_mat = l0_action_matrix(M_tar, f_idx, e44_data, max_d=1)[1]
         images = Kw * f_mat.transpose()
         null = images.left_kernel().basis()
         if not null:
@@ -1772,7 +1778,7 @@ def w2DA(t, e44_data):
     # (2) HW condition: ker(f_2) ∩ ker(f_3)
     Kw = matrix(QQ, wt_vecs)
     for f_idx in [_SL4_LOWER_L0[2], _SL4_LOWER_L0[3]]:
-        f_mat = l0_action_matrix(M, f_idx, e44_data)[2]
+        f_mat = l0_action_matrix(M, f_idx, e44_data, max_d=2)[2]
         images = Kw * f_mat.transpose()
         null = images.left_kernel().basis()
         if not null:
@@ -1863,8 +1869,7 @@ def phi_1E(e44_data, max_source_deg=1, src_e44_data=None):
     L0 = e44_data['E44'][0]
     K_mat = matrix(QQ, ker)                       # rows = kernel vectors
     for l0_idx in range(len(L0)):
-        l0_mat = l0_action_matrix(M_tar, l0_idx, e44_data)[1]
-        # Restrict L_0 action to the L_1-kernel: ker × l0_mat^T \to images
+        l0_mat = l0_action_matrix(M_tar, l0_idx, e44_data, max_d=1)[1]
         images = K_mat * l0_mat.transpose()       # each row \to L_0\cdot(ker vec)
         # Find sub-kernel: vectors in ker annihilated by this L_0 gen
         sub_ker = images.left_kernel().basis()
@@ -2048,7 +2053,7 @@ def _check_s35(e44_data=None, verbose=True):
     # ── (2) L_0 equivariance (16 even generators) ──────────────────────────
     n_l0_fail = 0
     for h_idx in range(16):
-        l0_tar = l0_action_matrix(M_tar, h_idx, e44_data)[1]
+        l0_tar = l0_action_matrix(M_tar, h_idx, e44_data, max_d=1)[1]
         h_W_src = _w_action_from_l0_idx(M_src.W, h_idx)
         for k in range(M_src.dim_W):
             lhs = l0_tar * phi0[k]
@@ -2190,7 +2195,7 @@ def _verify_morphism_equivariance(name, M_src, M_tar, sv_deg, phi0,
 
     for h_idx in range(n_l0_gens):
         # Target action: l0 on M_tar[sv_deg]
-        l0_tar = l0_action_matrix(M_tar, h_idx, e44_data)[sv_deg]
+        l0_tar = l0_action_matrix(M_tar, h_idx, e44_data, max_d=sv_deg)[sv_deg]
         # Source fiber action
         if has_phat4_src:
             h_W_src = M_src.W.action_mats[h_idx]
