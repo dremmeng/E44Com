@@ -7,6 +7,7 @@
 \usepackage{amscd,amssymb,amsmath,color,stmaryrd}
 \usepackage{latexsym}
 \usepackage{booktabs}
+\usepackage{float}
 \usepackage{hyperref}
 \usepackage{accents}
 \usepackage{mathrsfs}
@@ -95,8 +96,8 @@ In this paper we show that NS sits at a fundamentally higher level of
 incompleteness, one that has not previously appeared in the theory of PDEs.
 To state it precisely we recall the complexity ladder:
 
-\medskip
-\begin{center}
+\begin{table}[h]
+\centering
 \begin{tabular}{lll}
 \toprule
 Level & Description & Known NS lower bound \\
@@ -108,8 +109,10 @@ $\Pi_1^1$ & Co-analytic & $A_\infty$ quasi-isomorphism \\
 cofinal & All of the above & $A_\infty$-wild: $E(4,4)$ module classification \\
 \bottomrule
 \end{tabular}
-\end{center}
-\medskip
+\caption{The computational complexity ladder for NS.  Each row records the
+highest level at which NS has been shown to have a lower bound.}
+\label{tab:ladder}
+\end{table}
 
 The key entries in the last two rows are new.  The $\Pi_1^1$ entry records
 that deciding whether two $A_\infty$-algebras are quasi-isomorphic is
@@ -308,7 +311,8 @@ convergence.
   The blowup time $T_{\mathrm{crit}}$, the formality depth of $\mathcal{A}$,
   and the decidability boundary for the NS classification problem are the
   same threshold, expressed in three languages:
-  \begin{center}
+  \begin{table}[H]
+  \centering
   \renewcommand{\arraystretch}{1.4}
   \begin{tabular}{lll}
   \toprule
@@ -319,7 +323,11 @@ convergence.
   Complexity & Depth-$d$ circuit: decidable & Unbounded depth: undecidable \\
   \bottomrule
   \end{tabular}
-  \end{center}
+  \caption{Three languages for the same threshold.  Each row expresses
+  the divergence of $\sum_n (n\text{-body term})$ in analytic, algebraic,
+  and computational terms.  The transition in each row is the same event.}
+  \label{tab:triple}
+  \end{table}
   In each row, the transition from left to right is the divergence of the
   same series $\sum_n (\text{$n$-body term})$.  Finite-time blowup, algebraic
   non-formality, and computational undecidability are not three separate
@@ -401,7 +409,8 @@ notion involves $A_\infty$-modules.  The tame-wild dichotomy does not apply.
 The key observation, readable directly from Complex B
 (module \texttt{de\_rham\_complex.py}):
 
-\begin{center}
+\begin{table}[h]
+\centering
 \begin{tabular}{lcc}
 \toprule
 Morphism & Degree & Acts on FAMILY\_D \\
@@ -414,7 +423,10 @@ $\phi_{3F}$ & 3 & target: $M_3(1,0,0)$ \\
 $\phi_{4H}$ & 4 & $M_{t-4}(1,0,0) \to M_t(1,0,0)$ (self-morphism) \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{Complex B morphisms acting on FAMILY\_D $= M_t(1,0,0)$.
+  Degrees 1 and 4 together force the Ext algebra to be $A_\infty$.}
+\label{tab:morphisms}
+\end{table}
 
 The FAMILY\_D module $M_t(1,0,0)$ receives morphisms in degree 1 ($\phi_{1E}$)
 and degree 4 ($\phi_{4H}$).  Therefore, in the Yoneda Ext algebra:
@@ -796,7 +808,8 @@ Blowup-Formality Theorem (Theorem~\ref{thm:blowup}).
 
 \subsection{Comparison with classical self-reference theorems}
 
-\begin{center}
+\begin{table}[h]
+\centering
 \begin{tabular}{llll}
 \toprule
 \textbf{Theorem} & \textbf{Sentence} & \textbf{Resolution} & \textbf{Type} \\
@@ -809,7 +822,11 @@ Tarski (1936) & ``This is not true in $M$.'' &
   Smoothness is \textbf{refuted} & \textbf{Refutation} \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{Classical self-reference theorems compared.  The NS Liar's Paradox
+  is the unique case where the self-referential sentence yields a
+  constructive disproof rather than unprovability or undefinability.}
+\label{tab:liar}
+\end{table}
 
 \medskip
 
