@@ -1,13 +1,13 @@
 #!/usr/bin/env sage
 """
-cohomology_h1_fast.py  —  Fast H^1 computation via n-decomposition
+cohomology_h1_fast.py  --  Fast H^1 computation via n-decomposition
 ===================================================================
 Computes H^{K_LEVEL} for Complex A and/or B by exploiting two reductions:
 
   1. Tight cochain window
      For H^1, we need only the levels that have edges incident to k=K_LEVEL:
-       Complex A (sv_deg ∈ {1,2}): levels K_LEVEL-2 .. K_LEVEL+2 = -1..3
-       Complex B (sv_deg ∈ {1,3,4}): levels K_LEVEL-4 .. K_LEVEL+4 = -3..5
+       Complex A (sv_deg in {1,2}): levels K_LEVEL-2 .. K_LEVEL+2 = -1..3
+       Complex B (sv_deg in {1,3,4}): levels K_LEVEL-4 .. K_LEVEL+4 = -3..5
      (In production_run.py the full window [-6,6] = 13 levels is used.)
 
   2. n-invariant decomposition
@@ -29,12 +29,12 @@ Computes H^{K_LEVEL} for Complex A and/or B by exploiting two reductions:
      participates.  For K_LEVEL=1 and max_deg=5, the n-slices at level 1
      have dimensions (approximately):
 
-         n=+1 (d=0): ~300 rows  — trivial
+         n=+1 (d=0): ~300 rows  -- trivial
          n= 0 (d=1): ~2.2K
          n=-1 (d=2): ~9K
          n=-2 (d=3): ~25K
          n=-3 (d=4): ~54K
-         n=-4 (d=5): ~100K  — largest, but GF(p)-feasible
+         n=-4 (d=5): ~100K  -- largest, but GF(p)-feasible
 
      compared with the full un-decomposed dimension of ~191K.
 
@@ -87,7 +87,7 @@ from de_rham_complex import (
 )
 
 # ---------------------------------------------------------------------------
-# Progress logger — writes directly to a file, bypassing Sage's stdout buffer.
+# Progress logger -- writes directly to a file, bypassing Sage's stdout buffer.
 # Sage's preparser replaces sys.stdout with a fully-buffered internal stream
 # that only flushes at process exit.  Use _log() for all progress output so
 # it is visible immediately in the log file.
@@ -139,7 +139,7 @@ def rank_certified(M, label=''):
 
 
 def tight_window_bounds(k_level, morphisms):
-    """Return (t_min_tight, t_max_tight) — the minimal window for H^{k_level}."""
+    """Return (t_min_tight, t_max_tight) -- the minimal window for H^{k_level}."""
     max_sv = max(spec.sv_deg for spec in morphisms)
     return k_level - max_sv, k_level + max_sv
 
@@ -208,8 +208,10 @@ def precompute_phi_matrices(morphisms, groups, e44_data,
             except BaseException as _exc:
                 _log(f'  !! edge {total} FAILED: {type(_exc).__name__}: {_exc}')
                 _log(traceback.format_exc())
-                if isinstance(_exc, (SystemExit, KeyboardInterrupt)):
+                if isinstance(_exc, KeyboardInterrupt):
                     raise
+                # SystemExit from Sage's sig_on() (SIGSEGV/OOM in GMP arithmetic)
+                # is treated as a skippable edge failure, not a genuine sys.exit().
                 cache[key] = None
                 fiber_cache[fiber_key] = None
                 skipped += 1
@@ -231,7 +233,7 @@ def assemble_n_slice(k_src, k_tar, d_src, d_tar,
                      g_src, g_tar, morphisms, phi_cache,
                      t_min, t_max, a_max):
     """
-    Assemble the n-slice of one differential component C^{k_src} \to C^{k_tar}
+    Assemble the n-slice of one differential component C^{k_src} to C^{k_tar}
     restricted to source PBW degree d_src and target PBW degree d_tar.
 
     n = k_src - d_src = k_tar - d_tar  (preserved by every morphism, since
@@ -290,7 +292,7 @@ def assemble_n_slice(k_src, k_tar, d_src, d_tar,
             nrows_exp = g_tar.vermas[tar_nd].dim(d_tar)
             ncols_exp = g_src.vermas[src_nd].dim(d_src)
             if block.nrows() != nrows_exp or block.ncols() != ncols_exp:
-                continue  # fiber mismatch — skip
+                continue  # fiber mismatch -- skip
 
             r0 = tar_offs[tar_nd]
             c0 = src_offs[src_nd]
@@ -349,11 +351,11 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
       d = k_level - n  (PBW degree at level k_level in this n-slice)
 
       1. Collect all incoming contributions (one per sv_deg s with k_level-s in window):
-         D^in_s: C^{k_level-s}_n \to C^{k_level}_n   (d-s) \to d
+         D^in_s: C^{k_level-s}_n to C^{k_level}_n   (d-s) to d
          Stack horizontally to form d^in_n.
 
       2. Collect all outgoing contributions (one per sv_deg s with k_level+s in window):
-         D^out_s: C^{k_level}_n \to C^{k_level+s}_n   d \to (d+s)
+         D^out_s: C^{k_level}_n to C^{k_level+s}_n   d to (d+s)
          Stack vertically to form d^out_n.
 
       3. H^k_n = (dim C^{k_level}_n - rank d^out_n) - rank d^in_n
@@ -362,7 +364,7 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
 
     Returns
     -------
-    int — dimension of H^{k_level}
+    int -- dimension of H^{k_level}
     """
     morphisms = MORPHISMS_A if cx_type == 'A' else MORPHISMS_B
     sv_degs   = sorted(set(spec.sv_deg for spec in morphisms))
@@ -372,7 +374,7 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
     t_max_eff = min(t_max_tight, t_max)
 
     _log(f'\n{"="*70}')
-    _log(f'H^{k_level}  —  Complex {cx_type}  (n-decomposition)')
+    _log(f'H^{k_level}  --  Complex {cx_type}  (n-decomposition)')
     _log(f'  Tight window: t=[{t_min_eff},{t_max_eff}]  '
           f'(full: [{t_min},{t_max}])  a_max={a_max}  max_deg={max_deg}')
     _log(f'  sv_degs: {sv_degs}')
@@ -394,14 +396,14 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
 
     g_k = groups[k_level]
 
-    # ── Pre-compute all phi matrices once ────────────────────────────────
+    # -- Pre-compute all phi matrices once --------------------------------
     _log(f'\n[{ts()}] Pre-computing phi matrices ...')
     phi_cache = precompute_phi_matrices(
         morphisms, groups, e44_data, t_min, t_max, a_max, max_deg
     )
     _log(f'[{ts()}] Done.')
 
-    # ── n-decomposition loop ──────────────────────────────────────────────
+    # -- n-decomposition loop ----------------------------------------------
     _log(f'\n[{ts()}] Computing H^{k_level} by n-slices ...\n')
 
     hdr = (f'  {"n":>4}  {"d":>3}  {"dim C_n":>9}  '
@@ -409,7 +411,7 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
            f'{"d^out shape":>22}  {"rk_out":>7}  '
            f'{"H^k_n":>7}  time')
     _log(hdr)
-    _log('  ' + '─' * (len(hdr) - 2))
+    _log('  ' + '-' * (len(hdr) - 2))
 
     total_h = 0
 
@@ -441,10 +443,10 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
             if D_in.ncols() > 0:
                 d_in_blocks.append(D_in)
 
-        # Stack horizontal to get combined d^in: C^{k-*}_n \to C^k_n
+        # Stack horizontal to get combined d^in: C^{k-*}_n to C^k_n
         d_in_combined = stack_horizontal(d_in_blocks) if d_in_blocks else None
         in_shape = (f'{d_in_combined.nrows()}x{d_in_combined.ncols()}'
-                    if d_in_combined is not None else '—')
+                    if d_in_combined is not None else '--')
         rank_in = rank_certified(d_in_combined, f'n={n} d^in') \
             if d_in_combined is not None else 0
 
@@ -466,10 +468,10 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
             if D_out.nrows() > 0:
                 d_out_blocks.append(D_out)
 
-        # Stack vertical to get combined d^out: C^k_n \to C^{k+*}_n
+        # Stack vertical to get combined d^out: C^k_n to C^{k+*}_n
         d_out_combined = stack_vertical(d_out_blocks) if d_out_blocks else None
         out_shape = (f'{d_out_combined.nrows()}x{d_out_combined.ncols()}'
-                     if d_out_combined is not None else '—')
+                     if d_out_combined is not None else '--')
         rank_out = rank_certified(d_out_combined, f'n={n} d^out') \
             if d_out_combined is not None else 0
 
@@ -482,16 +484,16 @@ def compute_hk(cx_type, e44_data, t_min=T_MIN, t_max=T_MAX,
               f'{out_shape:>22}  {rank_out:>7,}  '
               f'{h_n:>7,}  {elapsed:.1f}s')
 
-    # ── Summary ──────────────────────────────────────────────────────────
+    # -- Summary ----------------------------------------------------------
     _log(f'\n{"="*70}')
     _log(f'  H^{k_level}(Complex {cx_type}) = {total_h}')
     _log(f'{"="*70}')
 
     if total_h == 0:
-        _log(f'\n  RESULT: H^{k_level} = 0  ✓ (Theorem 1.1 holds for Complex {cx_type})')
+        _log(f'\n  RESULT: H^{k_level} = 0  [OK] (Theorem 1.1 holds for Complex {cx_type})')
     else:
         _log(f'\n  RESULT: H^{k_level} = {total_h}  '
-              f'(nonzero — review computation or increase max_deg/a_max)')
+              f'(nonzero -- review computation or increase max_deg/a_max)')
 
     return total_h
 
@@ -521,7 +523,7 @@ if __name__ == '__main__':
     T_MIN   = args.t_min
     T_MAX   = args.t_max
 
-    # Open progress log file — all _log() calls write here immediately.
+    # Open progress log file -- all _log() calls write here immediately.
     # This bypasses Sage's fully-buffered stdout wrapper.
     _log_path = args.log
     if _log_path is None:

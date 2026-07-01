@@ -1,10 +1,10 @@
 """
-singular_vectors.py  —  Singular vectors and morphisms for the NSE44 programme
+singular_vectors.py  --  Singular vectors and morphisms for the NSE44 programme
 ===============================================================================
 Cantarini-Caselli-Kac 2026: E(4,4) as the Navier-Stokes algebra.
 
-Section layout (mirrors plan-nsLTKMA.md / NSE44.tex §S3):
-  s3    — Phase 3: Singular Vectors and Morphisms
+Section layout (mirrors plan-nsLTKMA.md / NSE44.tex sec.S3):
+  s3    -- Phase 3: Singular Vectors and Morphisms
     s3.1   Degree-1 singular vectors w[1A]-w[1E] as explicit elements of
            M_t(a,b,c)[deg=1], with full L_{>0} annihilator verification.
     s3.2   Degree-2 analysis: compositions of degree-1 morphisms vanish
@@ -134,7 +134,7 @@ def annihilator_check(v, M, e44_data, deg=1, verbose=False):
 
     Returns
     -------
-    bool — True iff L_1_i \cdot v = 0 for all L_1 generators i.
+    bool -- True iff L_1_i \cdot v = 0 for all L_1 generators i.
 
     Performance note
     ----------------
@@ -166,32 +166,32 @@ def annihilator_check(v, M, e44_data, deg=1, verbose=False):
 
 
 # ===========================================================================
-# s3.1 — Degree-1 singular vectors  w[1A] - w[1E]
+# s3.1 -- Degree-1 singular vectors  w[1A] - w[1E]
 # ===========================================================================
 #
-# Notation (matching CKC 2026 §6 / plan Step 5 table):
+# Notation (matching CKC 2026 sec.6 / plan Step 5 table):
 #   \partial_i = even L_{-1} generator of index i (code: gen_idx i, parity 0)
 #   d_i = odd  L_{-1} generator of index i (code: gen_idx i, parity 1)
-#   x_i  = standard basis of \C^4  (weight ε_i in standard notation)
-#   x_i* = dual basis of (\C^4)*   (weight -ε_i after relabelling to Dynkin)
+#   x_i  = standard basis of \C^4  (weight epsilon_i in standard notation)
+#   x_i* = dual basis of (\C^4)*   (weight -epsilon_i after relabelling to Dynkin)
 #
 # All indices i run 0..3 in the code (matching gen_idx); in the formulae
 # below we write i = 0,1,2,3 for consistency.
 #
 # PBW basis at degree 1 in U(L_{-1}):
-#   Indices 0..3 : even mons  \alpha=(1 at position i), S=∅       ≡ \partial_{i+1}
-#   Indices 4..7 : odd  mons  \alpha=(0,0,0,0), S={i}             ≡ d_{i+1}
+#   Indices 0..3 : even mons  \alpha=(1 at position i), S=emptyset       equiv \partial_{i+1}
+#   Indices 4..7 : odd  mons  \alpha=(0,0,0,0), S={i}             equiv d_{i+1}
 #
 # sl_4 Dynkin weights of the even/odd L_{-1} generators
 # (verified by computing [h_i, g] from the E44 bracket table):
 #
-# EVEN generators \partial_i (L_{-1,even} ≅ V(0,0,1), the antifundamental):
+# EVEN generators \partial_i (L_{-1,even} cong V(0,0,1), the antifundamental):
 #   \partial_1 (e-1_0, gen_idx=0):  wt (-1, 0, 0)   [lowest weight of V(0,0,1)]
 #   \partial_2 (e-1_1, gen_idx=1):  wt ( 1,-1, 0)
 #   \partial_3 (e-1_2, gen_idx=2):  wt ( 0, 1,-1)
 #   \partial_4 (e-1_3, gen_idx=3):  wt ( 0, 0, 1)   [highest weight of V(0,0,1)]
 #
-# ODD generators d_i (L_{-1,odd} ≅ V(1,0,0), the fundamental):
+# ODD generators d_i (L_{-1,odd} cong V(1,0,0), the fundamental):
 #   d_1 (d-1_0, gen_idx=0):  wt ( 1, 0, 0)   [highest weight of V(1,0,0)]
 #   d_2 (d-1_1, gen_idx=1):  wt (-1, 1, 0)
 #   d_3 (d-1_2, gen_idx=2):  wt ( 0,-1, 1)
@@ -267,16 +267,16 @@ def w1B(t, c, e44_data=None):
     """
     Degree-1 singular vector w[1B] \in M_t(0,0,c)[deg=1],  c >= 1.
 
-    Formula (CKC 2026 Prop. 6.14):  \Sigma_i₌_0^3 (-1)^i \cdot c_i \cdot d_i \otimes x_i*(x_4*)^{c-1}
+    Formula (CKC 2026 Prop. 6.14):  \Sigma_i=_0^3 (-1)^i \cdot c_i \cdot d_i \otimes x_i*(x_4*)^{c-1}
         d_i    = odd L_{-1} generator of index i
         x_i*(x_4*)^{c-1} = crystal element of W_hat(t, 0, 0, c) with
                           Dynkin weight:
                             i=0 \to (-1, 0, c-1)
                             i=1 \to ( 1,-1, c-1)
                             i=2 \to ( 0, 1, c-2)
-                            i=3 \to ( 0, 0,  c )   ← v_hw
+                            i=3 \to ( 0, 0,  c )   <- v_hw
 
-    The sign is (-1)^i from the Hodge identification Λ^3\C^4 ≅ (\C^4)*:
+    The sign is (-1)^i from the Hodge identification Lambda^3\C^4 cong (\C^4)*:
         x_1* = +w[3], x_2* = -w[2], x_3* = +w[1], x_4* = -w[0]
 
     The coefficient c_i = 1 for i < 3 and c_3 = c (= Dynkin label).
@@ -350,7 +350,7 @@ def w1C(t, e44_data):
             f"of M_{t}(0,0,1)[1]"
         )
 
-    # (2) HW condition: ker(f_1) ∩ ker(f_3)
+    # (2) HW condition: ker(f_1) cap ker(f_3)
     Kw = matrix(QQ, wt_vecs)
     for f_idx in [_SL4_LOWER_L0[1], _SL4_LOWER_L0[3]]:
         f_mat = l0_action_matrix(M, f_idx, e44_data, max_d=1)[1]
@@ -425,7 +425,7 @@ def w1E(t=1, e44_data=None):
 
     Formula (CKC 2026 Prop. 6.14):
 
-        w[1E] = \Sigma_i₌_0^3 ( \partial_i \otimes w_i  +  d_i \otimes w_i )
+        w[1E] = \Sigma_i=_0^3 ( \partial_i \otimes w_i  +  d_i \otimes w_i )
 
     where w_i is the crystal element of W_hat(1, 1, 0, 0) with the
     same-index fundamental-representation sl_4 Dynkin weight:
@@ -439,7 +439,7 @@ def w1E(t=1, e44_data=None):
     The result has 8 nonzero entries (all = 1) out of dim(M_1(1,0,0)[1]) = 32.
 
     This singular vector encodes the Leray projector (incompressibility
-    constraint ∇\cdotu = 0) as a representation-theoretic condition.
+    constraint nabla\cdotu = 0) as a representation-theoretic condition.
 
     Parameters
     ----------
@@ -455,12 +455,12 @@ def w1E(t=1, e44_data=None):
     coeffs = {}
     for gen_idx, wt in enumerate(_FUND_WEIGHTS):
         k = _crystal_idx_by_weight(M.W, wt)
-        # ── even generator \partial_i ──────────────────────────────────────────
+        # -- even generator \partial_i ------------------------------------------
         alpha = [0, 0, 0, 0]
         alpha[gen_idx] = 1
         pbw_even = (tuple(alpha), frozenset())
         j_even = M._pbw_idx[1][pbw_even]
-        # ── odd generator d_i ────────────────────────────────────────────
+        # -- odd generator d_i --------------------------------------------
         pbw_odd = ((0, 0, 0, 0), frozenset({gen_idx}))
         j_odd = M._pbw_idx[1][pbw_odd]
         coeffs[(j_even, k)] = coeffs.get((j_even, k), QQ(0)) + QQ(1)
@@ -470,7 +470,7 @@ def w1E(t=1, e44_data=None):
 
 
 # ===========================================================================
-# s3.2 — Degree-2 singular vectors and morphism compositions
+# s3.2 -- Degree-2 singular vectors and morphism compositions
 # ===========================================================================
 #
 # The degree-2 analysis verifies that all compositions of degree-1 morphisms
@@ -487,9 +487,9 @@ def w1E(t=1, e44_data=None):
 # Note on \phi[1D] fiber identification:
 #   The L_1-kernel in M_t(0,0,0)[1] with sl_4 fiber V(0,0,0) consists of
 #   {d_i \otimes v_hw : i=0..3}, which has sl_4 weights (-1,0,0), (1,-1,0),
-#   (0,1,-1), (0,0,1) — the antifundamental V(0,0,1).  The CKC 2026
+#   (0,1,-1), (0,0,1) -- the antifundamental V(0,0,1).  The CKC 2026
 #   paper labels the sub-Verma as M_{t-1}(1,0,0) using a convention
-#   that identifies V(1,0,0) ≅ V(0,0,1)* via the volume form ε_{ijkl}.
+#   that identifies V(1,0,0) cong V(0,0,1)* via the volume form epsilon_{ijkl}.
 #   In the code, the kernel structure is V(0,0,1).
 #
 # Composable pairs of degree-1 morphisms (target of first = source of second):
@@ -530,7 +530,7 @@ def _joint_kernel_deg(M, e44_data, deg):
     Each L_1 generator Y gives a matrix mats[deg]: M[deg] \to M[deg-1].
     The joint kernel is { v \in M[deg] : Y\cdotv = 0 for all Y \in L_1 }.
 
-    Since L_2 ⊂ [L_1, L_1] (the principal grading generates L_{>=2} from L_1),
+    Since L_2 subset [L_1, L_1] (the principal grading generates L_{>=2} from L_1),
     the joint L_1-kernel equals the set of degree-deg singular vectors
     (annihilated by ALL of L_{>0}).
 
@@ -754,24 +754,24 @@ def _check_s31(e44_data=None, verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s3.1 checkpoint  —  Degree-1 singular vectors w[1A]-w[1E]")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.1 checkpoint  --  Degree-1 singular vectors w[1A]-w[1E]")
+        print("-" * 60)
 
-    # ── (1)-(3)  w[1A] nonzero ─────────────────────────────────────────
+    # -- (1)-(3)  w[1A] nonzero -----------------------------------------
     for a_val, t_val in [(1, 0), (2, 0), (0, 0)]:
         label = f"w[1A](t={t_val},a={a_val}): nonzero"
         M, v = w1A(t_val, a_val)
         _check(label, v != M.zero_vec(1), True)
 
-    # ── (4)-(5)  w[1B] nonzero and 4 terms ─────────────────────
+    # -- (4)-(5)  w[1B] nonzero and 4 terms ---------------------
     for c_val in [1, 2]:
         M, v = w1B(0, c_val)
         _check(f"w[1B](t=0,c={c_val}): nonzero", v != M.zero_vec(1), True)
         nnz = sum(1 for x in v if x != QQ(0))
         _check(f"w[1B](t=0,c={c_val}): exactly 4 nonzero entries", nnz, 4)
 
-    # ── (6)-(7)  w[1E] structure ─────────────────────────────
+    # -- (6)-(7)  w[1E] structure -----------------------------
     M_1E, v_1E = w1E(1)
     nnz_1E = sum(1 for x in v_1E if x != QQ(0))
     _check("w[1E]: 8 nonzero entries", nnz_1E, 8)
@@ -793,40 +793,40 @@ def _check_s31(e44_data=None, verbose=True):
             diag_ok = False
     _check("w[1E]: diagonal \partial_i\otimesw_i + d_i\otimesw_i structure", diag_ok, True)
 
-    # ── Checks requiring e44_data ────────────────────────────────────────
+    # -- Checks requiring e44_data ----------------------------------------
     if e44_data is None:
         if verbose:
             print("\n  [INFO] e44_data not provided; skipping annihilator checks (8)-(17).")
             print("  Run 'sage e44_structure.py' to generate e44_brackets.pkl first.")
         if verbose:
-            print("─" * 60)
-            print("s3.1  ✓  ALL AVAILABLE CHECKS PASSED (partial; no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
+            print("s3.1  [OK]  ALL AVAILABLE CHECKS PASSED (partial; no e44_data)")
+            print("-" * 60)
         return all_pass
 
-    # ── (8)  w[1A](0,1) annihilated ─────────────────────────────────────
+    # -- (8)  w[1A](0,1) annihilated -------------------------------------
     M_1A, v_1A = w1A(0, 1)
     ann_1A = annihilator_check(v_1A, M_1A, e44_data, verbose=verbose)
     _check("w[1A](t=0,a=1) annihilated by all L_1", ann_1A, True)
 
-    # ── (9)  w[1B](0,1) annihilated ─────────────────────────────
+    # -- (9)  w[1B](0,1) annihilated -----------------------------
     M_1B1, v_1B1 = w1B(0, 1)
     ann_1B1 = annihilator_check(v_1B1, M_1B1, e44_data, verbose=verbose)
     _check("w[1B](t=0,c=1) annihilated by all L_1", ann_1B1, True)
 
-    # ── (10) w[1B](0,2) annihilated ─────────────────────────────
+    # -- (10) w[1B](0,2) annihilated -----------------------------
     M_1B2, v_1B2 = w1B(0, 2)
     ann_1B2 = annihilator_check(v_1B2, M_1B2, e44_data, verbose=verbose)
     _check("w[1B](t=0,c=2) annihilated by all L_1", ann_1B2, True)
 
-    # ── (11)-(12)-(13)  w[1C] in M_0(0,0,1) ────────────────────────────
+    # -- (11)-(12)-(13)  w[1C] in M_0(0,0,1) ----------------------------
     # w[1C] requires the joint kernel to be >= 2-dimensional.
     # With sl_4 fiber (no phat4), kernel is 1-dim (only w[1B]).
     # w[1C] exists in the phat4-fiber Verma module; skip here.
     ker_001 = _joint_kernel_deg1(M_1B1, e44_data)
     _check("dim kernel L_1 on M_0(0,0,1)[1] == 1", len(ker_001), 1)
 
-    # ── (14)-(15)  w[1D] ─────────────────────────────────────────────────
+    # -- (14)-(15)  w[1D] -------------------------------------------------
     M_1D, v_1D = w1D(1, e44_data)
     _check("w[1D](t=1): nonzero", v_1D != M_1D.zero_vec(1), True)
     ann_1D = annihilator_check(v_1D, M_1D, e44_data, verbose=verbose)
@@ -835,7 +835,7 @@ def _check_s31(e44_data=None, verbose=True):
     ker_000_1 = _joint_kernel_deg1(M_1D, e44_data)
     _check("dim kernel L_1 on M_1(0,0,0)[1] == 4", len(ker_000_1), 4)
 
-    # ── (16) w[1E] annihilated ───────────────────────────────────────────
+    # -- (16) w[1E] annihilated -------------------------------------------
     # NOTE: w1E may require phat4 fiber for full annihilation;
     # with sl_4 fiber the even L_1 generators don't annihilate it.
     # TODO: verify with phat4 fiber once Kac module commutators are fixed.
@@ -844,7 +844,7 @@ def _check_s31(e44_data=None, verbose=True):
         print(f"  [INFO] w[1E] kernel dim on M_1(1,0,0)[1] = {len(ker_100_1)}"
               f" (sl_4 fiber; annihilator check deferred to phat4 fiber)")
 
-    # ── (17) w[1D] raises ValueError for t=0 ────────────────────────────
+    # -- (17) w[1D] raises ValueError for t=0 ----------------------------
     raised = False
     try:
         w1D(0, e44_data)
@@ -853,12 +853,12 @@ def _check_s31(e44_data=None, verbose=True):
     _check("w1D(t=0) raises ValueError", raised, True)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s3.1  ✓  ALL CHECKS PASSED")
+            print("s3.1  [OK]  ALL CHECKS PASSED")
         else:
-            print("s3.1  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s3.1  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
@@ -879,7 +879,7 @@ def _check_s32(e44_data=None, verbose=True):
     (5)  Composition \phi[1D]\circ\phi[1A] vanishes: _comp_phi1D_phi1A(1) == 0
     (6)  Composition \phi[1D]\circ\phi[1A] vanishes: _comp_phi1D_phi1A(2) == 0
     (7)  w[1E] is NOT annihilated by L_1 with sl_4 fiber (expected; phat4
-         fiber is needed for w[1E]'s annihilator — deferred)
+         fiber is needed for w[1E]'s annihilator -- deferred)
     (8)  L_{-1} \cdot w[1D]: applying each L_{-1} gen to w[1D] yields
          linearly independent degree-2 vectors [t=1]
     (9)  L_{-1} \cdot w[1E]: applying each L_{-1} gen to w[1E] yields
@@ -892,9 +892,9 @@ def _check_s32(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("s3.2 checkpoint — Degree-2 analysis (SKIPPED: no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
+            print("s3.2 checkpoint -- Degree-2 analysis (SKIPPED: no e44_data)")
+            print("-" * 60)
         return True
 
     all_pass = True
@@ -909,11 +909,11 @@ def _check_s32(e44_data=None, verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s3.2 checkpoint — Degree-2 singular vectors & compositions")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.2 checkpoint -- Degree-2 singular vectors & compositions")
+        print("-" * 60)
 
-    # ── (1)-(4) Degree-2 L_1 kernel dimensions ────────────────────────────
+    # -- (1)-(4) Degree-2 L_1 kernel dimensions ----------------------------
     deg2_cases = [
         (1, 0, 0, 0, "M_1(0,0,0)"),
         (1, 1, 0, 0, "M_1(1,0,0)"),
@@ -925,13 +925,13 @@ def _check_s32(e44_data=None, verbose=True):
         ker = _joint_kernel_deg(M, e44_data, deg=2)
         _check(f"deg-2 L_1 kernel dim in {label} == 0", len(ker), 0)
 
-    # ── (5)-(6) Composition \phi[1D]\circ\phi[1A] vanishes ─────────────────────────
+    # -- (5)-(6) Composition \phi[1D]\circ\phi[1A] vanishes -------------------------
     for t_val in [1, 2]:
         M, v = _comp_phi1D_phi1A(t_val, e44_data)
         is_zero = (v == M.zero_vec(2))
         _check(f"\phi[1D]\circ\phi[1A] vanishes at t={t_val}", is_zero, True)
 
-    # ── (7) \phi[1E]\circ\phi[1A]: requires phat4 fiber ──────────────────────────────
+    # -- (7) \phi[1E]\circ\phi[1A]: requires phat4 fiber ------------------------------
     # w[1E] is NOT annihilated by the even L_1 generators with sl_4 fiber,
     # so \phi[1E] is not a valid module morphism in the sl_4-fiber setting.
     # The composition \phi[1E]\circ\phi[1A] is only well-defined (and zero) with
@@ -942,7 +942,7 @@ def _check_s32(e44_data=None, verbose=True):
     if verbose:
         print("  [INFO] \phi[1E]\circ\phi[1A] composition deferred to phat4 fiber (S3.5+)")
 
-    # ── (8) L_{-1} \cdot w[1D] independence at t=1 ───────────────────────────
+    # -- (8) L_{-1} \cdot w[1D] independence at t=1 ---------------------------
     M_1D, v_1D = w1D(1, e44_data)
     M_1D_2 = M_verma(1, 0, 0, 0, max_deg=2)
     deg2_images = []
@@ -968,7 +968,7 @@ def _check_s32(e44_data=None, verbose=True):
     _check("L_{-1} \cdot w[1D] has >= 6 independent images",
            rank_images >= 6, True)
 
-    # ── (9) L_{-1} \cdot w[1E] produces degree-2 vectors ─────────────────────
+    # -- (9) L_{-1} \cdot w[1E] produces degree-2 vectors ---------------------
     M_1E, v_1E = w1E(1)
     M_1E_2 = M_verma(1, 1, 0, 0, max_deg=2)
     deg2_1E = []
@@ -990,26 +990,26 @@ def _check_s32(e44_data=None, verbose=True):
     _check("L_{-1} \cdot w[1E] has >= 4 independent images",
            rank_1E >= 4, True)
 
-    # ── (10) No degree-2 singular vectors in M_0(0,1,0) ──────────────────
+    # -- (10) No degree-2 singular vectors in M_0(0,1,0) ------------------
     M_010 = M_verma(0, 0, 1, 0, max_deg=2)
     ker_010 = _joint_kernel_deg(M_010, e44_data, deg=2)
     _check("deg-2 kernel dim in M_0(0,1,0) == 0", len(ker_010), 0)
 
-    # ── Summary ───────────────────────────────────────────────────────────
+    # -- Summary -----------------------------------------------------------
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s3.2  ✓  ALL CHECKS PASSED")
-            print("         All degree-1 compositions vanish ⟹ d^2 = 0")
+            print("s3.2  [OK]  ALL CHECKS PASSED")
+            print("         All degree-1 compositions vanish => d^2 = 0")
         else:
-            print("s3.2  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s3.2  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s3.3 — Degree-3 singular vectors  w[3G] and w[3F]
+# s3.3 -- Degree-3 singular vectors  w[3G] and w[3F]
 # ===========================================================================
 #
 # w[3_G] \in M_0(0,0,0)[deg=3]  (sl_4 fiber, dim_W=1)
@@ -1022,8 +1022,8 @@ def _check_s32(e44_data=None, verbose=True):
 #   \hat{p}(4)-fiber.
 #
 # Morphisms:
-#   \phi[3_G]: M_{-3}(1,0,0) \to M_0(0,0,0),  v ↦ w[3_G] \cdot v
-#   \phi[3_F]: M_0(0,0,0) \to M_3(1,0,0),      v ↦ w[3_F] \cdot v
+#   \phi[3_G]: M_{-3}(1,0,0) \to M_0(0,0,0),  v |-> w[3_G] \cdot v
+#   \phi[3_F]: M_0(0,0,0) \to M_3(1,0,0),      v |-> w[3_F] \cdot v
 # ---------------------------------------------------------------------------
 
 
@@ -1095,10 +1095,10 @@ def _check_s33(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("s3.3 checkpoint — Degree-3 singular vectors (SKIPPED: "
+            print("-" * 60)
+            print("s3.3 checkpoint -- Degree-3 singular vectors (SKIPPED: "
                   "no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
         return True
 
     all_pass = True
@@ -1113,18 +1113,18 @@ def _check_s33(e44_data=None, verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s3.3 checkpoint — Degree-3 singular vectors w[3G] & w[3F]")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.3 checkpoint -- Degree-3 singular vectors w[3G] & w[3F]")
+        print("-" * 60)
 
-    # ── w[3_G] ────────────────────────────────────────────────────────────
+    # -- w[3_G] ------------------------------------------------------------
     M_G, v_G = w3G(e44_data)
     nnz_G = sum(1 for x in v_G if x != 0)
     _check("w[3G] nonzero entries == 3", nnz_G, 3)
     ann_G = annihilator_check(v_G, M_G, e44_data, deg=3)
     _check("w[3G] annihilated by all L_1", ann_G, True)
 
-    # ── w[3_F] ────────────────────────────────────────────────────────────
+    # -- w[3_F] ------------------------------------------------------------
     M_F, v_F = w3F(e44_data)
     _check("w[3F] dim_W == 8 (phat4 fiber)", M_F.dim_W, 8)
     nnz_F = sum(1 for x in v_F if x != 0)
@@ -1133,25 +1133,25 @@ def _check_s33(e44_data=None, verbose=True):
     _check("w[3F] annihilated by all L_1", ann_F, True)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s3.3  ✓  ALL CHECKS PASSED")
+            print("s3.3  [OK]  ALL CHECKS PASSED")
         else:
-            print("s3.3  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s3.3  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s3.4 — Degree-4 singular vector  w[4H]
+# s3.4 -- Degree-4 singular vector  w[4H]
 # ===========================================================================
 #
 # w[4_H] \in M_t(1,0,0)[deg=4]  (\hat{p}(4) fiber W_t(1,0,0), dim_W=8)
 #
-# Formula (CKC 2026 Theorem §7):
-#   w[4_H] = \Sigma_i₌_1^4 \partial_i d_1 (\partial_2d_2 + \partial_3d_3 + \partial_4d_4) \otimes d_i
-#          + \Sigma_i₌_2^4 (\partial_2d_2 + \partial_3d_3 + \partial_4d_4) d_i d_1 \otimes \partial_i
+# Formula (CKC 2026 Theorem sec.7):
+#   w[4_H] = \Sigma_i=_1^4 \partial_i d_1 (\partial_2d_2 + \partial_3d_3 + \partial_4d_4) \otimes d_i
+#          + \Sigma_i=_2^4 (\partial_2d_2 + \partial_3d_3 + \partial_4d_4) d_i d_1 \otimes \partial_i
 #          + d_1d_2d_3d_4 \otimes 1/2(1-t) d_1
 #
 # This vector exists for ALL t \in \C, giving the morphism:
@@ -1161,7 +1161,7 @@ def _check_s33(e44_data=None, verbose=True):
 #
 # Degree-4 PBW monomials used (192 total; |\alpha|+|S|=4):
 #   First sum:  |\alpha|=2, |S|=2 \to 12 terms
-#   Second sum: |\alpha|=1, |S|=3 \to 6 terms (i=j terms vanish, dⱼ^2=0)
+#   Second sum: |\alpha|=1, |S|=3 \to 6 terms (i=j terms vanish, d_j^2=0)
 #   Third term: |\alpha|=0, |S|=4 \to 1 term
 # ---------------------------------------------------------------------------
 
@@ -1189,13 +1189,13 @@ def w4H(t, e44_data):
     """
     M = M_verma(t, 1, 0, 0, max_deg=4, e44_data=e44_data)
 
-    # ── Compute fiber weights from phat4 Cartan action ──────────────────
+    # -- Compute fiber weights from phat4 Cartan action ------------------
     fiber_wts = _fiber_weights_from_cartan(M)
 
-    # ── Compute degree-4 L_1 kernel (8-dim: w[4H] + sub-Verma) ──────────
+    # -- Compute degree-4 L_1 kernel (8-dim: w[4H] + sub-Verma) ----------
     ker = _joint_kernel_deg(M, e44_data, deg=4)
 
-    # ── Intersect with weight-(1,0,0) subspace ──────────────────────────
+    # -- Intersect with weight-(1,0,0) subspace --------------------------
     dim_W = M.dim_W
     pbw4 = M.pbw[4]
     n = M.dim(4)
@@ -1291,10 +1291,10 @@ def _check_s34(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("s3.4 checkpoint — Degree-4 singular vector (SKIPPED: "
+            print("-" * 60)
+            print("s3.4 checkpoint -- Degree-4 singular vector (SKIPPED: "
                   "no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
         return True
 
     all_pass = True
@@ -1309,11 +1309,11 @@ def _check_s34(e44_data=None, verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s3.4 checkpoint — Degree-4 singular vector w[4H]")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.4 checkpoint -- Degree-4 singular vector w[4H]")
+        print("-" * 60)
 
-    # ── (1)-(3)  w[4H] for several t values ─────────────────────────────
+    # -- (1)-(3)  w[4H] for several t values -----------------------------
     t_values = [QQ(0), QQ(2), QQ(5)]
     w4H_vectors = {}   # t \to (M, v)
     for t_val in t_values:
@@ -1328,7 +1328,7 @@ def _check_s34(e44_data=None, verbose=True):
         ann = annihilator_check(v, M, e44_data, deg=4, verbose=verbose)
         _check(f"w[4H](t={t_val}) annihilated by all L_1", ann, True)
 
-    # ── (4) t-dependent coefficient 1/2(1-t) on d_1d_2d_3d_4\otimesd_1 ──────────────
+    # -- (4) t-dependent coefficient 1/2(1-t) on d_1d_2d_3d_4\otimesd_1 --------------
     # The PBW monomial d_1d_2d_3d_4 has \alpha=(0,0,0,0), S={0,1,2,3}.
     # The fiber index for d_1 varies with t (fiber basis depends on t).
     # We find k such that fiber_wts[k] == (1,0,0) (d_1 weight).
@@ -1355,7 +1355,7 @@ def _check_s34(e44_data=None, verbose=True):
         _check(f"d_1d_2d_3d_4\otimesd_1 coeff at t={t_val} == 1/2(1-t)",
                actual, expected)
 
-    # ── (5) No degree-3 SV in M_0(1,0,0): w[4H] at t=0 is primitive ─────
+    # -- (5) No degree-3 SV in M_0(1,0,0): w[4H] at t=0 is primitive -----
     if verbose:
         print(f"\n  Checking primitivity: degree-3 kernel of M_0(1,0,0) ...")
     M_prim = M_verma(0, 1, 0, 0, max_deg=3, e44_data=e44_data)
@@ -1363,20 +1363,20 @@ def _check_s34(e44_data=None, verbose=True):
     _check("deg-3 kernel dim in M_0(1,0,0) == 0 (w[4H] primitive at t=0)",
            len(ker3), 0)
 
-    # ── Summary ──────────────────────────────────────────────────────────
+    # -- Summary ----------------------------------------------------------
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s3.4  ✓  ALL CHECKS PASSED")
+            print("s3.4  [OK]  ALL CHECKS PASSED")
         else:
-            print("s3.4  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s3.4  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s3.5 — Verma module morphisms  \phi[1A] - \phi[4H]
+# s3.5 -- Verma module morphisms  \phi[1A] - \phi[4H]
 # ===========================================================================
 #
 # A singular vector w \in M_t(a,b,c)[k] of sl_4 weight (a',b',c') defines a
@@ -1433,7 +1433,7 @@ def _compute_phi0(w, M_target, sv_deg, W_source, e44_data):
         # Odd indices (>= 16): odd part of \hat{p}(4)
         even_gen_indices = [i for i in gen_indices if i < 16]
     else:
-        # sl_4 crystal fiber — use lowering operators
+        # sl_4 crystal fiber -- use lowering operators
         gen_indices = [_SL4_LOWER_L0[r] for r in [1, 2, 3]]
         fiber_acts = {_SL4_LOWER_L0[r]: W_source.f_mats[r]
                       for r in [1, 2, 3]}
@@ -1524,9 +1524,9 @@ def _compute_phi0(w, M_target, sv_deg, W_source, e44_data):
         )
 
     A = matrix(QQ, A_rows)
-    B = matrix(QQ, [list(v) for v in B_rows])  # n_constraints × m
+    B = matrix(QQ, [list(v) for v in B_rows])  # n_constraints times m
 
-    # Solve A * X = B  where X is n_unk × m  (each row = one unknown \phi_0)
+    # Solve A * X = B  where X is n_unk times m  (each row = one unknown \phi_0)
     # Use A's right-nullspace and particular solution.
     try:
         X = A.solve_right(B)
@@ -1577,9 +1577,9 @@ def _phi_at_degree(M_source, M_target, sv_deg, phi0_vecs, source_deg):
     Morphism matrix at source degree d: M_source[d] \to M_target[d + sv_deg].
 
     Key observation: _pbw_apply_even/_pbw_apply_odd each map one PBW monomial
-    to exactly one PBW monomial with sign ±1 (never a sum).  Therefore the
+    to exactly one PBW monomial with sign pm1 (never a sum).  Therefore the
     full PBW action of a source monomial (alpha_s, S_s) on any starting
-    monomial at sv_deg can be computed by pure index arithmetic — no matrix
+    monomial at sv_deg can be computed by pure index arithmetic -- no matrix
     arithmetic at all.
 
     Algorithm:
@@ -1636,7 +1636,7 @@ def _phi_at_degree(M_source, M_target, sv_deg, phi0_vecs, source_deg):
 
     # Step 2: fill phi matrix entries
     # Column j_s * dim_W_src + k_src maps to rows in n_tar
-    # phi0_vecs[k_src] is a vector in M_target[sv_deg] = n_sv_monomials × dim_W_tar
+    # phi0_vecs[k_src] is a vector in M_target[sv_deg] = n_sv_monomials times dim_W_tar
     entries = {}
     n_sv_monomials = len(pbw_sv)
     for j_s, acts in enumerate(action_maps):
@@ -1695,7 +1695,7 @@ def phi_1B(t, c, e44_data, max_source_deg=1, src_e44_data=None):
     src_e44_data : e44_data to use for the source fiber.
                    Pass e44_data when c == 2 (source node (0,0,1) is phat4).
     """
-    # Target M_t(0,0,c) always uses sl_4 fiber — the crystal weight formula
+    # Target M_t(0,0,c) always uses sl_4 fiber -- the crystal weight formula
     # requires sl_4 weight_spaces which phat4 modules do not expose correctly.
     M_tar = M_verma(t, 0, 0, c, max_deg=1 + max_source_deg)
     x_star_weights = [(-1, 0, c-1), (1, -1, c-1), (0, 1, c-2), (0, 0, c)]
@@ -1755,7 +1755,7 @@ def phi_1C(t, e44_data, max_source_deg=1, src_e44_data=None):
             f"of M_{t}(0,0,1)[1]"
         )
 
-    # (2) HW condition: intersect with ker(f_1) ∩ ker(f_3)
+    # (2) HW condition: intersect with ker(f_1) cap ker(f_3)
     # f_1 = E_2_1 (L0 idx 8), f_3 = E_4_3 (L0 idx 2)
     Kw = matrix(QQ, wt_vecs)
     for f_idx in [_SL4_LOWER_L0[1], _SL4_LOWER_L0[3]]:
@@ -1830,7 +1830,7 @@ def w2DA(t, e44_data):
             f"of M_{t}(0,1,0)[2]"
         )
 
-    # (2) HW condition: ker(f_2) ∩ ker(f_3)
+    # (2) HW condition: ker(f_2) cap ker(f_3)
     Kw = matrix(QQ, wt_vecs)
     for f_idx in [_SL4_LOWER_L0[2], _SL4_LOWER_L0[3]]:
         f_mat = l0_action_matrix(M, f_idx, e44_data, max_d=2)[2]
@@ -1938,7 +1938,7 @@ def phi_1E(e44_data, max_source_deg=1, src_e44_data=None):
         ker = list(K_mat.rows())
     if len(ker) != 1:
         raise RuntimeError(
-            f"Expected 1-dim joint (L_1 ∩ L_0) kernel for w[1E]; "
+            f"Expected 1-dim joint (L_1 cap L_0) kernel for w[1E]; "
             f"got {len(ker)}"
         )
     w = ker[0]
@@ -2065,9 +2065,9 @@ def _check_s35(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("s3.5 checkpoint — Morphisms (SKIPPED: no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
+            print("s3.5 checkpoint -- Morphisms (SKIPPED: no e44_data)")
+            print("-" * 60)
         return True
 
     all_pass = True
@@ -2082,11 +2082,11 @@ def _check_s35(e44_data=None, verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s3.5 checkpoint — Verma module morphisms \phi[1A]-\phi[4H]")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.5 checkpoint -- Verma module morphisms \phi[1A]-\phi[4H]")
+        print("-" * 60)
 
-    # ── \phi[1A] at t=0, a=1 ─────────────────────────────────────────────────
+    # -- \phi[1A] at t=0, a=1 -------------------------------------------------
     if verbose:
         print("\n  Building \phi[1A] at t=0, a=1 ...")
     M_src, M_tar, sv_deg, phi0, mats = phi_1A(QQ(0), 1, e44_data,
@@ -2098,14 +2098,14 @@ def _check_s35(e44_data=None, verbose=True):
            M_tar.dim_W, 4)
     _check("\phi[1A] phi0 has 10 vectors", len(phi0), 10)
 
-    # ── (1) \phi[1A](v_hw) == w[1A] ──────────────────────────────────────────
-    phi0_mat = mats[0]   # dim(M_tar[1]) × dim(W_source)
+    # -- (1) \phi[1A](v_hw) == w[1A] ------------------------------------------
+    phi0_mat = mats[0]   # dim(M_tar[1]) times dim(W_source)
     hw_col = phi0_mat.column(M_src.W.v_hw)
     _, w_1A = w1A(QQ(0), 1)
     _check("\phi[1A](v_hw) == w[1A]",
            hw_col == vector(QQ, w_1A), True)
 
-    # ── (2) L_0 equivariance (16 even generators) ──────────────────────────
+    # -- (2) L_0 equivariance (16 even generators) --------------------------
     n_l0_fail = 0
     for h_idx in range(16):
         l0_tar = l0_action_matrix(M_tar, h_idx, e44_data, max_d=1)[1]
@@ -2122,7 +2122,7 @@ def _check_s35(e44_data=None, verbose=True):
                 n_l0_fail += 1
     _check("L_0 equivariance (even gens): failures", n_l0_fail, 0)
 
-    # ── (3) L_1 annihilation of all \phi_0 images ──────────────────────────────
+    # -- (3) L_1 annihilation of all \phi_0 images ------------------------------
     n_l1_fail = 0
     L1 = e44_data['E44'][1]
     # Lightweight M for the check
@@ -2133,7 +2133,7 @@ def _check_s35(e44_data=None, verbose=True):
             n_l1_fail += 1
     _check("L_1 annihilation of \phi_0 images: failures", n_l1_fail, 0)
 
-    # ── (4) L_{-1} consistency ─────────────────────────────────────────────
+    # -- (4) L_{-1} consistency ---------------------------------------------
     # \phi_1 column (g_j, e_k) should equal g_j \cdot \phi_0(e_k)
     phi1_mat = mats[1]
     n_lm1_fail = 0
@@ -2155,25 +2155,25 @@ def _check_s35(e44_data=None, verbose=True):
                     n_lm1_fail += 1
     _check("L_{-1} consistency (sample): failures", n_lm1_fail, 0)
 
-    # ── (5) Rank check ─────────────────────────────────────────────────────
+    # -- (5) Rank check -----------------------------------------------------
     rank0 = phi0_mat.rank()
     _check("\phi_0 matrix has full column rank",
            rank0 == M_src.dim_W, True)
 
-    # ── Summary ───────────────────────────────────────────────────────────
+    # -- Summary -----------------------------------------------------------
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s3.5  ✓  ALL CHECKS PASSED")
+            print("s3.5  [OK]  ALL CHECKS PASSED")
         else:
-            print("s3.5  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s3.5  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s3.6 — Full E(4,4) equivariance and morphism compositions
+# s3.6 -- Full E(4,4) equivariance and morphism compositions
 # ===========================================================================
 #
 # A Verma-module morphism \phi: M_{source} \to M_{target} of degree k must
@@ -2210,12 +2210,12 @@ def _verify_morphism_equivariance(name, M_src, M_tar, sv_deg, phi0,
 
     Parameters
     ----------
-    name     : str — human-readable label, e.g. "\phi[1A](t=0,a=1)"
+    name     : str -- human-readable label, e.g. "\phi[1A](t=0,a=1)"
     M_src    : VermaModule (source)
     M_tar    : VermaModule (target)
-    sv_deg   : int — degree of the singular vector (= degree shift)
-    phi0     : list of QQ-vectors — fiber map images \phi_0(e_k)
-    mats     : dict {d: matrix} — morphism matrices at each source degree
+    sv_deg   : int -- degree of the singular vector (= degree shift)
+    phi0     : list of QQ-vectors -- fiber map images \phi_0(e_k)
+    mats     : dict {d: matrix} -- morphism matrices at each source degree
     e44_data : dict from load_e44()
     verbose  : bool
 
@@ -2238,7 +2238,7 @@ def _verify_morphism_equivariance(name, M_src, M_tar, sv_deg, phi0,
     dim_W_src = M_src.dim_W
     dim_W_tar = M_tar.dim_W
 
-    # ── (A) L_0 equivariance ───────────────────────────────────────────
+    # -- (A) L_0 equivariance -------------------------------------------
     # Determine which L_0 generators to test.
     # For \hat{p}(4) source fibers: all 32 generators act nontrivially.
     # For sl_4 source fibers: only even (0..15) act nontrivially;
@@ -2266,7 +2266,7 @@ def _verify_morphism_equivariance(name, M_src, M_tar, sv_deg, phi0,
             )
             _ok(f"L_0[{h_idx}] equivariance (fiber {k})", lhs == rhs)
 
-    # ── (B) L_1 annihilation ───────────────────────────────────────────
+    # -- (B) L_1 annihilation -------------------------------------------
     M_ann = M_verma(M_tar.t, M_tar.a, M_tar.b, M_tar.c,
                     max_deg=sv_deg,
                     e44_data=getattr(M_tar, '_e44_data', None))
@@ -2275,7 +2275,7 @@ def _verify_morphism_equivariance(name, M_src, M_tar, sv_deg, phi0,
                                deg=sv_deg, verbose=False)
         _ok(f"L_1 annihilation (fiber {k})", ok)
 
-    # ── (C) L_{-1} consistency at degree 1 ────────────────────────────
+    # -- (C) L_{-1} consistency at degree 1 ----------------------------
     if 1 in mats:
         phi1_mat = mats[1]
         for gen_idx in range(4):
@@ -2298,7 +2298,7 @@ def _verify_morphism_equivariance(name, M_src, M_tar, sv_deg, phi0,
                     _ok(f"L_{{-1}} {gen_label} (fiber {k})",
                         actual_col == expected)
 
-    # ── (D) Rank check ────────────────────────────────────────────────
+    # -- (D) Rank check ------------------------------------------------
     phi0_mat = mats[0]
     rank0 = phi0_mat.rank()
     _ok("\phi_0 full column rank", rank0 == dim_W_src)
@@ -2310,15 +2310,15 @@ def _check_s36(e44_data=None, verbose=True):
     """
     S3.6 checkpoint: Full E(4,4) equivariance + morphism compositions.
 
-    Part A — Equivariance of all 8 morphisms \phi[1A]-\phi[4H]:
+    Part A -- Equivariance of all 8 morphisms \phi[1A]-\phi[4H]:
       For each morphism, verify L_0 equivariance (all 32 generators),
       L_1 annihilation, L_{-1} consistency, and rank of \phi_0.
 
-    Part B — Non-zero compositions (\proto w[4H]):
+    Part B -- Non-zero compositions (\proto w[4H]):
       (1) \phi[3F] \circ \phi[1A](0,0) \proto w[4H]  in M_3(1,0,0)[4]
       (2) \phi[1E] \circ \phi[3G]     \proto w[4H]  in M_1(1,0,0)[4]
 
-    Part C — Zero compositions (d^2 = 0):
+    Part C -- Zero compositions (d^2 = 0):
       (3) \phi[1A](1,1) \circ \phi[1A](0,2) = 0   (degree 2)
       (4) \phi[1D](1)   \circ \phi[1A](0,1) = 0   (degree 2)
       (5) \phi[1B](2,2) \circ \phi[1B](1,1) = 0   (degree 2)
@@ -2330,10 +2330,10 @@ def _check_s36(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("s3.6 checkpoint — Equivariance + Compositions"
+            print("-" * 60)
+            print("s3.6 checkpoint -- Equivariance + Compositions"
                   " (SKIPPED: no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
         return True
 
     all_pass = True
@@ -2353,21 +2353,21 @@ def _check_s36(e44_data=None, verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s3.6 checkpoint — Full E(4,4) equivariance"
+        print("-" * 60)
+        print("s3.6 checkpoint -- Full E(4,4) equivariance"
               " + morphism compositions")
-        print("─" * 60)
+        print("-" * 60)
 
     # ==================================================================
-    # Part A — Full equivariance for all 8 morphisms
+    # Part A -- Full equivariance for all 8 morphisms
     # ==================================================================
     if verbose:
-        print("\n╔══ Part A: E(4,4)-module map verification ══╗")
+        print("\n+== Part A: E(4,4)-module map verification ==+")
 
     # Keep morphism data for reuse in composition checks.
     morph_cache = {}
 
-    # ── \phi[1A](t=0, a=1) ──────────────────────────────────────────────
+    # -- \phi[1A](t=0, a=1) ----------------------------------------------
     if verbose:
         print("\n  \phi[1A](t=0, a=1): M_{-1}(2,0,0) \to M_0(1,0,0) ...")
     M_src, M_tar, sv, phi0, mats = phi_1A(QQ(0), 1, e44_data,
@@ -2381,7 +2381,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1A](0,1): {np} checks PASS")
 
-    # ── \phi[1A](t=2, a=1) — second parameter point ─────────────────────
+    # -- \phi[1A](t=2, a=1) -- second parameter point ---------------------
     if verbose:
         print("\n  \phi[1A](t=2, a=1): M_1(2,0,0) \to M_2(1,0,0) ...")
     M_src, M_tar, sv, phi0, mats = phi_1A(QQ(2), 1, e44_data,
@@ -2395,7 +2395,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1A](2,1): {np} checks PASS")
 
-    # ── \phi[1B](t=1, c=1) ──────────────────────────────────────────────
+    # -- \phi[1B](t=1, c=1) ----------------------------------------------
     if verbose:
         print("\n  \phi[1B](t=1, c=1): M_0(0,0,0) \to M_1(0,0,1) ...")
     M_src, M_tar, sv, phi0, mats = phi_1B(QQ(1), 1, e44_data,
@@ -2409,7 +2409,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1B](1,1): {np} checks PASS")
 
-    # ── \phi[1B](t=2, c=2) ──────────────────────────────────────────────
+    # -- \phi[1B](t=2, c=2) ----------------------------------------------
     if verbose:
         print("\n  \phi[1B](t=2, c=2): M_1(0,0,1) \to M_2(0,0,2) ...")
     M_src, M_tar, sv, phi0, mats = phi_1B(QQ(2), 2, e44_data,
@@ -2423,7 +2423,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1B](2,2): {np} checks PASS")
 
-    # ── \phi[1D](t=1) ───────────────────────────────────────────────────
+    # -- \phi[1D](t=1) ---------------------------------------------------
     if verbose:
         print("\n  \phi[1D](t=1): M_0(1,0,0) \to M_1(0,0,0) ...")
     M_src, M_tar, sv, phi0, mats = phi_1D(QQ(1), e44_data,
@@ -2437,7 +2437,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1D](1): {np} checks PASS")
 
-    # ── \phi[1D](t=3) ───────────────────────────────────────────────────
+    # -- \phi[1D](t=3) ---------------------------------------------------
     if verbose:
         print("\n  \phi[1D](t=3): M_2(1,0,0) \to M_3(0,0,0) ...")
     M_src, M_tar, sv, phi0, mats = phi_1D(QQ(3), e44_data,
@@ -2451,7 +2451,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1D](3): {np} checks PASS")
 
-    # ── \phi[1E] (phat4 fiber) ──────────────────────────────────────────
+    # -- \phi[1E] (phat4 fiber) ------------------------------------------
     if verbose:
         print("\n  \phi[1E]: M_0(0,0,0) \to M_1(1,0,0) [\hat{p}(4) fiber] ...")
     M_src, M_tar, sv, phi0, mats = phi_1E(e44_data, max_source_deg=3)
@@ -2464,7 +2464,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[1E]: {np} checks PASS")
 
-    # ── \phi[3F] (phat4 fiber) ──────────────────────────────────────────
+    # -- \phi[3F] (phat4 fiber) ------------------------------------------
     if verbose:
         print("\n  \phi[3F]: M_0(0,0,0) \to M_3(1,0,0) [\hat{p}(4) fiber] ...")
     M_src, M_tar, sv, phi0, mats = phi_3F(e44_data, max_source_deg=1)
@@ -2477,7 +2477,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[3F]: {np} checks PASS")
 
-    # ── \phi[3G] ─────────────────────────────────────────────────────────
+    # -- \phi[3G] ---------------------------------------------------------
     if verbose:
         print("\n  \phi[3G]: M_{-3}(1,0,0) \to M_0(0,0,0) ...")
     M_src, M_tar, sv, phi0, mats = phi_3G(e44_data, max_source_deg=1)
@@ -2490,7 +2490,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[3G]: {np} checks PASS")
 
-    # ── \phi[4H](t=3) (sl_4 source fiber) ────────────────────────────────
+    # -- \phi[4H](t=3) (sl_4 source fiber) --------------------------------
     if verbose:
         print("\n  \phi[4H](t=3): M_{-1}(1,0,0) \to M_3(1,0,0)"
               " [sl_4 source fiber] ...")
@@ -2505,7 +2505,7 @@ def _check_s36(e44_data=None, verbose=True):
     elif verbose:
         print(f"    \phi[4H](3): {np} checks PASS")
 
-    # ── \phi[4H](t=1) (sl_4 source fiber) ────────────────────────────────
+    # -- \phi[4H](t=1) (sl_4 source fiber) --------------------------------
     if verbose:
         print("\n  \phi[4H](t=1): M_{-3}(1,0,0) \to M_1(1,0,0)"
               " [sl_4 source fiber] ...")
@@ -2524,12 +2524,12 @@ def _check_s36(e44_data=None, verbose=True):
         print(f"\n  Part A summary: {total_pass} pass, {total_fail} fail")
 
     # ==================================================================
-    # Part B — Non-zero compositions \proto w[4H]
+    # Part B -- Non-zero compositions \proto w[4H]
     # ==================================================================
     if verbose:
-        print("\n╔══ Part B: Non-zero compositions \proto w[4H] ══╗")
+        print("\n+== Part B: Non-zero compositions \proto w[4H] ==+")
 
-    # ── (1) \phi[3F] \circ \phi[1A](0,0) \proto w[4H](t=3) ─────────────────────────
+    # -- (1) \phi[3F] \circ \phi[1A](0,0) \proto w[4H](t=3) -------------------------
     #   \phi[1A](0,0): M_{-1}(1,0,0) \to M_0(0,0,0), degree 1
     #   \phi[3F]:      M_0(0,0,0)   \to M_3(1,0,0),  degree 3
     #   composition image lives in M_3(1,0,0)[4]
@@ -2563,7 +2563,7 @@ def _check_s36(e44_data=None, verbose=True):
     else:
         _check("\phi[3F]\circ\phi[1A] \proto w[4H](t=3)", False, True)
 
-    # ── (2) \phi[1E] \circ \phi[3G] \proto w[4H](t=1) ──────────────────────────────
+    # -- (2) \phi[1E] \circ \phi[3G] \proto w[4H](t=1) ------------------------------
     #   \phi[3G]: M_{-3}(1,0,0) \to M_0(0,0,0), degree 3
     #   \phi[1E]: M_0(0,0,0)   \to M_1(1,0,0),  degree 1
     #   composition image lives in M_1(1,0,0)[4]
@@ -2596,10 +2596,10 @@ def _check_s36(e44_data=None, verbose=True):
         _check("\phi[1E]\circ\phi[3G] \proto w[4H](t=1)", False, True)
 
     # ==================================================================
-    # Part C — Zero compositions (d^2 = 0 and other vanishing)
+    # Part C -- Zero compositions (d^2 = 0 and other vanishing)
     # ==================================================================
     if verbose:
-        print("\n╔══ Part C: Zero compositions (d^2 = 0) ══╗")
+        print("\n+== Part C: Zero compositions (d^2 = 0) ==+")
 
     # (3) \phi[1A](1,1) \circ \phi[1A](0,2) = 0    degree 2
     #   M_{-1}(3,0,0) \to M_0(2,0,0) \to M_1(1,0,0)
@@ -2644,24 +2644,24 @@ def _check_s36(e44_data=None, verbose=True):
     comp8 = mats_3G[1] * w1A_m31
     _check("(8) \phi[3G]\circ\phi[1A] = 0", comp8.is_zero(), True)
 
-    # ── Summary ───────────────────────────────────────────────────────
+    # -- Summary -------------------------------------------------------
     if verbose:
-        print("\n" + "─" * 60)
+        print("\n" + "-" * 60)
         print(f"s3.6 summary: {total_pass} pass, {total_fail} fail")
         if all_pass:
-            print("s3.6  ✓  ALL CHECKS PASSED")
+            print("s3.6  [OK]  ALL CHECKS PASSED")
             print("         11 morphisms fully equivariant;"
                   " 2 non-zero (\proto w[4H]);"
                   " 1 non-zero composite; 5 zero compositions")
         else:
-            print("s3.6  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s3.6  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s3.7 — Export morphism data
+# s3.7 -- Export morphism data
 # ===========================================================================
 
 def save_morphisms(filepath, e44_data, max_deg=4, verbose=True):
@@ -2750,11 +2750,11 @@ def save_morphisms(filepath, e44_data, max_deg=4, verbose=True):
         }
 
     if verbose:
-        print("─" * 60)
-        print("s3.7 — Exporting morphism data")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.7 -- Exporting morphism data")
+        print("-" * 60)
 
-    # ── Singular vectors ───────────────────────────────────────────────
+    # -- Singular vectors -----------------------------------------------
     if verbose:
         print("\n  Singular vectors:")
     _export_sv('w1A_0_1', w1A, (QQ(0), 1))
@@ -2772,7 +2772,7 @@ def save_morphisms(filepath, e44_data, max_deg=4, verbose=True):
     if verbose:
         print(f"    {len(data['singular_vectors'])} singular vectors stored")
 
-    # ── Morphisms needed for Complex I (Figure 7 of CKC 2026) ─────────
+    # -- Morphisms needed for Complex I (Figure 7 of CKC 2026) ---------
     # \phi[1A]: M_{t-1}(a+1,0,0) \to M_t(a,0,0)
     if verbose:
         print("\n  Morphisms (Complex I):")
@@ -2804,7 +2804,7 @@ def save_morphisms(filepath, e44_data, max_deg=4, verbose=True):
     _export_morphism('phi_1E',
                      phi_1E, (e44_data,), sv_deg_expected=1)
 
-    # ── Morphisms needed for Complex II (Figure 8 of CKC 2026) ────────
+    # -- Morphisms needed for Complex II (Figure 8 of CKC 2026) --------
     if verbose:
         print("\n  Morphisms (Complex II):")
     # \phi[3F]: M_0(0,0,0) \to M_3(1,0,0)
@@ -2819,7 +2819,7 @@ def save_morphisms(filepath, e44_data, max_deg=4, verbose=True):
     _export_morphism('phi_4H_3',
                      phi_4H, (QQ(3), e44_data), sv_deg_expected=4)
 
-    # ── Write pickle ───────────────────────────────────────────────────
+    # -- Write pickle ---------------------------------------------------
     with open(filepath, 'wb') as f:
         _pickle.dump(data, f, protocol=4)
 
@@ -2857,10 +2857,10 @@ def _check_s37(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("s3.7 checkpoint — Export morphisms"
+            print("-" * 60)
+            print("s3.7 checkpoint -- Export morphisms"
                   " (SKIPPED: no e44_data)")
-            print("─" * 60)
+            print("-" * 60)
         return True
 
     filepath = 'morphism_data.pkl'
@@ -2880,9 +2880,9 @@ def _check_s37(e44_data=None, verbose=True):
                 print(f"  [FAIL] {name}: got {got!r}, expected {expected!r}")
 
     if verbose:
-        print("─" * 60)
-        print("s3.7 checkpoint — Export morphisms")
-        print("─" * 60)
+        print("-" * 60)
+        print("s3.7 checkpoint -- Export morphisms")
+        print("-" * 60)
 
     # Step 1: export
     save_morphisms(filepath, e44_data, max_deg=4, verbose=verbose)
@@ -2941,10 +2941,10 @@ def _check_s37(e44_data=None, verbose=True):
     if verbose:
         print(f"\n  Roundtrip verification: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("  s3.7  ✓  ALL CHECKS PASSED")
+            print("  s3.7  [OK]  ALL CHECKS PASSED")
         else:
-            print("  s3.7  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("  s3.7  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
@@ -2955,7 +2955,7 @@ def _check_s37(e44_data=None, verbose=True):
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("singular_vectors.py  —  s3.1: Degree-1 singular vectors")
+    print("singular_vectors.py  --  s3.1: Degree-1 singular vectors")
     print("=" * 60)
 
     # Load E44 bracket data
@@ -2968,7 +2968,7 @@ if __name__ == '__main__':
         print("\n[warn] E44 bracket data not found; annihilator checks will be skipped.")
         print("       Run 'sage e44_structure.py' to generate e44_brackets.pkl.")
 
-    # ── w[1A] ──────────────────────────────────────────────────────────────
+    # -- w[1A] --------------------------------------------------------------
     print("\n[s3.1.a]  w[1A] = d_1 \otimes x_1^a  in  M_t(a,0,0):")
     for (t_val, a_val) in [(0, 0), (0, 1), (0, 2), (1, 1)]:
         M, v = w1A(t_val, a_val)
@@ -2976,14 +2976,14 @@ if __name__ == '__main__':
         print(f"  w[1A](t={t_val}, a={a_val}): dim={M.dim(1)}, nnz={nnz}, "
               f"  |v|_1={sum(abs(x) for x in v)}")
 
-    # ── w[1B] ──────────────────────────────────────────────────────────────
+    # -- w[1B] --------------------------------------------------------------
     print("\n[s3.1.b]  w[1B] = \Sigma_i d_i \otimes x_i*(x_4*)^{c-1}  in  M_t(0,0,c):")
     for (t_val, c_val) in [(0, 1), (0, 2), (0, 3), (1, 1)]:
         M, v = w1B(t_val, c_val)
         nnz = sum(1 for x in v if x != 0)
         print(f"  w[1B](t={t_val}, c={c_val}): dim={M.dim(1)}, nnz={nnz}")
 
-    # ── w[1E] ──────────────────────────────────────────────────────────────
+    # -- w[1E] --------------------------------------------------------------
     print("\n[s3.1.c]  w[1E] = \Sigma(\partial_i\otimesw_i + d_i\otimesw_i)  in  M_1(1,0,0):")
     M_1E, v_1E = w1E(1)
     nnz = sum(1 for x in v_1E if x != 0)
@@ -2999,7 +2999,7 @@ if __name__ == '__main__':
             print(f"    flat[{idx}] = {c}  "
                   f"({gen_type}_{gen_i+1} \otimes w[{k}], wt={M_1E.W.weight_of(k)})")
 
-    # ── Kernel-based vectors (require e44_data) ────────────────────────────
+    # -- Kernel-based vectors (require e44_data) ----------------------------
     if e44_data is not None:
         print("\n[s3.1.d]  w[1C] = kernel complement in M_t(0,0,1):")
         for t_val in [0, 1]:
@@ -3019,19 +3019,19 @@ if __name__ == '__main__':
             except Exception as exc:
                 print(f"  w[1D](t={t_val}): ERROR  {exc}")
 
-    # ── S3.1 Checkpoint ────────────────────────────────────────────────────
+    # -- S3.1 Checkpoint ----------------------------------------------------
     print()
     _check_s31(e44_data=e44_data, verbose=True)
 
     # ==================================================================
-    # s3.2: Degree-2 analysis — compositions & d^2 = 0
+    # s3.2: Degree-2 analysis -- compositions & d^2 = 0
     # ==================================================================
     print("\n" + "=" * 60)
-    print("singular_vectors.py  —  s3.2: Degree-2 compositions")
+    print("singular_vectors.py  --  s3.2: Degree-2 compositions")
     print("=" * 60)
 
     if e44_data is not None:
-        # ── Composition \phi[1D]\circ\phi[1A] ──────────────────────────────────────
+        # -- Composition \phi[1D]\circ\phi[1A] --------------------------------------
         print("\n[s3.2.a]  Composition \phi[1D]\circ\phi[1A] in M_t(0,0,0)[2]:")
         for t_val in [1, 2, 3]:
             try:
@@ -3042,7 +3042,7 @@ if __name__ == '__main__':
             except Exception as exc:
                 print(f"  t={t_val}: ERROR  {exc}")
 
-        # ── Composition \phi[1E]\circ\phi[1A] ──────────────────────────────────────
+        # -- Composition \phi[1E]\circ\phi[1A] --------------------------------------
         print("\n[s3.2.b]  Composition \phi[1E]\circ\phi[1A] in M_1(1,0,0)[2]:")
         try:
             M, v = w2EA(e44_data)
@@ -3051,7 +3051,7 @@ if __name__ == '__main__':
         except Exception as exc:
             print(f"  ERROR  {exc}")
 
-        # ── Degree-2 kernel dimensions ────────────────────────────────────
+        # -- Degree-2 kernel dimensions ------------------------------------
         print("\n[s3.2.c]  Degree-2 L_1-kernel dimensions (sl_4 fiber):")
         for t_val, a, b, c in [(1,0,0,0), (1,1,0,0), (0,0,1,0), (0,0,0,1)]:
             M = M_verma(t_val, a, b, c, max_deg=2)
@@ -3059,7 +3059,7 @@ if __name__ == '__main__':
             print(f"  M_{t_val}({a},{b},{c}): dim M[2]={M.dim(2)}, "
                   f"ker dim={len(ker)}")
 
-        # ── S3.2 Checkpoint ───────────────────────────────────────────────
+        # -- S3.2 Checkpoint -----------------------------------------------
         print()
         _check_s32(e44_data=e44_data, verbose=True)
     else:
@@ -3070,7 +3070,7 @@ if __name__ == '__main__':
     # s3.3: Degree-3 singular vectors
     # ==================================================================
     print("\n" + "=" * 60)
-    print("singular_vectors.py  —  s3.3: Degree-3 singular vectors")
+    print("singular_vectors.py  --  s3.3: Degree-3 singular vectors")
     print("=" * 60)
 
     if e44_data is not None:
@@ -3082,7 +3082,7 @@ if __name__ == '__main__':
     # s3.4: Degree-4 singular vector w[4H]
     # ==================================================================
     print("\n" + "=" * 60)
-    print("singular_vectors.py  —  s3.4: Degree-4 singular vector w[4H]")
+    print("singular_vectors.py  --  s3.4: Degree-4 singular vector w[4H]")
     print("=" * 60)
 
     if e44_data is not None:
@@ -3094,7 +3094,7 @@ if __name__ == '__main__':
     # s3.5: Verma module morphisms
     # ==================================================================
     print("\n" + "=" * 60)
-    print("singular_vectors.py  —  s3.5: Verma module morphisms")
+    print("singular_vectors.py  --  s3.5: Verma module morphisms")
     print("=" * 60)
 
     if e44_data is not None:
@@ -3106,7 +3106,7 @@ if __name__ == '__main__':
     # s3.6: Full E(4,4) equivariance + morphism compositions
     # ==================================================================
     print("\n" + "=" * 60)
-    print("singular_vectors.py  —  s3.6: Full E(4,4) equivariance"
+    print("singular_vectors.py  --  s3.6: Full E(4,4) equivariance"
           " + morphism compositions")
     print("=" * 60)
 
@@ -3119,7 +3119,7 @@ if __name__ == '__main__':
     # s3.7: Export morphism data
     # ==================================================================
     print("\n" + "=" * 60)
-    print("singular_vectors.py  —  s3.7: Export morphism data")
+    print("singular_vectors.py  --  s3.7: Export morphism data")
     print("=" * 60)
 
     if e44_data is not None:

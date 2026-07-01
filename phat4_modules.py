@@ -1,5 +1,5 @@
 """
-phat4_modules.py  —  Full \hat{p}(4)-modules W_t(a,b,c) for the NSE44 programme
+phat4_modules.py  --  Full \hat{p}(4)-modules W_t(a,b,c) for the NSE44 programme
 ==========================================================================
 Cantarini-Caselli-Kac 2026: E(4,4) as the Navier-Stokes algebra.
 
@@ -7,11 +7,11 @@ Implements the irreducible \hat{p}(4)-module W_t(a,b,c) as a quotient of the
 Kac module K_t(a,b,c) = \wedge^\circ(\hat{p}(4)_{-1}) \otimes F_t(a,b,c), where F_t(a,b,c)
 is the irreducible sl_4-module V(a,b,c) with C acting as t\cdotId.
 
-The \hat{p}(4) grading (internal to L_0 ≅ \hat{p}(4)):
+The \hat{p}(4) grading (internal to L_0 cong \hat{p}(4)):
     \hat{p}(4)_{-2} = \C C          (central, 1-dim)
     \hat{p}(4)_{-1} = span{a_{ij}} (6 odd generators, i<j)
     \hat{p}(4)_0    = gl_4           (16 even generators)
-    \hat{p}(4)_1    = span{b_{ij}} (10 odd generators, i≤j)
+    \hat{p}(4)_1    = span{b_{ij}} (10 odd generators, ileqj)
 
 where  a_{ij} = x_i d_j - x_j d_i  (antisymmetric)
        b_{ij} = x_i d_j + x_j d_i  (symmetric)
@@ -61,9 +61,9 @@ BIJ_PAIRS = [(1, 1), (1, 2), (1, 3), (1, 4),
 # Bilinear form B(a_m, a_n) for the Clifford structure of \hat{p}(4)_{-1}.
 # {a_m, a_n} = c_mn \cdot C, so B(a_m, a_n) = c_mn (multiply by t in the module).
 # Pairs: (m, n, c_mn) where m < n index into AIJ_PAIRS.
-#   a_{12} ↔ a_{34}: c = 2
-#   a_{13} ↔ a_{24}: c = -2
-#   a_{14} ↔ a_{23}: c = 2
+#   a_{12} <-> a_{34}: c = 2
+#   a_{13} <-> a_{24}: c = -2
+#   a_{14} <-> a_{23}: c = 2
 _CLIFFORD_PAIRS = [(0, 5, QQ(2)), (1, 4, QQ(-2)), (2, 3, QQ(2))]
 
 
@@ -75,7 +75,7 @@ class KacModule:
     """
     Kac module K_t(a,b,c) = \wedge^\circ(\hat{p}(4)_{-1}) \otimes F_t(a,b,c).
 
-    Basis ordering:  for each subset I ⊆ {0,..,5} (indexing the 6 a_{ij}
+    Basis ordering:  for each subset I subseteq {0,..,5} (indexing the 6 a_{ij}
     generators in AIJ_PAIRS order), and each crystal basis vector v_k
     of V(a,b,c), there is a basis element  \omega_I \otimes v_k.
 
@@ -120,7 +120,7 @@ class KacModule:
         # Do NOT pre-build all 32 here: for large reps (e.g. a=4, dim=2240) each
         # matrix is ~5 GB dense and building all 32 at construction time is
         # catastrophic when many Phat4Modules are live simultaneously.
-        self.action_mats = {}   # {L0_idx: dim x dim QQ matrix} — populated lazily
+        self.action_mats = {}   # {L0_idx: dim x dim QQ matrix} -- populated lazily
 
     def _get_action_mat(self, L0_idx):
         """Return the action matrix for L0_idx, building it lazily if needed."""
@@ -138,7 +138,7 @@ class KacModule:
 
         For even L_0 (gl_4):
             X \cdot (\omega_I \otimes v) = (ad(X)\cdot\omega_I) \otimes v + \omega_I \otimes (X\cdotv)
-            ad(X) acts on each a_{ij} factor in \omega_I via [X, a_{ij}] ∈ \hat{p}(4)_{-1}.
+            ad(X) acts on each a_{ij} factor in \omega_I via [X, a_{ij}] in \hat{p}(4)_{-1}.
 
         For odd L_0 in \hat{p}(4)_{-1} (a_{kl}):
             a_{kl} \cdot (\omega_I \otimes v) = (a_{kl} \wedge \omega_I) \otimes v
@@ -170,7 +170,7 @@ class KacModule:
         # Pre-compute: for each a_{ij} (index m=0..5), the result of
         # [even_L0, a_{ij}] expressed in {a_{kl}} basis.
         ad_on_a = self._adjoint_even_on_a(L0_idx)
-        # ad_on_a[m] = {m': coeff}  meaning  [X, a_m] = Σ coeff * a_{m'}
+        # ad_on_a[m] = {m': coeff}  meaning  [X, a_m] = Sigma coeff * a_{m'}
 
         for si, I in enumerate(self.subsets):
             # Fiber action: \omega_I \otimes (X\cdotv)
@@ -185,12 +185,12 @@ class KacModule:
             # Adjoint action on \wedge part: Leibniz over each factor in I
             I_sorted = sorted(I)
             for pos, m in enumerate(I_sorted):
-                # Replace a_m with [X, a_m] = Σ coeff * a_{m'}
+                # Replace a_m with [X, a_m] = Sigma coeff * a_{m'}
                 sign = QQ((-1) ** pos)  # sign from moving X past preceding factors
                 for m_prime, coeff in ad_on_a[m].items():
                     new_I = frozenset((I - {m}) | {m_prime})
                     if m_prime in (I - {m}):
-                        continue  # a_{m'} already in I → \wedge = 0
+                        continue  # a_{m'} already in I -> \wedge = 0
                     if len(new_I) != len(I):
                         continue  # shouldn't happen but safety check
 
@@ -214,7 +214,7 @@ class KacModule:
         Classify as \hat{p}(4)_{-1} (a_{ij}) or \hat{p}(4)_1 (b_{ij}) and dispatch.
         """
         # Decompose L0[L0_idx] = x_r dx_s into a_{ij} and b_{ij} components.
-        # x_r dx_s = (1/2)(a_{rs} + b_{rs}) if r ≠ s
+        # x_r dx_s = (1/2)(a_{rs} + b_{rs}) if r neq s
         # x_r dx_r = (1/2) b_{rr}
         #
         # But we need to be careful: individual x_r dx_s generators are NOT
@@ -228,7 +228,7 @@ class KacModule:
         mat = matrix(QQ, self.dim, self.dim)
 
         if r == s:
-            # x_r dx_r = b_{rr}/2 → action = (1/2) * b_{rr}_action
+            # x_r dx_r = b_{rr}/2 -> action = (1/2) * b_{rr}_action
             mat += QQ(1) / 2 * self._b_action(r, s)
         elif r < s:
             # x_r dx_s = (b_{rs} + a_{rs})/2
@@ -255,12 +255,12 @@ class KacModule:
 
     def _a_action(self, i, j):
         """
-        Action of a_{ij} ∈ \hat{p}(4)_{-1} on K_t (Clifford multiplication):
+        Action of a_{ij} in \hat{p}(4)_{-1} on K_t (Clifford multiplication):
             a_m \cdot (\omega_I \otimes v) = (a_m \wedge \omega_I) \otimes v  +  l_{a_m}(\omega_I) \otimes v
 
         The contraction l uses the bilinear form from {a_m, a_n} = c_mn \cdot C,
         with C acting as t on the module:
-            l_{a_m}(\omega_I) = Σ_{n ∈ I} (-1)^{pos(n)} \cdot (c_mn \cdot t / 2) \cdot \omega_{I\n}
+            l_{a_m}(\omega_I) = Sigma_{n in I} (-1)^{pos(n)} \cdot (c_mn \cdot t / 2) \cdot \omega_{I\n}
         """
         m = AIJ_PAIRS.index((i, j))  # index 0..5
 
@@ -302,18 +302,18 @@ class KacModule:
 
     def _b_action(self, i, j):
         """
-        Action of b_{ij} ∈ \hat{p}(4)_1 on K_t via recursive PBW normal-ordering.
+        Action of b_{ij} in \hat{p}(4)_1 on K_t via recursive PBW normal-ordering.
 
         In the induced module K = U(\hat{p}_{-}) \otimes_{U(p+)} V, the correct
         recursive formula (using exterior basis) is:
 
-            b \cdot (a_{m₁} \wedge \omega' \otimes v) = g_{m₁}^{full} \cdot (\omega' \otimes v)
-                                      - a_{m₁}^{Cl} \cdot [b \cdot (\omega' \otimes v)]
-                                      - b \cdot l_{a_{m₁}}(\omega')
+            b \cdot (a_{m_1} \wedge \omega' \otimes v) = g_{m_1}^{full} \cdot (\omega' \otimes v)
+                                      - a_{m_1}^{Cl} \cdot [b \cdot (\omega' \otimes v)]
+                                      - b \cdot l_{a_{m_1}}(\omega')
 
-        where g_{m₁} = {b, a_{m₁}} ∈ gl_4 acts via full Leibniz on \omega' \otimes v,
-        a_{m₁}^{Cl} acts by Clifford multiplication (exterior + contraction),
-        l_{a_{m₁}}(\omega') is the contraction of \omega' by a_{m₁} via the bilinear
+        where g_{m_1} = {b, a_{m_1}} in gl_4 acts via full Leibniz on \omega' \otimes v,
+        a_{m_1}^{Cl} acts by Clifford multiplication (exterior + contraction),
+        l_{a_{m_1}}(\omega') is the contraction of \omega' by a_{m_1} via the bilinear
         form B(a_m, a_n) = c_mn \cdot t / 2 from {a_m, a_n} = c_mn \cdot C,
         and the base case is b \cdot (1 \otimes v) = 0.
 
@@ -357,7 +357,7 @@ class KacModule:
             # Extract the dim_V columns of mat for I' (already computed)
             mat_block = mat.submatrix(0, p0, self.dim, dV)
 
-            # Term 2: A * mat_block  (a_{m₁}^{Cl} \cdot [b \cdot \omega'])
+            # Term 2: A * mat_block  (a_{m_1}^{Cl} \cdot [b \cdot \omega'])
             correction = A * mat_block
 
             # Term 1: G columns for I' block
@@ -367,8 +367,8 @@ class KacModule:
             else:
                 result_block = -correction
 
-            # Term 3: b \cdot l_{a_{m₁}}(\omega')
-            # l_{a_{m₁}}(\omega_{I'}) = Σ_{n ∈ I'} (-1)^{pos(n)} B(m₁,n) \omega_{I'\n}
+            # Term 3: b \cdot l_{a_{m_1}}(\omega')
+            # l_{a_{m_1}}(\omega_{I'}) = Sigma_{n in I'} (-1)^{pos(n)} B(m_1,n) \omega_{I'\n}
             # b acts on \omega_{I'\n} which is at level |I|-2 (already computed).
             I_prime_sorted = sorted(I_prime)
             for pos_n, n in enumerate(I_prime_sorted):
@@ -456,10 +456,10 @@ class KacModule:
 
     def _adjoint_even_on_a(self, L0_idx):
         """
-        Compute ad(L_0[L0_idx]) on each a_{m} ∈ \hat{p}(4)_{-1},
+        Compute ad(L_0[L0_idx]) on each a_{m} in \hat{p}(4)_{-1},
         returning the result decomposed in the {a_m} basis.  Cached.
 
-        Returns dict {m: {m': coeff}} where [X, a_m] = Σ coeff * a_{m'}.
+        Returns dict {m: {m': coeff}} where [X, a_m] = Sigma coeff * a_{m'}.
         """
         if L0_idx in self._adjoint_cache:
             return self._adjoint_cache[L0_idx]
@@ -491,9 +491,9 @@ class KacModule:
 
             # Re-express in {a_{kl}} basis
             # Each L0_odd element is x_r dx_s.
-            # x_r dx_s contributes: if r<s → (1/2)(a_{rs} + b_{rs})
-            #                       if r>s → (1/2)(b_{sr} - a_{sr})
-            #                       if r=s → (1/2) b_{rr}
+            # x_r dx_s contributes: if r<s -> (1/2)(a_{rs} + b_{rs})
+            #                       if r>s -> (1/2)(b_{sr} - a_{sr})
+            #                       if r=s -> (1/2) b_{rr}
             # The result of [even, a_{ij}] must be in \hat{p}(4)_{-1} (by grading),
             # so only a_{kl} components survive.
             a_coeffs = {}
@@ -506,7 +506,7 @@ class KacModule:
                 elif r > s:
                     m_prime = AIJ_PAIRS.index((s, r))
                     a_coeffs[m_prime] = a_coeffs.get(m_prime, QQ(0)) - coeff / 2
-                # r == s → pure b, no a component
+                # r == s -> pure b, no a component
 
             result[m] = {mp: c for mp, c in a_coeffs.items() if c != 0}
         self._adjoint_cache[L0_idx] = result
@@ -615,7 +615,7 @@ class Phat4Module:
         for v in ker_basis:
             if v[hw_flat] == 0:
                 non_hw_singular.append(v)
-            # Those with v[hw_flat] ≠ 0 include the hw direction
+            # Those with v[hw_flat] neq 0 include the hw direction
 
         # Step 3: Generate maximal submodule from non-hw singular vectors
         if not non_hw_singular:
@@ -684,7 +684,7 @@ class Phat4Module:
                 current_orbit = candidate
 
         if not good_seeds:
-            # No proper submodule found → K is irreducible
+            # No proper submodule found -> K is irreducible
             self.dim = K.dim
             self.action_mats = dict(K.action_mats)
             self.quotient_proj = identity_matrix(QQ, K.dim)
@@ -714,8 +714,8 @@ class Phat4Module:
         self._incl = matrix(QQ, [K_id.row(i) for i in complement_cols])
 
         # Projection: for RREF with pivots P and free cols F,
-        # the quotient map q: K → K/N is:
-        #   q(v)[r] = v[F_r] - Σ_i v[P_i] * work[i, F_r]
+        # the quotient map q: K -> K/N is:
+        #   q(v)[r] = v[F_r] - Sigma_i v[P_i] * work[i, F_r]
         # This zeroes out the N-component of v.
         Q = matrix(QQ, quot_dim, K.dim)
         for r in range(quot_dim):
@@ -726,7 +726,7 @@ class Phat4Module:
         self._proj_coords = Q
 
         # Build action matrices in quotient basis:
-        #   q ∘ (action on K) ∘ incl
+        #   q circ (action on K) circ incl
         self.action_mats = {}
         for L0_idx in range(32):
             K_mat = K.action_mats[L0_idx]
@@ -739,7 +739,7 @@ class Phat4Module:
         self.dim_V = K.dim_V
 
     def action_of_C(self):
-        """Matrix of C ∈ \hat{p}(4)_{-2}: acts as t\cdotId."""
+        """Matrix of C in \hat{p}(4)_{-2}: acts as t\cdotId."""
         return self.t * identity_matrix(QQ, self.dim)
 
 
@@ -829,7 +829,7 @@ def _check_phat4(verbose=True):
 
     Checks:
     (1) dim W_1(1,0,0) = 8  (standard module = E(4,4)_{-1})
-    (2) dim W_t(0,0,0) for t≠0: should be smaller than 64
+    (2) dim W_t(0,0,0) for tneq0: should be smaller than 64
     (3) [L_0,L_0] commutator identity holds on W at degree 0
     (4) Odd L_0 generators act nontrivially on W_1(1,0,0)
     """
@@ -850,9 +850,9 @@ def _check_phat4(verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         print("\hat{p}(4)-module checks")
-        print("─" * 60)
+        print("-" * 60)
 
     # (1) Standard module W_1(1,0,0) = 8-dim
     W_std = phat4_module(1, 1, 0, 0, e44_data)
@@ -893,7 +893,7 @@ def _check_phat4(verbose=True):
 
             if lhs != rhs:
                 # The bracket may have a central element C component
-                # (from {a_{ij}, a_{kl}} ∈ \hat{p}(4)_{-2} = \C C).
+                # (from {a_{ij}, a_{kl}} in \hat{p}(4)_{-2} = \C C).
                 # C acts as t\cdotId on W, so check if diff is scalar\cdotId.
                 diff = lhs - rhs
                 c_val = diff[0, 0]
@@ -913,12 +913,12 @@ def _check_phat4(verbose=True):
     _check("Odd L_0 acts nontrivially on W_1(1,0,0)", any_nonzero, True)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("\hat{p}(4)-module checks  ✓  ALL PASSED")
+            print("\hat{p}(4)-module checks  [OK]  ALL PASSED")
         else:
-            print("\hat{p}(4)-module checks  ✗  SOME FAILED")
-        print("─" * 60)
+            print("\hat{p}(4)-module checks  [X]  SOME FAILED")
+        print("-" * 60)
 
     return all_pass
 
@@ -929,7 +929,7 @@ def _check_phat4(verbose=True):
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("phat4_modules.py  —  Full \hat{p}(4)-modules W_t(a,b,c)")
+    print("phat4_modules.py  --  Full \hat{p}(4)-modules W_t(a,b,c)")
     print("=" * 60)
 
     e44_data = load_e44()
@@ -945,12 +945,12 @@ if __name__ == '__main__':
         (0, 0, 0, 0, "trivial t=0"),
         (0, 0, 0, 1, "dual fund t=0"),
         (1, 0, 0, 1, "dual fund t=1"),
-        (0, 0, 0, 2, "Sym² dual"),
+        (0, 0, 0, 2, "Sym^2 dual"),
     ]
 
     print("\nModule dimensions:")
     print(f"  {'Parameters':<20} {'dim_K':>6} {'dim_W':>6}  Note")
-    print(f"  {'─'*20} {'─'*6} {'─'*6}  {'─'*20}")
+    print(f"  {'-'*20} {'-'*6} {'-'*6}  {'-'*20}")
     for t, a, b, c, note in test_cases:
         K = KacModule(t, a, b, c, e44_data)
         W = phat4_module(t, a, b, c, e44_data)

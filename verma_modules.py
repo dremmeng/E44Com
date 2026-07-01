@@ -1,10 +1,10 @@
 """
-verma_modules.py  —  Verma/Kac modules for the NSE44 programme
+verma_modules.py  --  Verma/Kac modules for the NSE44 programme
 ===============================================================
 Cantarini-Caselli-Kac 2026: E(4,4) as the Navier-Stokes algebra.
 
 Section layout (mirrors plan-nsLTKMA.md / NSE44.tex SS2):
-  s2   — Phase 2: Verma Modules and Singular Vectors
+  s2   -- Phase 2: Verma Modules and Singular Vectors
     s2.1   \hat{p}(4)-module W_hat(t, a, b, c): weight spaces, sl_4 action,
            central charge  (checkpoint: dim(W_hat(1,1,0,0)) == 4)
     (s2.2-s2.5 in later milestones)
@@ -45,20 +45,20 @@ def load_e44(path="e44_brackets.pkl"):
 
 
 # ===========================================================================
-# s2.1 — \hat{p}(4)-module  W_hat(t, a, b, c)
+# s2.1 -- \hat{p}(4)-module  W_hat(t, a, b, c)
 # ===========================================================================
 #
 # The reductive core of L_0 = \hat{p}(4) (non-central extension of the strange
 # Lie superalgebra p(4)) contains:
-#   \hat{p}(4)_0  ≅  sl_4       (A_3 base)
-#   \hat{p}(4)_{-1} ≅ \wedge^2(C^4*)  (antisymmetric 2-tensors, dim = 6)
-#   \hat{p}(4)_1  ≅  S^2(C^4)     (symmetric 2-tensors, dim = 10)
+#   \hat{p}(4)_0  cong  sl_4       (A_3 base)
+#   \hat{p}(4)_{-1} cong \wedge^2(C^4*)  (antisymmetric 2-tensors, dim = 6)
+#   \hat{p}(4)_1  cong  S^2(C^4)     (symmetric 2-tensors, dim = 10)
 #   centre   = CC          (central element C; acts as scalar t)
 #
 # The irreducible finite-dimensional \hat{p}(4)-module W_hat(t, a, b, c) is
 # characterised by:
-#   • sl_4 Dynkin highest weight labels (a, b, c)  with a,b,c \in Z_{>=0}
-#   • central charge t \in C  (C acts as t \cdot Id)
+#   * sl_4 Dynkin highest weight labels (a, b, c)  with a,b,c \in Z_{>=0}
+#   * central charge t \in C  (C acts as t \cdot Id)
 #
 # As a vector space it equals the irreducible sl_4-module
 #     V(a\cdot\omega_1 + b\cdot\omega_2 + c\cdot\omega_3)
@@ -66,19 +66,19 @@ def load_e44(path="e44_brackets.pkl"):
 #                       with entries in {1,2,3,4}}.
 #
 # Implementation
-# ──────────────
-# • SageMath's crystals.Tableaux(['A', 3], shape) enumerates all basis
+# --------------
+# * SageMath's crystals.Tableaux(['A', 3], shape) enumerates all basis
 #   elements and encodes the sl_4 weight structure.
 #   - shape = (a+b+c, b+c, c)  (no trailing zeros)
-# • Basis vectors are indexed 0 ... dim-1 (crystal enumeration order).
-# • The sl_4 weight of basis vector k is stored as the tuple
+# * Basis vectors are indexed 0 ... dim-1 (crystal enumeration order).
+# * The sl_4 weight of basis vector k is stored as the tuple
 #       (h_1, h_2, h_3)  =  (n_1-n_2, n_2-n_3, n_3-n_4)
-#   where nⱼ = number of times letter j appears in the k-th tableau.
+#   where n_j = number of times letter j appears in the k-th tableau.
 #   These are the eigenvalues of the simple coroot operators H_i.
-# • sl_4 Chevalley generator matrices are built from the crystal operators
+# * sl_4 Chevalley generator matrices are built from the crystal operators
 #   \tilde{e}_i, \tilde{f}_i (Kashiwara crystal basis: non-zero entries are all 1).
 #   The relation [e_i, f_j] = \delta_{ij} h_i holds in this basis.
-# • The central element C acts as t \cdot Id_{dim}.
+# * The central element C acts as t \cdot Id_{dim}.
 # ---------------------------------------------------------------------------
 
 
@@ -201,7 +201,7 @@ class WHat4Module:
 
         a, b, c = self.a, self.b, self.c     # local ints for construction
 
-        # ── Trivial module (a = b = c = 0) ──────────────────────────────
+        # -- Trivial module (a = b = c = 0) ------------------------------
         if a == 0 and b == 0 and c == 0:
             self.crystal    = None
             self.basis_elts = [None]          # sentinel for the unique basis vector
@@ -214,7 +214,7 @@ class WHat4Module:
             self.h_mats = {i: _zero for i in range(1, 4)}
             return
 
-        # ── General module ───────────────────────────────────────────────
+        # -- General module -----------------------------------------------
         self.crystal    = _sl4_crystal(a, b, c)
         self.basis_elts = list(self.crystal)
         self.dim        = len(self.basis_elts)
@@ -303,7 +303,7 @@ def W_hat(t, a, b, c):
     sage: W_hat(0, 0, 1, 0).dim     # \wedge^2(C^4)
     6
 
-    sage: W_hat(0, 0, 0, 1).dim     # \wedge^3(C^4) ≅ (C^4)*
+    sage: W_hat(0, 0, 0, 1).dim     # \wedge^3(C^4) cong (C^4)*
     4
 
     sage: W_hat(0, 0, 0, 0).dim     # trivial
@@ -345,9 +345,9 @@ def _check_s21(verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s2.1 checkpoint  —  W_hat(t, a, b, c) dimensions and structure")
-        print("─" * 60)
+        print("-" * 60)
+        print("s2.1 checkpoint  --  W_hat(t, a, b, c) dimensions and structure")
+        print("-" * 60)
 
     # (1)-(5): dimension checks
     _check("dim W_hat(1,1,0,0) [fundamental (1,0,0)]",  W_hat(1,1,0,0).dim, 4)
@@ -382,18 +382,18 @@ def _check_s21(verbose=True):
     _check("Chevalley [e_i,f_i] = h_i (i=1,2,3) on W_hat(1,1,0,0)", comm_ok, True)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s2.1  ✓  ALL CHECKS PASSED")
+            print("s2.1  [OK]  ALL CHECKS PASSED")
         else:
-            print("s2.1  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s2.1  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s2.2 — Verma module M(t, a, b, c) as a graded vector space
+# s2.2 -- Verma module M(t, a, b, c) as a graded vector space
 # ===========================================================================
 #
 # M(t,a,b,c) = U(L_{-1}) \otimes W_hat(t,a,b,c)   (Verma / Kac module)
@@ -439,7 +439,7 @@ def _pbw_basis_at_degree(d):
     Return the ordered list of PBW monomials for U(L_{-1}) at degree d.
 
     Each monomial is a pair  (alpha, S)  where:
-      alpha = (a0,a1,a2,a3) — tuple of non-negative ints, \Sigma\alpha_i = d - |S|
+      alpha = (a0,a1,a2,a3) -- tuple of non-negative ints, \Sigma\alpha_i = d - |S|
       S     = frozenset \subseteq {0,1,2,3}   (chosen odd generators)
       \Sigma\alpha_i + |S| = d
 
@@ -588,7 +588,7 @@ class VermaModule:
     # principal grading of E(4,4).)
     #
     # The derivation D_i acts on PBW monomials (\alpha, S) \otimes w by:
-    #   D_i((\alpha, S) \otimes w) = \alpha_i · (\alpha - \epsilon_i, S) \otimes w
+    #   D_i((\alpha, S) \otimes w) = \alpha_i * (\alpha - \epsilon_i, S) \otimes w
     # where \epsilon_i = (0,...,1,...,0) in slot i.  This is independent of the fiber
     # and encodes \partial/\partialx_i on formal Taylor-series coefficients.
     # ---------------------------------------------------------------------------
@@ -599,14 +599,14 @@ class VermaModule:
 
         D_i is the PBW derivation that removes one factor of the even generator
         e_i from each monomial:
-            D_i((\alpha, S) \otimes w) = \alpha_i · (\alpha - \epsilon_i, S) \otimes w.
+            D_i((\alpha, S) \otimes w) = \alpha_i * (\alpha - \epsilon_i, S) \otimes w.
 
         Parameters
         ----------
         i : int in {0, 1, 2, 3}
             Index of the even L_{-1} generator.
         d : int
-            Source degree.  Must satisfy 1 ≤ d ≤ max_deg.
+            Source degree.  Must satisfy 1 leq d leq max_deg.
 
         Returns
         -------
@@ -670,14 +670,14 @@ def M_verma(t, a, b, c, max_deg=4, e44_data=None):
 
 
 # ===========================================================================
-# Step 4 — Laplacian operator on M
+# Step 4 -- Laplacian operator on M
 # ===========================================================================
 #
 # The formal spatial Laplacian is  \Delta = \Sigma_i D_i^2  where
 #   D_i = \partial/\partiale_i : M[d] \to M[d-1]   (action_of_ei above).
 #
 # It maps  M[d] \to M[d-2]  and has matrix:
-#   B(d) = \Sigma_i A_i(d-1) · A_i(d)
+#   B(d) = \Sigma_i A_i(d-1) * A_i(d)
 # where  A_i(d) = M.action_of_ei(i, d).
 #
 # B(d) is a  dim(d-2) \times dim(d)  rational matrix.
@@ -687,12 +687,12 @@ def laplacian_matrix(M, d):
     """
     Matrix of the formal Laplacian  \Delta = \Sigma_i D_i^2  on  M[d] \to M[d-2].
 
-    Computes B(d) = \Sigma_i A_i(d-1) · A_i(d)  where A_i(k) = M.action_of_ei(i, k).
+    Computes B(d) = \Sigma_i A_i(d-1) * A_i(d)  where A_i(k) = M.action_of_ei(i, k).
 
     Parameters
     ----------
     M : VermaModule
-    d : int — source degree (must satisfy d >= 2)
+    d : int -- source degree (must satisfy d >= 2)
 
     Returns
     -------
@@ -730,17 +730,17 @@ def laplacian_matrices(M):
 
 
 # ===========================================================================
-# s2.3 — L_{<0}-action on M and commutator verification
+# s2.3 -- L_{<0}-action on M and commutator verification
 # ===========================================================================
 #
 # The Verma module M = U(L_{-1}) \otimes W is an E(4,4)-module.  The action of
 # L_{<0} = L_{-1} on a PBW basis element  (\alpha,S) \otimes w  at degree d is:
 #
 #   e_i \cdot ((\alpha,S) \otimes w)  =  (\alpha + \epsilon_i, S) \otimes w      (even generator; polynomial mult)
-#   d_i \cdot ((\alpha,S) \otimes w)  =  sgn \cdot (\alpha, S\cup{i}) \otimes w  (odd; \epsilon if i ∉ S)
+#   d_i \cdot ((\alpha,S) \otimes w)  =  sgn \cdot (\alpha, S\cup{i}) \otimes w  (odd; \epsilon if i notin S)
 #                         0                       (if i \in S)
 #
-# where sgn = (-1)^{|S ∩ {0,...,i-1}|} from the super-commutation rule.
+# where sgn = (-1)^{|S cap {0,...,i-1}|} from the super-commutation rule.
 #
 # The L_0 action is derived from the Verma property via the PBW relation:
 #   X \cdot (u \otimes w) = (X\cdotu) \otimes w + u \otimes (X\cdotw)      (Leibniz / module axiom)
@@ -754,10 +754,10 @@ def laplacian_matrices(M):
 # Then (L_0-element) acts on the remaining PBW part via another Leibniz step.
 #
 # Implementation note:
-#   • We store L_{-1}, L_0, L_1 bases from the E44 pickle;
-#   • We build coefficient-extraction helpers to decompose bracket results;
-#   • The L_0 action on W_hat uses the sl_4 Chevalley matrices from WHat4Module
-#     (the central element C acts as t \cdot Id, and \hat{p}(4)_{±1} pieces act trivially
+#   * We store L_{-1}, L_0, L_1 bases from the E44 pickle;
+#   * We build coefficient-extraction helpers to decompose bracket results;
+#   * The L_0 action on W_hat uses the sl_4 Chevalley matrices from WHat4Module
+#     (the central element C acts as t \cdot Id, and \hat{p}(4)_{pm1} pieces act trivially
 #      on the lowest-weight Verma generator by construction).
 # ---------------------------------------------------------------------------
 
@@ -806,7 +806,7 @@ def _pbw_apply_odd(alpha, S, gen_idx):
     Returns (alpha, S\cup{i}, sign) or None if i \in S.
 
     Sign from super-commutation:
-        d_i \cdot (dⱼ_1 ∧ ... ∧ dⱼ_k) = sgn \cdot d_i ∧ dⱼ_1 ∧ ... ∧ dⱼ_k
+        d_i \cdot (d_j_1 wedge ... wedge d_j_k) = sgn \cdot d_i wedge d_j_1 wedge ... wedge d_j_k
     We put d_i at position p = |{j \in S : j < i}|.
     In our canonical ordering (S = {j_1 < j_2 < ... < j_k}),
         d_i is inserted at position p, so sign = (-1)^p.
@@ -877,10 +877,10 @@ def l_minus1_action_matrix(M, gen_idx, parity):
 #
 # The L_0 action via Leibniz:
 #   h \cdot ((\alpha,S) \otimes w_k)
-#     = \Sigmaⱼ c_j \cdot ((\alphaⱼ',Sⱼ') \otimes w_k)   [from [h, generators] decomposed in L_{-1}]
+#     = \Sigma_j c_j \cdot ((\alpha_j',S_j') \otimes w_k)   [from [h, generators] decomposed in L_{-1}]
 #     + (\alpha,S) \otimes (h\cdotw_k)              [from the W-action]
 #
-# For the sl_4 generators (identified as the degree-0 vector fields xⱼ\partial_i \in L_0),
+# For the sl_4 generators (identified as the degree-0 vector fields x_j\partial_i \in L_0),
 # the adjoint action [sl4_elem, e_i-generator] and [sl4_elem, d_i-generator]
 # is given by the E44 bracket, decomposed in L_{-1}.
 # The W-action uses the sl_4 matrices from W_hat.
@@ -939,25 +939,25 @@ def _w_action_from_l0_idx(W, L0_idx):
     [x_4, x_3, x_2, x_1] and each slot 0..3 (\partial_1..\partial_4).  Thus:
         L0[k] = x_{row} \partial_{col}  where  row = 4 - k//4,  col = k%4 + 1  (1-indexed).
 
-    e44_structure convention: E_ij(i,j) = E_{ij} = -xⱼ \partial_i,  so
+    e44_structure convention: E_ij(i,j) = E_{ij} = -x_j \partial_i,  so
         x_{row} \partial_{col}  =  -E_{col, row}   (1-indexed matrix units).
 
-    Representation map:  The Lie algebra homomorphism ψ: gl_4^{code} \to gl_4^{std}
-    is ψ(E_{ij}^{code}) = -e_{ji}^{std}  (the transpose with a sign, required to
-    preserve the bracket: [ψ(X), ψ(Y)] = ψ([X, Y])).
+    Representation map:  The Lie algebra homomorphism psi: gl_4^{code} \to gl_4^{std}
+    is psi(E_{ij}^{code}) = -e_{ji}^{std}  (the transpose with a sign, required to
+    preserve the bracket: [psi(X), psi(Y)] = psi([X, Y])).
 
     Therefore:
         p(L0[k]) = p(-E_{col,row}^{code}) = -p(E_{col,row}^{code})
                  = -(-e_{row,col}^{crystal}) = +e_{row,col}^{crystal}.
 
     This gives the action on W:
-      • Off-diagonal col < row  (e_{row,col}^{std} with row > col = lowering):
+      * Off-diagonal col < row  (e_{row,col}^{std} with row > col = lowering):
             W_mat = f[...]  (Chevalley lowering matrix)
-      • Off-diagonal col > row  (e_{row,col}^{std} with row < col = raising):
+      * Off-diagonal col > row  (e_{row,col}^{std} with row < col = raising):
             W_mat = e[...]  (Chevalley raising matrix)
-      • Diagonal col = row = r:
+      * Diagonal col = row = r:
             x_r \partial_r = -E_{rr}^{code} + (1/4)C,  so
-            action = \epsilonᵣ + t/4,  where
+            action = \epsilon_r + t/4,  where
               \epsilon_1 = (3h_1+2h_2+h_3)/4,  \epsilon_2 = (-h_1+2h_2+h_3)/4,
               \epsilon_3 = (-h_1-2h_2+h_3)/4,  \epsilon_4 = (-h_1-2h_2-3h_3)/4.
             This gives:
@@ -1068,16 +1068,16 @@ def l0_action_matrix(M, L0_idx, e44_data, max_d=None):
 
     # L_0 action on W_hat via sl_4 matrices:
     # Map L_0 basis element to a sl_4 Chevalley generator index, or None.
-    # L_0 even has 16 elements = 4\times4 matrix units acting as xⱼ\partial_i.
+    # L_0 even has 16 elements = 4\times4 matrix units acting as x_j\partial_i.
     # We identify the (i,j) matrix unit with the sl_4 generator action.
     # The sl_4 matrices in W_hat are keyed by Chevalley index {1,2,3};
-    # we need the full gl_4 ≅ sl_4 \oplus C action.
+    # we need the full gl_4 cong sl_4 \oplus C action.
     # Strategy: act on W-component using the bracket [b0, L_{-1}] result
     # expressed in L_{-1}, then deduce how W transforms.
     # For the full implementation we use the W_hat matrices directly.
-    # The L_0 even basis in e44_structure.py is E_{ij} = -xⱼ\partial_i + (1/4)\delta_iⱼ C.
+    # The L_0 even basis in e44_structure.py is E_{ij} = -x_j\partial_i + (1/4)\delta_i_j C.
     # To find which (i,j) pairs, we look at the single-monomial structure:
-    # b0['basis'] = (0,...,xⱼ,...,0) \times (-1) in slot i (or +correction for diagonal).
+    # b0['basis'] = (0,...,x_j,...,0) \times (-1) in slot i (or +correction for diagonal).
     # We compute the W-action by evaluating how sl_4 matrices act, using
     # the adjoint table on the degree-0 piece (which is just the W-action).
 
@@ -1459,9 +1459,9 @@ def _check_s23(verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s2.3 checkpoint  —  L_{-1} / L_0 / L_1 actions and commutator")
-        print("─" * 60)
+        print("-" * 60)
+        print("s2.3 checkpoint  --  L_{-1} / L_0 / L_1 actions and commutator")
+        print("-" * 60)
 
     e44_data = load_e44()
     if e44_data is None:
@@ -1550,25 +1550,25 @@ def _check_s23(verbose=True):
             _check(f"{tag} commutator ({im1},{i1})", diff.is_zero(), True)
 
     # (5)-(24) Commutator identity on M_0(1,0,0)  [W_hat = fund., dim 4]
-    # [L_{-1,i}, L_1,j]ₘₐₜ v = (L_{-1,i}\circL_1,j - (-1)^{p_i p_j} L_1,j\circL_{-1,i}) v
+    # [L_{-1,i}, L_1,j]_m_a_t v = (L_{-1,i}\circL_1,j - (-1)^{p_i p_j} L_1,j\circL_{-1,i}) v
     # should equal L_0[L_{-1,i},L_1,j]_bracket v  for all v in M[1].
     #
     # 20 pairs covering all four parity combinations:
     #   even\timeseven, odd\timeseven, even\timesodd, odd\timesodd.
-    # L₋_1 indices: 0-3 even (e_i), 4-7 odd (d_i).
+    # L-_1 indices: 0-3 even (e_i), 4-7 odd (d_i).
     # L_1  indices: 0-39 even, 40-79 odd.
 
     if verbose:
         print("  --- M_0(1,0,0)  [W_hat = fund. rep, dim 4] ---")
 
     _commutator_checks(M, [
-        # even L₋_1 \times even L_1
+        # even L-_1 \times even L_1
         (0,0),(1,0),(0,1),(2,3),(3,2),
-        # odd L₋_1 \times even L_1
+        # odd L-_1 \times even L_1
         (4,0),(5,1),(4,4),
-        # even L₋_1 \times odd L_1
+        # even L-_1 \times odd L_1
         (0,40),(1,45),(2,50),(0,60),(3,70),
-        # odd L₋_1 \times odd L_1
+        # odd L-_1 \times odd L_1
         (4,40),(5,45),(6,50),(7,60),(4,70),(5,55),(6,65),
     ], "M_0(1,0,0)")
 
@@ -1583,23 +1583,23 @@ def _check_s23(verbose=True):
     M_triv = M_verma(1, 0, 0, 0)
 
     _commutator_checks(M_triv, [
-        # even L₋_1 \times even L_1
+        # even L-_1 \times even L_1
         (0,0),(1,0),(2,3),(3,2),
-        # odd L₋_1 \times even L_1
+        # odd L-_1 \times even L_1
         (4,0),(5,1),(6,2),(7,3),
-        # even L₋_1 \times odd L_1
+        # even L-_1 \times odd L_1
         (0,40),(1,45),(2,50),(3,60),(0,70),(1,55),(2,65),(3,75),
-        # odd L₋_1 \times odd L_1
+        # odd L-_1 \times odd L_1
         (4,40),(5,45),(6,50),(7,60),
     ], "M_1(0,0,0)")
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s2.3  ✓  ALL CHECKS PASSED")
+            print("s2.3  [OK]  ALL CHECKS PASSED")
         else:
-            print("s2.3  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s2.3  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
@@ -1616,9 +1616,9 @@ def _check_commutator_all_deg(verbose=True):
     specified module.  Reports per-degree failure counts.
 
     Modules tested:
-      • M_0(1,0,0)   [fund. rep, dim_W=4]
-      • M_1(0,0,0)   [trivial, dim_W=1]
-      • M_0(0,0,2)   [Sym^2(C^4)*, dim_W=10]
+      * M_0(1,0,0)   [fund. rep, dim_W=4]
+      * M_1(0,0,0)   [trivial, dim_W=1]
+      * M_0(0,0,2)   [Sym^2(C^4)*, dim_W=10]
     """
     e44_data = load_e44()
     L1_list  = e44_data['E44'][1]
@@ -1644,9 +1644,9 @@ def _check_commutator_all_deg(verbose=True):
             pass  # suppress per-check output for brevity
 
     if verbose:
-        print("─" * 60)
-        print("Commutator identity  —  all degrees, all pairs")
-        print("─" * 60)
+        print("-" * 60)
+        print("Commutator identity  --  all degrees, all pairs")
+        print("-" * 60)
 
     modules = [
         (0, 1, 0, 0, 4, "M_0(1,0,0)"),
@@ -1742,12 +1742,12 @@ def _check_commutator_all_deg(verbose=True):
         _check(f"{tag} all-degree commutator", n_fail, 0)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("Commutator (all deg)  ✓  ALL CHECKS PASSED")
+            print("Commutator (all deg)  [OK]  ALL CHECKS PASSED")
         else:
-            print(f"Commutator (all deg)  ✗  {total_failures} FAILED")
-        print("─" * 60)
+            print(f"Commutator (all deg)  [X]  {total_failures} FAILED")
+        print("-" * 60)
 
     return all_pass
 
@@ -1782,9 +1782,9 @@ def _check_leibniz(verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("Leibniz checkpoint  —  direct deg-2 verification")
-        print("─" * 60)
+        print("-" * 60)
+        print("Leibniz checkpoint  --  direct deg-2 verification")
+        print("-" * 60)
 
     e44_data = load_e44()
     if e44_data is None:
@@ -1805,7 +1805,7 @@ def _check_leibniz(verbose=True):
         print(f"  dim(0)={M.dim(0)}, dim(1)={M.dim(1)}, dim(2)={M.dim(2)}")
         print()
 
-    # ── Part 1: Direct Leibniz at degree 2 ──────────────────────────
+    # -- Part 1: Direct Leibniz at degree 2 --------------------------
     # For each L_1 gen Y, compute l1(Y, d=2) and compare with manual
     # Leibniz expansion on all M[2] basis vectors.
     #
@@ -1959,26 +1959,26 @@ def _check_leibniz(verbose=True):
     if verbose:
         if n_fail > 0:
             print(f"  ({n_fail} of {n_total} Leibniz checks failed)")
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("Leibniz  ✓  ALL CHECKS PASSED")
+            print("Leibniz  [OK]  ALL CHECKS PASSED")
         else:
-            print("Leibniz  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("Leibniz  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 
 # ===========================================================================
-# s2.4 — Grothendieck decomposition of M_t(a, b, c)
+# s2.4 -- Grothendieck decomposition of M_t(a, b, c)
 # ===========================================================================
 #
 # By the CKC 2026 singular vector classification (Step 5 / S4), the
 # degenerate Verma modules are:
-#   • M_t(a, 0, 0)  for all t \in QQ, a \in Z_{>=0}
-#   • M_t(0, 0, c)  for all t \in QQ, c \in Z_{>=0}
-#   • M_t(0, 1, 0)  for all t \in QQ
+#   * M_t(a, 0, 0)  for all t \in QQ, a \in Z_{>=0}
+#   * M_t(0, 0, c)  for all t \in QQ, c \in Z_{>=0}
+#   * M_t(0, 1, 0)  for all t \in QQ
 #
 # Every degenerate Verma module has at least one sub-Verma, whose highest-
 # weight vector is the corresponding singular vector.  The ones visible at
@@ -1988,7 +1988,7 @@ def _check_leibniz(verbose=True):
 #           present when a >= 1  OR  (a = 0 AND t = 0)
 #   w[1B]: sub-Verma M_{t-1}(0,0,c-1)  in  M_t(0,0,c),  c >= 1
 #   w[1C]: sub-Verma M_{t-1}(0,1,0)    in  M_t(0,0,1),  all t
-#   w[1D]: sub-Verma M_{t-1}(1,0,0)    in  M_t(0,0,0),  t ≠ 0
+#   w[1D]: sub-Verma M_{t-1}(1,0,0)    in  M_t(0,0,0),  t neq 0
 #   w[1E]: sub-Verma M_0(0,0,0)        in  M_1(1,0,0)   only (t = 1)
 #   w[4H]: sub-Verma M_{t-4}(1,0,0)    in  M_t(1,0,0),  all t  (degree 4)
 #
@@ -2029,12 +2029,12 @@ def _known_subvermas(t, a, b, c):
     a, b, c = int(a), int(b), int(c)
     subs = []
 
-    # ── (a, 0, 0) family ────────────────────────────────────────────────────
+    # -- (a, 0, 0) family ----------------------------------------------------
     if b == 0 and c == 0:
         # w[1A]: degree-1 sv present for a >= 1, or a = t = 0
         if a >= 1 or t_q == 0:
             subs.append((1, t_q - 1, a + 1, 0, 0))
-        # w[1D]: degree-1 sv in M_t(0,0,0) for t ≠ 0 (note: at a = 0)
+        # w[1D]: degree-1 sv in M_t(0,0,0) for t neq 0 (note: at a = 0)
         if a == 0 and t_q != 0:
             subs.append((1, t_q - 1, 1, 0, 0))
         # w[1E]: degree-1 sv in M_1(1,0,0) only
@@ -2044,7 +2044,7 @@ def _known_subvermas(t, a, b, c):
         if a == 1:
             subs.append((4, t_q - 4, 1, 0, 0))
 
-    # ── (0, 0, c) family ────────────────────────────────────────────────────
+    # -- (0, 0, c) family ----------------------------------------------------
     if a == 0 and b == 0 and c >= 1:
         # w[1B]: degree-1 sv for c >= 1 \to sub-Verma M_{t-1}(0,0,c-1)
         subs.append((1, t_q - 1, 0, 0, c - 1))
@@ -2052,7 +2052,7 @@ def _known_subvermas(t, a, b, c):
         if c == 1:
             subs.append((1, t_q - 1, 0, 1, 0))
 
-    # ── (0, 1, 0) family ────────────────────────────────────────────────────
+    # -- (0, 1, 0) family ----------------------------------------------------
     # M_t(0,1,0) is degenerate per CKC 2026 S5, but the explicit sub-Verma
     # structure requires the degree-2 singular vectors w[2DA] / w[2EA]
     # (computed in singular_vectors.py, S3).  Treated as irreducible here.
@@ -2189,11 +2189,11 @@ def grothendieck_table(families=None, t_val=QQ(0), max_depth=4, verbose=True):
 
     results = {}
     if verbose:
-        print("─" * 72)
+        print("-" * 72)
         print(f"Grothendieck table   t = {t_val},  max_depth = {max_depth}")
-        print("─" * 72)
+        print("-" * 72)
         print(f"{'M_t(a,b,c)':<20} #factors  composition factors  [L_{{t'}}(a',b',c')]")
-        print("─" * 72)
+        print("-" * 72)
 
     for (a, b, c) in families:
         d = grothendieck_decomp(t_val, a, b, c, max_depth=max_depth)
@@ -2207,7 +2207,7 @@ def grothendieck_table(families=None, t_val=QQ(0), max_depth=4, verbose=True):
             print(f"  {label:<18} {len(d):>5}      {factors}")
 
     if verbose:
-        print("─" * 72)
+        print("-" * 72)
 
     return results
 
@@ -2253,9 +2253,9 @@ def _check_s24(verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s2.4 checkpoint  —  Grothendieck decompositions")
-        print("─" * 60)
+        print("-" * 60)
+        print("s2.4 checkpoint  --  Grothendieck decompositions")
+        print("-" * 60)
 
     t0 = QQ(0)
     t1 = QQ(1)
@@ -2326,18 +2326,18 @@ def _check_s24(verbose=True):
            len(d_b) > len(d_a), True)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s2.4  ✓  ALL CHECKS PASSED")
+            print("s2.4  [OK]  ALL CHECKS PASSED")
         else:
-            print("s2.4  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s2.4  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# s2.5 — Export: save_verma_data("verma_cache.pkl")
+# s2.5 -- Export: save_verma_data("verma_cache.pkl")
 # ===========================================================================
 #
 # The pickle stores a dict with the following keys:
@@ -2415,11 +2415,11 @@ def save_verma_data(path="verma_cache.pkl", max_deg=4, grothendieck_depth=6,
 
     Returns
     -------
-    dict  — the payload that was written (same object as in the file).
+    dict  -- the payload that was written (same object as in the file).
     """
     payload = {}
 
-    # ── 1.  W_hat dimensions ─────────────────────────────────────────────
+    # -- 1.  W_hat dimensions ---------------------------------------------
     if verbose:
         print("  [s2.5] computing W_hat dimensions ...")
     w_hat_dims = {}
@@ -2428,7 +2428,7 @@ def save_verma_data(path="verma_cache.pkl", max_deg=4, grothendieck_depth=6,
         w_hat_dims[(a, b, c)] = W.dim
     payload['W_hat_dims'] = w_hat_dims
 
-    # ── 2.  Crystal data ─────────────────────────────────────────────────
+    # -- 2.  Crystal data -------------------------------------------------
     if verbose:
         print("  [s2.5] computing crystal data ...")
     crystal_data = {}
@@ -2443,12 +2443,12 @@ def save_verma_data(path="verma_cache.pkl", max_deg=4, grothendieck_depth=6,
         }
     payload['crystal_data'] = crystal_data
 
-    # ── 3.  Shared PBW basis ─────────────────────────────────────────────
+    # -- 3.  Shared PBW basis ---------------------------------------------
     if verbose:
         print("  [s2.5] computing PBW bases ...")
     payload['pbw_bases'] = {d: _pbw_basis_at_degree(d) for d in range(max_deg + 1)}
 
-    # ── 4.  Graded dimension tables ──────────────────────────────────────
+    # -- 4.  Graded dimension tables --------------------------------------
     if verbose:
         print("  [s2.5] computing Verma graded dimensions ...")
     verma_dim_tables = {}
@@ -2457,7 +2457,7 @@ def save_verma_data(path="verma_cache.pkl", max_deg=4, grothendieck_depth=6,
         verma_dim_tables[(QQ(t), a, b, c)] = {d: M.dim(d) for d in range(max_deg + 1)}
     payload['verma_dim_tables'] = verma_dim_tables
 
-    # ── 5.  Grothendieck decompositions ──────────────────────────────────
+    # -- 5.  Grothendieck decompositions ----------------------------------
     if verbose:
         print(f"  [s2.5] computing Grothendieck decompositions (depth={grothendieck_depth}) ...")
     groth = {}
@@ -2467,7 +2467,7 @@ def save_verma_data(path="verma_cache.pkl", max_deg=4, grothendieck_depth=6,
         )
     payload['grothendieck'] = groth
 
-    # ── 6.  Write pickle ─────────────────────────────────────────────────
+    # -- 6.  Write pickle -------------------------------------------------
     with open(path, 'wb') as fh:
         _pickle.dump(payload, fh, protocol=_pickle.HIGHEST_PROTOCOL)
 
@@ -2535,15 +2535,15 @@ def _check_s25(path="verma_cache.pkl", verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s2.5 checkpoint  —  verma_cache.pkl export")
-        print("─" * 60)
+        print("-" * 60)
+        print("s2.5 checkpoint  --  verma_cache.pkl export")
+        print("-" * 60)
 
     # (1) File exists
     _check("file exists", _os.path.exists(path), True)
     if not _os.path.exists(path):
         if verbose:
-            print("  [FATAL] file not found — skipping remaining checks.")
+            print("  [FATAL] file not found -- skipping remaining checks.")
         return False
 
     # (2) File size > 0
@@ -2594,12 +2594,12 @@ def _check_s25(path="verma_cache.pkl", verbose=True):
            set(data2.keys()) == set(data.keys()), True)
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s2.5  ✓  ALL CHECKS PASSED")
+            print("s2.5  [OK]  ALL CHECKS PASSED")
         else:
-            print("s2.5  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s2.5  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
@@ -2634,9 +2634,9 @@ def _check_s22(verbose=True):
             all_pass = False
 
     if verbose:
-        print("─" * 60)
-        print("s2.2 checkpoint  —  VermaModule graded dimensions")
-        print("─" * 60)
+        print("-" * 60)
+        print("s2.2 checkpoint  --  VermaModule graded dimensions")
+        print("-" * 60)
 
     M100 = M_verma(0, 1, 0, 0)
     M000 = M_verma(0, 0, 0, 0)
@@ -2658,18 +2658,18 @@ def _check_s22(verbose=True):
     _check("len(basis(1)) == dim(1)", len(M100.basis(1)), M100.dim(1))
     _check("len(basis(2)) == dim(2)", len(M100.basis(2)), M100.dim(2))
 
-    # (9): to_vec round-trip — set coefficient (mon_idx=0, w_idx=0) = 1
+    # (9): to_vec round-trip -- set coefficient (mon_idx=0, w_idx=0) = 1
     v = M100.to_vec(1, {(0, 0): QQ(1)})
     _check("to_vec round-trip: entry 0 of deg-1 vec == 1", v[0], QQ(1))
     _check("to_vec round-trip: entry 1 of deg-1 vec == 0", v[1], QQ(0))
 
     if verbose:
-        print("─" * 60)
+        print("-" * 60)
         if all_pass:
-            print("s2.2  ✓  ALL CHECKS PASSED")
+            print("s2.2  [OK]  ALL CHECKS PASSED")
         else:
-            print("s2.2  ✗  SOME CHECKS FAILED — see above")
-        print("─" * 60)
+            print("s2.2  [X]  SOME CHECKS FAILED -- see above")
+        print("-" * 60)
 
     return all_pass
 
@@ -2680,7 +2680,7 @@ def _check_s22(verbose=True):
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("verma_modules.py  —  s2.1 + s2.2")
+    print("verma_modules.py  --  s2.1 + s2.2")
     print("=" * 60)
 
     # Attempt to load E44 bracket data; warn if absent but continue
@@ -2704,7 +2704,7 @@ if __name__ == '__main__':
             print(f"\n  W_hat({t},{a},{b},{c}):")
             print(W.character_string())
         except Exception as exc:
-            print(f"  W_hat({t},{a},{b},{c}): ERROR — {exc}")
+            print(f"  W_hat({t},{a},{b},{c}): ERROR -- {exc}")
 
     # --- NS velocity-pressure module ---
     print("\n[s2.1.b] NS velocity module W_hat(1,1,0,0) = Verma base W_t(1,0,0):")
@@ -2720,7 +2720,7 @@ if __name__ == '__main__':
     # -----------------------------------------------------------------------
     print()
     print("=" * 60)
-    print("verma_modules.py  —  s2.2: Verma module graded structure")
+    print("verma_modules.py  --  s2.2: Verma module graded structure")
     print("=" * 60)
 
     # Dimension tables for key modules
@@ -2736,7 +2736,7 @@ if __name__ == '__main__':
     M100 = M_verma(0, 1, 0, 0)
     for idx, (mon, k) in enumerate(M100.basis(1)[:8]):
         alpha, S = mon
-        print(f"  [{idx}] e^{alpha} ∧ f_S{sorted(S)}  \otimes  w[{k}]")
+        print(f"  [{idx}] e^{alpha} wedge f_S{sorted(S)}  \otimes  w[{k}]")
 
     # --- S2.2 Checkpoint ---
     print()
@@ -2747,12 +2747,12 @@ if __name__ == '__main__':
     # -----------------------------------------------------------------------
     print()
     print("=" * 60)
-    print("verma_modules.py  —  s2.3: L_{<0}, L_0, L_1 actions + commutator")
+    print("verma_modules.py  --  s2.3: L_{<0}, L_0, L_1 actions + commutator")
     print("=" * 60)
     print()
     _check_s23(verbose=True)
 
-    # ── Leibniz direct verification ───────────────────────────────────
+    # -- Leibniz direct verification -----------------------------------
     print()
     _check_leibniz(verbose=True)
 
@@ -2761,7 +2761,7 @@ if __name__ == '__main__':
     # -----------------------------------------------------------------------
     print()
     print("=" * 60)
-    print("verma_modules.py  —  s2.4: Grothendieck decompositions")
+    print("verma_modules.py  --  s2.4: Grothendieck decompositions")
     print("=" * 60)
 
     # Sample decompositions
@@ -2777,7 +2777,7 @@ if __name__ == '__main__':
         (0, 1, 1, 0, 2),
     ]:
         d = grothendieck_decomp(t_, a_, b_, c_, max_depth=depth_)
-        print(f"\n  [M_{t_}({a_},{b_},{c_})]  (depth ≤ {depth_}):")
+        print(f"\n  [M_{t_}({a_},{b_},{c_})]  (depth leq {depth_}):")
         for (tt, aa, bb, cc), mult in sorted(d.items()):
             print(f"    {mult} \cdot [L_{{{tt}}}({aa},{bb},{cc})]")
 
@@ -2794,7 +2794,7 @@ if __name__ == '__main__':
     # -----------------------------------------------------------------------
     print()
     print("=" * 60)
-    print("verma_modules.py  —  s2.5: export verma_cache.pkl")
+    print("verma_modules.py  --  s2.5: export verma_cache.pkl")
     print("=" * 60)
     print()
 

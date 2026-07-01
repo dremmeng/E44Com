@@ -1,9 +1,9 @@
 """
-morphisms.py  —  Verma-module morphisms for the de Rham complex of E(4,4)
+morphisms.py  --  Verma-module morphisms for the de Rham complex of E(4,4)
 =========================================================================
-Section 7 of the NSE44 programme  (Cantarini–Caselli–Kac 2026).
+Section 7 of the NSE44 programme  (Cantarini--Caselli--Kac 2026).
 
-This module assembles the ten E(4,4)-Verma-module morphisms \phi[1A]–\phi[4H]
+This module assembles the ten E(4,4)-Verma-module morphisms \phi[1A]--\phi[4H]
 needed for both incarnations of the exceptional de Rham complex (Figures 7
 and 8 of the paper).  The degree-1 through degree-4 morphisms are imported
 from singular_vectors.py, and the composite degree-2 morphism \phi[2EA] is
@@ -12,34 +12,34 @@ constructed here.
 Morphism catalogue
 ------------------
   phi_1A(t, a, e44_data, max_source_deg)
-        M_{t-1}(a+1,0,0) \to M_t(a,0,0)         degree 1   a≥1 or a=t=0
+        M_{t-1}(a+1,0,0) \to M_t(a,0,0)         degree 1   ageq1 or a=t=0
 
   phi_1B(t, c, e44_data, max_source_deg)
-        M_{t-1}(0,0,c-1) \to M_t(0,0,c)          degree 1   c≥1
+        M_{t-1}(0,0,c-1) \to M_t(0,0,c)          degree 1   cgeq1
 
   phi_1C(t, e44_data, max_source_deg)
-        M_{t-1}(0,1,0) \to M_t(0,0,1)            degree 1   p̂(4) target fiber
+        M_{t-1}(0,1,0) \to M_t(0,0,1)            degree 1   p_hat(4) target fiber
 
   phi_1D(t, e44_data, max_source_deg)
-        M_{t-1}(1,0,0) \to M_t(0,0,0)            degree 1   t≠0
+        M_{t-1}(1,0,0) \to M_t(0,0,0)            degree 1   tneq0
 
   phi_1E(e44_data, max_source_deg)
-        M_0(0,0,0) \to M_1(1,0,0)                degree 1   p̂(4) target fiber
+        M_0(0,0,0) \to M_1(1,0,0)                degree 1   p_hat(4) target fiber
 
   phi_2DA(t, e44_data, max_source_deg)
-        M_{t-2}(2,0,0) \to M_t(0,1,0)            degree 2   p̂(4) target fiber
+        M_{t-2}(2,0,0) \to M_t(0,1,0)            degree 2   p_hat(4) target fiber
 
   phi_2EA(e44_data, max_source_deg)
         M_{-1}(1,0,0) \to M_1(1,0,0)             degree 2   = phi_1E \circ phi_1A
 
   phi_3F(e44_data, max_source_deg)
-        M_0(0,0,0) \to M_3(1,0,0)                degree 3   p̂(4) target fiber
+        M_0(0,0,0) \to M_3(1,0,0)                degree 3   p_hat(4) target fiber
 
   phi_3G(e44_data, max_source_deg)
         M_{-3}(1,0,0) \to M_0(0,0,0)             degree 3
 
   phi_4H(t, e44_data, max_source_deg)
-        M_{t-4}(1,0,0) \to M_t(1,0,0)            degree 4   p̂(4) target fiber
+        M_{t-4}(1,0,0) \to M_t(1,0,0)            degree 4   p_hat(4) target fiber
 
 Return convention
 -----------------
@@ -47,12 +47,12 @@ Every phi_* function returns a 5-tuple:
     (M_src, M_tar, sv_deg, phi0_vecs, matrices)
 
 where:
-  M_src     : VermaModule — source module M_{t'}(a',b',c')
-  M_tar     : VermaModule — target module M_t(a,b,c)
-  sv_deg    : int — degree of the defining singular vector
-  phi0_vecs : list[QQ-vector] — fiber-map images \phi_0(e_k) \in M_tar[sv_deg],
+  M_src     : VermaModule -- source module M_{t'}(a',b',c')
+  M_tar     : VermaModule -- target module M_t(a,b,c)
+  sv_deg    : int -- degree of the defining singular vector
+  phi0_vecs : list[QQ-vector] -- fiber-map images \phi_0(e_k) \in M_tar[sv_deg],
               one per source-fiber basis vector (len = M_src.dim_W)
-  matrices  : dict{d: QQ-matrix} — morphism matrices at source degree d,
+  matrices  : dict{d: QQ-matrix} -- morphism matrices at source degree d,
               shape dim(M_tar[sv_deg+d]) \times dim(M_src[d]),
               for d = 0 ... max_source_deg
 
@@ -72,8 +72,8 @@ Utility functions
 
 Dependency
 ----------
-  e44_brackets.pkl  — written by sage e44_structure.py
-  phat4_cache.pkl   — written by sage phat4_modules.py (optional cache)
+  e44_brackets.pkl  -- written by sage e44_structure.py
+  phat4_cache.pkl   -- written by sage phat4_modules.py (optional cache)
 
 Run inside SageMath:  sage morphisms.py
 """
@@ -127,7 +127,7 @@ __all__ = [
 
 
 # ===========================================================================
-# \phi[2EA] — composite degree-2 morphism  M_{-1}(1,0,0) \to M_1(1,0,0)
+# \phi[2EA] -- composite degree-2 morphism  M_{-1}(1,0,0) \to M_1(1,0,0)
 # ===========================================================================
 #
 # \phi[2EA] is the degree-2 morphism defined by the composite
@@ -141,8 +141,8 @@ __all__ = [
 # The degree-2 singular vector w[2EA] \in M_1(1,0,0)[2] is:
 #       w[2EA] = (\phi[1E] degree-1 matrix) \cdot w[1A](0,0)
 #
-# This is nonzero — the composite morphism is a proper degree-2 embedding.
-# (The composition \phi[1E] \circ \phi[1A] ≠ 0, confirmed numerically in s3.6.)
+# This is nonzero -- the composite morphism is a proper degree-2 embedding.
+# (The composition \phi[1E] \circ \phi[1A] neq 0, confirmed numerically in s3.6.)
 # ---------------------------------------------------------------------------
 
 def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
@@ -157,7 +157,7 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
 
     Parameters
     ----------
-    e44_data      : dict from load_e44() — E(4,4) bracket data
+    e44_data      : dict from load_e44() -- E(4,4) bracket data
     max_source_deg: int (default 0)
         Compute morphism matrices at source degrees 0 ... max_source_deg.
     src_e44_data  : e44_data to use for the source fiber.
@@ -167,7 +167,7 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
     -------
     (M_src, M_tar, sv_deg, phi0_vecs, matrices)
       M_src     : VermaModule  M_{-1}(1,0,0)  fiber determined by src_e44_data
-      M_tar     : VermaModule  M_1(1,0,0)     p̂(4) fiber dim_W = 8
+      M_tar     : VermaModule  M_1(1,0,0)     p_hat(4) fiber dim_W = 8
       sv_deg    : 2
       phi0_vecs : list of QQ-vectors in M_tar[2] (one per src fiber basis vector)
       matrices  : dict{d: matrix} for d = 0 ... max_source_deg
@@ -182,7 +182,7 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
 
     sv_deg = 2
 
-    # ── Step 1: build w[2EA] = \phi[1E][degree-1 mat] * w[1A](0,0) ────────
+    # -- Step 1: build w[2EA] = \phi[1E][degree-1 mat] * w[1A](0,0) --------
     # \phi[1E] with max_source_deg=1 to expose its degree-1 morphism matrix,
     # which maps M_0(0,0,0)[1] \to M_1(1,0,0)[2].
     _, _, _, _, mats_1E = phi_1E(e44_data, max_source_deg=1)
@@ -195,7 +195,7 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
             "expected a nonzero degree-2 singular vector in M_1(1,0,0)."
         )
 
-    # ── Step 2: set up source and target modules ──────────────────────────
+    # -- Step 2: set up source and target modules --------------------------
     M_tar = M_verma(QQ(1), 1, 0, 0,
                     max_deg=sv_deg + max_source_deg,
                     e44_data=e44_data)
@@ -203,10 +203,10 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
     M_src = M_verma(QQ(-1), 1, 0, 0, max_deg=max_source_deg,
                     e44_data=src_e44_data)
 
-    # ── Step 3: fiber map \phi_0: W_{-1}(1,0,0) \to M_1(1,0,0)[2] ────────────
+    # -- Step 3: fiber map \phi_0: W_{-1}(1,0,0) \to M_1(1,0,0)[2] ------------
     phi0 = _compute_phi0(w_2EA, M_tar, sv_deg, M_src.W, e44_data)
 
-    # ── Step 4: assemble morphism matrices at each source degree ──────────
+    # -- Step 4: assemble morphism matrices at each source degree ----------
     matrices = {}
     for d in range(max_source_deg + 1):
         matrices[d] = _phi_at_degree(M_src, M_tar, sv_deg, phi0, d)
@@ -231,14 +231,14 @@ def compose_morphisms(phi_B_mats, phi_A_mats, sv_deg_A, max_result_deg=0):
 
     Parameters
     ----------
-    phi_B_mats    : dict{d: QQ-matrix} — matrices for \phi_B (outer morphism)
-    phi_A_mats    : dict{d: QQ-matrix} — matrices for \phi_A (inner morphism)
-    sv_deg_A      : int — degree shift of \phi_A (singular-vector degree)
-    max_result_deg: int (default 0) — compute for source degrees 0..max_result_deg
+    phi_B_mats    : dict{d: QQ-matrix} -- matrices for \phi_B (outer morphism)
+    phi_A_mats    : dict{d: QQ-matrix} -- matrices for \phi_A (inner morphism)
+    sv_deg_A      : int -- degree shift of \phi_A (singular-vector degree)
+    max_result_deg: int (default 0) -- compute for source degrees 0..max_result_deg
 
     Returns
     -------
-    dict{d: QQ-matrix} — composition matrices at source degree d
+    dict{d: QQ-matrix} -- composition matrices at source degree d
     """
     result = {}
     for d in range(max_result_deg + 1):
@@ -286,7 +286,7 @@ def _check_section7(e44_data=None, verbose=True):
     """
     Section 7 checkpoint: morphism construction and composition tests.
 
-    Part A — Construct all 10 morphisms; verify E(4,4) equivariance
+    Part A -- Construct all 10 morphisms; verify E(4,4) equivariance
              (L_0 equivariance, L_1 annihilation, L_{-1} consistency, rank)
              for a selection of parameter values:
                \phi[1A](t=0, a=1),  \phi[1B](t=1, c=1),  \phi[1C](t=1),
@@ -294,12 +294,12 @@ def _check_section7(e44_data=None, verbose=True):
                \phi[2DA](t=2),      \phi[2EA],
                \phi[3F],            \phi[3G],             \phi[4H](t=3).
 
-    Part B — Non-zero compositions:
+    Part B -- Non-zero compositions:
       (1) \phi[1E] \circ \phi[1A](0,0)  = \phi[2EA]     (defines the composite morphism)
       (2) \phi[3F] \circ \phi[1A](0,0) \proto w[4H](t=3)  in M_3(1,0,0)[4]
       (3) \phi[1E] \circ \phi[3G]       \proto w[4H](t=1) in M_1(1,0,0)[4]
 
-    Part C — Zero compositions (d² = 0 for the de Rham complex):
+    Part C -- Zero compositions (d^2 = 0 for the de Rham complex):
       (4) \phi[1A](1,1) \circ \phi[1A](0,2) = 0
       (5) \phi[1D](1)   \circ \phi[1A](0,1) = 0
       (6) \phi[1B](2,2) \circ \phi[1B](1,1) = 0
@@ -310,10 +310,10 @@ def _check_section7(e44_data=None, verbose=True):
     """
     if e44_data is None:
         if verbose:
-            print("─" * 60)
-            print("Section 7 checkpoint — SKIPPED (no e44_data)")
+            print("-" * 60)
+            print("Section 7 checkpoint -- SKIPPED (no e44_data)")
             print("Load via:  e44_data = load_e44('e44_brackets.pkl')")
-            print("─" * 60)
+            print("-" * 60)
         return True
 
     all_pass = True
@@ -334,14 +334,14 @@ def _check_section7(e44_data=None, verbose=True):
 
     if verbose:
         print("=" * 60)
-        print("Section 7 — Verma-module morphisms \phi[1A]–\phi[4H]")
+        print("Section 7 -- Verma-module morphisms \phi[1A]--\phi[4H]")
         print("=" * 60)
 
     # ======================================================================
-    # Part A — Construction and equivariance of all 10 morphisms
+    # Part A -- Construction and equivariance of all 10 morphisms
     # ======================================================================
     if verbose:
-        print("\n╔══ Part A: Construct and verify all 10 morphisms ══╗\n")
+        print("\n+== Part A: Construct and verify all 10 morphisms ==+\n")
 
     cache = {}      # store for reuse in Parts B and C
 
@@ -389,7 +389,7 @@ def _check_section7(e44_data=None, verbose=True):
         {'max_source_deg': 1},
     )
 
-    # \phi[1C](t=1)   [p̂(4) target fiber]
+    # \phi[1C](t=1)   [p_hat(4) target fiber]
     _build_and_verify(
         "phi_1C(1)", phi_1C, (QQ(1), e44_data),
         {'max_source_deg': 1},
@@ -407,7 +407,7 @@ def _check_section7(e44_data=None, verbose=True):
         {'max_source_deg': 3},
     )
 
-    # \phi[2DA](t=2)  [p̂(4) target fiber]
+    # \phi[2DA](t=2)  [p_hat(4) target fiber]
     _build_and_verify(
         "phi_2DA(2)", phi_2DA, (QQ(2), e44_data),
         {'max_source_deg': 0},
@@ -419,7 +419,7 @@ def _check_section7(e44_data=None, verbose=True):
         {'max_source_deg': 0},
     )
 
-    # \phi[3F]   [p̂(4) target fiber]
+    # \phi[3F]   [p_hat(4) target fiber]
     _build_and_verify(
         "phi_3F", phi_3F, (e44_data,),
         {'max_source_deg': 1},
@@ -445,10 +445,10 @@ def _check_section7(e44_data=None, verbose=True):
         print(f"\n  Part A summary: {total_pass} pass, {total_fail} fail")
 
     # ======================================================================
-    # Part B — Non-zero compositions
+    # Part B -- Non-zero compositions
     # ======================================================================
     if verbose:
-        print("\n╔══ Part B: Non-zero compositions ══╗\n")
+        print("\n+== Part B: Non-zero compositions ==+\n")
 
     pass_b = 0
     fail_b = 0
@@ -467,7 +467,7 @@ def _check_section7(e44_data=None, verbose=True):
             total_fail += 1
             all_pass = False
 
-    # ── (1) \phi[1E] \circ \phi[1A](0,0) == w[2EA] ────────────────────────────────
+    # -- (1) \phi[1E] \circ \phi[1A](0,0) == w[2EA] --------------------------------
     # Both land in M_1(1,0,0)[2].
     # Compute composition: phi_1E[1] * w[1A](0,0)
     if cache.get("phi_1E") is not None:
@@ -489,7 +489,7 @@ def _check_section7(e44_data=None, verbose=True):
         if verbose:
             print("  [(SKIP)] (1): phi_1E not built successfully")
 
-    # ── (2) \phi[3F] \circ \phi[1A](0,0) \proto w[4H](t=3) ─────────────────────────────
+    # -- (2) \phi[3F] \circ \phi[1A](0,0) \proto w[4H](t=3) -----------------------------
     # \phi[1A](0,0): M_{-1}(1,0,0) \to M_0(0,0,0), degree 1
     # \phi[3F]:      M_0(0,0,0)    \to M_3(1,0,0), degree 3
     # Image: M_3(1,0,0)[4].
@@ -512,7 +512,7 @@ def _check_section7(e44_data=None, verbose=True):
         if verbose:
             print("  [(SKIP)] (2): phi_3F not built successfully")
 
-    # ── (3) \phi[1E] \circ \phi[3G] \proto w[4H](t=1) ──────────────────────────────────
+    # -- (3) \phi[1E] \circ \phi[3G] \proto w[4H](t=1) ----------------------------------
     # \phi[3G]: M_{-3}(1,0,0) \to M_0(0,0,0), degree 3
     # \phi[1E]: M_0(0,0,0)    \to M_1(1,0,0), degree 1
     # Image: M_1(1,0,0)[4].
@@ -535,7 +535,7 @@ def _check_section7(e44_data=None, verbose=True):
         else:
             if verbose:
                 print("  [(SKIP)] (3): phi_1E degree-3 matrix not available "
-                      "(need max_source_deg≥3)")
+                      "(need max_source_deggeq3)")
     else:
         if verbose:
             print("  [(SKIP)] (3): phi_1E or phi_3G not built successfully")
@@ -544,10 +544,10 @@ def _check_section7(e44_data=None, verbose=True):
         print(f"\n  Part B: {pass_b} pass, {fail_b} fail")
 
     # ======================================================================
-    # Part C — Zero compositions  (d² = 0)
+    # Part C -- Zero compositions  (d^2 = 0)
     # ======================================================================
     if verbose:
-        print("\n╔══ Part C: Zero compositions (d² = 0) ══╗\n")
+        print("\n+== Part C: Zero compositions (d^2 = 0) ==+\n")
 
     pass_c = 0
     fail_c = 0
@@ -637,15 +637,15 @@ def _check_section7(e44_data=None, verbose=True):
     if verbose:
         print(f"\n  Part C: {pass_c} pass, {fail_c} fail")
 
-    # ── Summary ───────────────────────────────────────────────────────────
+    # -- Summary -----------------------------------------------------------
     if verbose:
-        print("\n" + "═" * 60)
+        print("\n" + "=" * 60)
         print(f"Section 7 summary: {total_pass} pass, {total_fail} fail")
         if all_pass:
-            print("Section 7  ✓  ALL CHECKS PASSED")
+            print("Section 7  [OK]  ALL CHECKS PASSED")
         else:
-            print("Section 7  ✗  SOME CHECKS FAILED — see above")
-        print("═" * 60)
+            print("Section 7  [X]  SOME CHECKS FAILED -- see above")
+        print("=" * 60)
 
     return all_pass
 
@@ -657,7 +657,7 @@ def _check_section7(e44_data=None, verbose=True):
 if __name__ == '__main__':
     import sys as _sys_main
 
-    print("morphisms.py — Section 7 self-test")
+    print("morphisms.py -- Section 7 self-test")
     print("Loading E(4,4) bracket data ...")
     e44 = load_e44('e44_brackets.pkl')
     if e44 is None:
