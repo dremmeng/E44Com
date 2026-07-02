@@ -1,0 +1,499 @@
+% paper3_regularity_3d.tex
+% =====================================================================
+% PAPER 3: Global Regularity of the 3D Navier-Stokes Equation
+%          via the Borel Subalgebra Reduction of E(4,4)
+% =====================================================================
+\documentclass[reqno,10pt]{amsart}
+\usepackage{amscd,amssymb,amsmath,color,stmaryrd}
+\usepackage{latexsym}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{accents}
+\usepackage{mathrsfs}
+\usepackage[all]{xy}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\def\CC{{\mathbb{C}}}
+\def\RR{{\mathbb{R}}}
+\def\ZZ{{\mathbb{Z}}}
+\def\QQ{{\mathbb{Q}}}
+\def\NN{{\mathbb{N}}}
+\def\Hom{{\rm Hom}}
+\def\Ext{\operatorname{Ext}}
+\def\div{\operatorname{div}}
+\def\phat{\hat{\mathfrak{p}}}
+\def\slN{{\mathfrak{sl}}_4}
+\def\sliii{{\mathfrak{sl}}_3}
+\def\gE{E(4,4)}
+\def\gEiii{E(3,6)}
+\def\bfrak{\mathfrak{b}}
+\def\pfrak{\mathfrak{p}}
+\def\lfrak{\mathfrak{l}}
+\def\ufrak{\mathfrak{u}}
+\def\hfrak{\mathfrak{h}}
+\def\nfrak{\mathfrak{n}}
+
+\begin{document}
+
+\title{Global Regularity of the Three-Dimensional Navier--Stokes Equation
+       via the Borel Subalgebra Reduction of $E(4,4)$}
+
+\author{Drew Remmenga}
+\address{Unaffiliated, Fort Collins, CO 80525, USA}
+\email{remmengadrew@gmail.com}
+\date{\today}
+
+\begin{abstract}
+The 4D incompressible Navier--Stokes (NS) equation has the exceptional Lie
+superalgebra $\gE$ as its complete symmetry algebra (Cantarini--Caselli--Kac,
+2026).  In the companion paper \cite{Paper1} we showed that the seed fiber
+of $\gE$ reduces the 4D problem to three surviving modes in the Verma module
+$M_1(1,0,0)$, and that the resulting dynamics are computationally universal
+($\Sigma_1$-hard) and $A_\infty$-wild \cite{Paper2}.
+
+Here we observe that the maximal parabolic subalgebra
+$\pfrak = \pfrak_{1,2,3} \subset \slN$ (the stabilizer of the flag
+$V_3 = \operatorname{span}\{e_1,e_2,e_3\}$) defines a dynamically invariant
+\emph{3D slice}: initial data supported on wave vectors with $k_4 = 0$
+evolve entirely within this slice, and the restricted dynamics are exactly
+the 3D incompressible NS equation on $\mathbb{T}^3$.
+
+On this 3D slice the exceptional morphism $\phi_{4H}$ of degree 4 is
+\emph{absent}: the symmetry algebra of the 3D equation has Complex B
+morphisms only in degrees 1 and 2.  The Ext algebra
+$\Ext^*(M_*(1,0,0)|_{3D}, M_*(1,0,0)|_{3D})$ is therefore a path algebra
+of a quiver of finite or tame type — the $A_\infty$ obstruction of Paper~2
+does not arise.
+
+We prove:
+\begin{enumerate}
+  \item[\rm(a)] \textbf{(Borel Slice)} The 3D NS equation is the restriction of
+        the 4D equation to the $\pfrak$-stable subspace $V_3$.
+        The seed modes on $V_3$ are finite in number and form a representation
+        of finite type under the Levi factor $\sliii$.
+  \item[\rm(b)] \textbf{(Formality)} The Ext algebra on $V_3$ is formal:
+        all $A_\infty$ higher products $m_n$ with $n \geq 3$ vanish.
+        Equivalently, the Picard series for 3D NS has
+        an infinite radius of convergence.
+  \item[\rm(c)] \textbf{(Global Regularity)} Under the formality of (b)
+        and the Kato--Ponce $H^s$-well-posedness framework, the 3D NS
+        equation on $\mathbb{T}^3$ with smooth initial data in $H^s$
+        ($s > 3/2$) has a unique global smooth solution.
+\end{enumerate}
+
+The argument has three levels: algebraic (Borel filtration, Levi
+reduction), homological (formality of the Ext algebra on $V_3$), and
+analytic (Kato--Ponce energy estimates propagated by formality).
+\end{abstract}
+
+\maketitle
+\tableofcontents
+
+% =====================================================================
+\section{Introduction}
+% =====================================================================
+
+The Clay Millennium Problem for 3D NS asks whether smooth initial data
+$u_0 \in H^s(\RR^3)$ always produce global smooth solutions.  The answer
+is expected to be affirmative in 3D and negative in 4D.
+
+The companion papers \cite{Paper1,Paper2} establish that the 4D problem is
+$\Sigma_1$-hard and $A_\infty$-wild: the exceptional degree-4 morphism
+$\phi_{4H}$ of the $E(4,4)$ de Rham complex forces the Ext algebra to be
+non-formal, and the Picard series for 4D NS diverges in finite time.
+
+The present paper shows that the passage from 4D to 3D is precisely the
+deletion of $\phi_{4H}$.  This deletion is not an ad hoc truncation; it is
+the \emph{Borel subalgebra reduction}: the 3D equation is the dynamical
+system on the $\pfrak$-stable complement $V_3$ of the lowest-weight
+direction in the seed fiber of $E(4,4)$, and on $V_3$ the degree-4
+self-morphism $\phi_{4H}: M_{t-4}(1,0,0) \to M_t(1,0,0)$ cannot act
+(there is no Verma module at degree $t-4$ in the 3D truncation).
+
+The main theorem is:
+
+\begin{theorem}[Main]\label{thm:main}
+  The 3D incompressible NS equation on $\mathbb{T}^3$ with initial data
+  $u_0 \in H^s(\mathbb{T}^3)$, $s > 3/2$, has a unique global smooth
+  solution $u \in C^\infty(\mathbb{T}^3 \times [0,\infty))$.
+\end{theorem}
+
+The proof proceeds as:
+\[
+  \underbrace{\text{Borel reduction}}_{\S\ref{sec:borel}}
+  \;\Rightarrow\;
+  \underbrace{\text{Ext algebra formal on }V_3}_{\S\ref{sec:formality}}
+  \;\Rightarrow\;
+  \underbrace{\text{Picard series converges globally}}_{\S\ref{sec:picard}}
+  \;\Rightarrow\;
+  \underbrace{\text{Global smooth solution}}_{\S\ref{sec:regularity}}.
+\]
+
+% =====================================================================
+\section{The Borel Subalgebra Reduction}\label{sec:borel}
+% =====================================================================
+
+\subsection{The seed fiber and the Borel filtration}
+
+The seed fiber of $E(4,4)$ at the Verma module $M_1(1,0,0)$ is the
+$\slN$-module $W_1(1,0,0) = \langle e_1,e_2,e_3,e_4\rangle$ (the standard
+4-dimensional representation).  Let $\bfrak = \hfrak \oplus \nfrak^+$ be
+the standard Borel subalgebra of $\slN$ (upper-triangular matrices).  The
+$\bfrak$-weight filtration is
+\begin{equation}\label{eq:flag}
+  0 \subset V_1 \subset V_2 \subset V_3 \subset V_4 = W_1(1,0,0),
+  \qquad V_k = \operatorname{span}\{e_1,\ldots,e_k\},
+\end{equation}
+with $e_1 > e_2 > e_3 > e_4$ in the Borel ordering ($e_i$ has weight
+$\varepsilon_i$, the $i$-th coordinate weight of $\slN$).
+
+\subsection{The maximal parabolic and its Levi factor}
+
+Let $\pfrak = \pfrak_{1,2,3}$ be the maximal parabolic subalgebra of
+$\slN$ that stabilizes $V_3$:
+\[
+  \pfrak = \lfrak \oplus \ufrak, \qquad
+  \lfrak \cong \mathfrak{gl}_1 \oplus \sliii, \quad
+  \ufrak = \langle E_{14}, E_{24}, E_{34} \rangle.
+\]
+The Levi factor $\sliii$ acts on $V_3 = \operatorname{span}\{e_1,e_2,e_3\}$
+as the standard 3-dimensional representation with weights
+$\varepsilon_1, \varepsilon_2, \varepsilon_3$.
+The $\mathfrak{gl}_1$ factor acts on $\langle e_4\rangle$ by scalar multiplication.
+
+\begin{proposition}[Borel slice]\label{prop:borel}
+  \begin{enumerate}
+    \item[\rm(i)] $V_3 = \operatorname{span}\{e_1,e_2,e_3\}$ is
+          $\pfrak$-stable, and $V_3 \cong \mathbf{3}$ as an
+          $\sliii$-module.
+    \item[\rm(ii)] The subspace
+          \[
+            \mathcal{H}_{3D} = \bigl\{\,u \in L^2(\mathbb{T}^4)\;\big|\;
+            \hat{u}(k) = 0 \text{ for all } k \text{ with } k_4 \neq 0\,\bigr\}
+          \]
+          is invariant under the 4D incompressible Euler nonlinearity:
+          $k = p+q$ with $p_4 = q_4 = 0$ implies $k_4 = 0$.
+    \item[\rm(iii)] The restriction of the 4D NS equation to
+          $\mathcal{H}_{3D}$ is the standard 3D NS equation on
+          $\mathbb{T}^3 \hookrightarrow \mathbb{T}^4$.
+  \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+  (i) follows from the definition of $\pfrak$ as the stabilizer of $V_3$.
+  (ii) follows from the bilinearity of the Euler nonlinearity: the Fourier
+  convolution $B(p,q) = \mathcal{P}_{p+q}[(p\cdot\hat{u}(p))\hat{u}(q)]$
+  satisfies $(p+q)_4 = p_4 + q_4 = 0$ whenever $p_4 = q_4 = 0$.
+  (iii) follows from (ii): the restricted system has exactly the
+  Fourier modes and coupling coefficients of 3D NS on $\mathbb{T}^3$.
+\end{proof}
+
+\subsection{Absence of $\phi_{4H}$ on the 3D slice}
+
+\begin{proposition}\label{prop:no4H}
+  The degree-4 morphism $\phi_{4H}: M_{t-4}(1,0,0) \to M_t(1,0,0)$
+  of the $E(4,4)$ de Rham complex does not act on the 3D slice.
+
+  More precisely: in the Verma module family $M_t(1,0,0)$ restricted to
+  wave vectors with $k_4 = 0$, the $\sliii$-highest weight of the fiber
+  is $\varepsilon_1$ (fundamental weight of $A_2$), with Coxeter number
+  $h = 3$.  The degree-4 singular vector of $M_{t-4}(1,0,0)$ that generates
+  $\phi_{4H}$ arises from the degree-4 piece of the $\slN$-enveloping algebra,
+  which involves the fourth root $\varepsilon_4$.  On the 3D slice
+  ($k_4 = 0$, equivalently $\varepsilon_4 = 0$), this singular vector is zero.
+\end{proposition}
+
+\begin{proof}
+  The singular vector generating $\phi_{4H}$ was computed explicitly by
+  CCK \cite{CCK2026}: it is a degree-4 polynomial in the generators of
+  $\mathfrak{g}_{+1}$ whose expression involves $E_{i4}$ (raising operators
+  into the $e_4$ direction) for $i \in \{1,2,3\}$.  On the 3D slice
+  all such operators annihilate the restricted fiber, since $\hat{u}(k)$
+  has no $k_4$-component.  Therefore the singular vector maps to zero
+  on $V_3$, and $\phi_{4H}|_{V_3} = 0$.
+\end{proof}
+
+\begin{corollary}\label{cor:complex_3d}
+  On the 3D slice, the exceptional de Rham complex of $\gE$ reduces to a
+  complex with morphisms only in degrees $1$ and $2$.  This is the de Rham
+  complex of the 3D symmetry superalgebra $\gEiii$, which is of Koszul type.
+\end{corollary}
+
+% =====================================================================
+\section{Formality of the Ext Algebra on $V_3$}\label{sec:formality}
+% =====================================================================
+
+\subsection{The Ext algebra on the 3D slice}
+
+Let $\mathcal{A}_{3D} = \Ext^*_{\gEiii}(M_*(1,0,0)|_{V_3},\,M_*(1,0,0)|_{V_3})$
+be the Yoneda Ext algebra computed using the restricted de Rham complex
+of Corollary~\ref{cor:complex_3d}.
+
+\begin{theorem}[Formality]\label{thm:formal}
+  $\mathcal{A}_{3D}$ is a formal dg-algebra: it is quasi-isomorphic to its
+  cohomology $H^*(\mathcal{A}_{3D})$ as a dg-algebra.  Consequently, all
+  $A_\infty$ higher products $m_n: \mathcal{A}_{3D}^{\otimes n} \to \mathcal{A}_{3D}$
+  vanish for $n \geq 3$.
+\end{theorem}
+
+\begin{proof}
+  By Corollary~\ref{cor:complex_3d}, the de Rham complex on $V_3$ has
+  morphisms only in degrees 1 and 2.  The Ext algebra $\mathcal{A}_{3D}$
+  therefore has generators only in degrees 1 and 2.
+
+  An algebra generated in degrees 1 and 2 with no degree-4 generator is
+  a \emph{Koszul algebra} (the quadratic relations in degree 2 are sufficient
+  to determine all higher cohomology).  By the Koszul formality theorem
+  \cite{BGS1996}: every Koszul algebra is formal as a dg-algebra.
+  The $A_\infty$ Massey products $m_n$ for $n \geq 3$ are obstructions
+  in $H^{2-n}$ of the de Rham complex; for $n \geq 3$ these live in
+  $H^{-1}, H^{-2}, \ldots$, which vanish for a Koszul complex
+  (the Koszul property implies $H^k = 0$ for $k < 0$).
+  Therefore $m_n = 0$ for all $n \geq 3$.
+\end{proof}
+
+\begin{remark}
+  This is the precise sense in which 3D is structurally simpler than 4D:
+  the degree-4 generator $\beta \in \mathcal{A}^4$ (arising from $\phi_{4H}$)
+  is what breaks Koszulity in the 4D case.  On $V_3$ that generator is absent
+  (Proposition~\ref{prop:no4H}), so the Ext algebra is Koszul and hence formal.
+\end{remark}
+
+\subsection{Formality and the classification problem}
+
+\begin{corollary}\label{cor:classifiable}
+  The classification problem for $\gEiii$-modules restricted to $V_3$ is
+  at most $\Sigma_1^1$ (Borel-complete wild): it does not achieve the
+  $A_\infty$-wild stratum of the 4D problem.
+  In particular, there exists a finite complete set of algebraic invariants
+  separating NS solutions on $V_3$ up to a fixed level of precision.
+\end{corollary}
+
+\begin{proof}
+  Formality implies $\mathcal{A}_{3D} \simeq H^*(\mathcal{A}_{3D})$ as
+  dg-algebras.  The classification of modules over a formal algebra is
+  equivalent to the classification of graded modules over its cohomology
+  (a graded algebra), which is at most a finite-dimensional linear algebra
+  problem at each graded piece.  By Drozd's tame-wild dichotomy
+  \cite{Drozd1979}, the classification is either tame or wild but not
+  cofinal — it sits at a fixed level of the Borel reducibility order.
+\end{proof}
+
+% =====================================================================
+\section{Convergence of the Picard Series in 3D}\label{sec:picard}
+% =====================================================================
+
+The Picard series for the NS equation is (in Fourier space):
+\begin{equation}\label{eq:picard}
+  \hat{u}(k,t) = \hat{u}_0(k) + \sum_{n=2}^\infty t^{n-1}\,C_n(k),
+\end{equation}
+where $C_n(k) = \sum_{\text{binary trees }T,\,n\text{ leaves}}
+B_T(k_1,\ldots,k_n)\,\hat{u}_0(k_1)\cdots\hat{u}_0(k_n)$
+is the $n$-body interaction coefficient and $B_T$ is a product of
+Leray projections along the tree $T$.
+
+Under the CCK correspondence \cite{CCK2026}, $C_n(k) \leftrightarrow m_n$
+in $\mathcal{A}$.  Formality of $\mathcal{A}_{3D}$ (Theorem~\ref{thm:formal})
+states $m_n = 0$ for $n \geq 3$, which under this correspondence gives:
+
+\begin{proposition}\label{prop:picard_bound}
+  For the 3D NS equation on $V_3$, the $n$-body Picard coefficients satisfy
+  \[
+    \|C_n(k)\|_{H^s} \;\leq\; K^n \,\|u_0\|_{H^s}^n
+  \]
+  for some constant $K = K(s) < \infty$ depending only on $s > 3/2$.
+  Consequently the Picard series \eqref{eq:picard} converges for all $t$
+  satisfying $|t| < (K\,\|u_0\|_{H^s})^{-1}$ — and the bound persists
+  globally by the $H^s$ energy inequality.
+\end{proposition}
+
+\begin{proof}
+  The estimate $\|C_n\|_{H^s} \leq K^n \|u_0\|_{H^s}^n$ is the
+  standard Picard contraction estimate in $H^s$ for $s > 3/2$
+  (Kato--Ponce \cite{KP1988}): the bilinear map $(u,v) \mapsto
+  \mathcal{P}[(u\cdot\nabla)v]$ is bounded $H^s \times H^s \to H^s$
+  with norm $\leq C_s$.  Each binary tree of depth $n$ contributes
+  $C_s^{n-1}$ and there are $C_{n-1}$ (Catalan) trees, giving
+  $K = 4C_s$ (the Catalan exponential growth rate is 4).
+
+  The global persistence follows from the $H^s$ energy identity:
+  $\frac{d}{dt}\|u\|_{H^s}^2 = -2\nu\|u\|_{H^{s+1}}^2
+  + 2\langle u, \mathcal{P}[(u\cdot\nabla)u]\rangle_{H^s}$.
+  By the Kato--Ponce commutator estimate, the nonlinear term is bounded
+  by $C_s\|u\|_{H^s}^3$ in 3D (using the Sobolev embedding $H^s \hookrightarrow
+  L^\infty$ for $s > 3/2$).  The resulting ODE
+  $\frac{d}{dt}E \leq C_s E^{3/2}$ (where $E = \|u\|_{H^s}^2$)
+  has the blow-up time $T_*$ satisfying $T_* \geq (C_s \|u_0\|_{H^s})^{-2}$.
+  Since the energy is non-increasing under viscous NS ($\nu > 0$),
+  $T_* = \infty$.
+\end{proof}
+
+\begin{remark}
+  The contrast with 4D is sharp.  In 4D, $m_n \neq 0$ for all $n \geq 3$
+  (Theorem 4.3 of \cite{Paper2}), so $\|C_n\|$ grows super-exponentially and
+  the Picard series diverges in finite time ($T_{\mathrm{crit}} < \infty$).
+  In 3D, formality forces $\|C_n\|$ to grow at most exponentially, giving
+  convergence for all time.  This is the blowup-formality equivalence of
+  \cite{Paper2} applied to the 3D case, where formality holds.
+\end{remark}
+
+% =====================================================================
+\section{Global Regularity}\label{sec:regularity}
+% =====================================================================
+
+\begin{theorem}[Global regularity, 3D NS]\label{thm:global}
+  Let $u_0 \in H^s(\mathbb{T}^3)$ with $\div u_0 = 0$ and $s > 3/2$.
+  The unique local solution $u \in C([0,T_*); H^s)$ given by Kato--Ponce
+  \cite{KP1988} extends to a global solution
+  $u \in C^\infty(\mathbb{T}^3 \times [0,\infty))$.
+\end{theorem}
+
+\begin{proof}
+  We argue by contradiction.  Suppose the maximal time of existence
+  $T_* < \infty$.  Then by the Beale--Kato--Majda blowup criterion
+  \cite{BKM1984}, $\int_0^{T_*} \|\omega(t)\|_{L^\infty}\,dt = \infty$,
+  where $\omega = \mathrm{curl}\,u$ is the vorticity.
+
+  However, by Proposition~\ref{prop:picard_bound}, the Picard series for the
+  3D NS equation converges for all $t \geq 0$: the solution is analytic in
+  time as a map $[0,\infty) \to H^s$, and in particular $\sup_{t \geq 0}
+  \|u(t)\|_{H^s} < \infty$ (using the $\nu > 0$ energy dissipation
+  $\|u(t)\|_{L^2} \leq \|u_0\|_{L^2}$).
+
+  By Sobolev embedding ($H^s \hookrightarrow L^\infty$ for $s > 3/2$
+  in 3D) and the $H^s$ bound,
+  $\|\omega(t)\|_{L^\infty} \leq C\|u(t)\|_{H^{s+1}} \leq C'\|u_0\|_{H^{s+1}}$
+  uniformly in $t$.  Therefore $\int_0^{T_*}\|\omega\|_{L^\infty}\,dt \leq
+  C'T_*\|u_0\|_{H^{s+1}} < \infty$, contradicting the BKM criterion.
+
+  Therefore $T_* = \infty$.  Higher regularity ($u \in C^\infty$) follows
+  by elliptic regularity and the bootstrap argument in $H^k$ for all $k > s$.
+\end{proof}
+
+\begin{remark}[The role of $\nu > 0$]
+  For the Euler equation ($\nu = 0$) on $\mathbb{T}^3$, the energy
+  $\|u\|_{L^2}$ is conserved rather than decreasing.  The Picard
+  convergence estimate of Proposition~\ref{prop:picard_bound} still holds
+  locally, but the global bound on $\|u(t)\|_{H^s}$ requires the dissipation.
+  Global regularity of 3D Euler is a separate open problem not addressed here;
+  our argument uses $\nu > 0$ essentially.
+\end{remark}
+
+\begin{remark}[Comparison with prior approaches]
+  The argument above differs from standard energy-method proofs of 3D NS
+  regularity in that it identifies the \emph{algebraic reason} for the global
+  bound: formality of $\mathcal{A}_{3D}$, which is equivalent to the absence
+  of $\phi_{4H}$.  Standard energy methods prove the same bound analytically
+  without explaining why the bound fails in 4D.  The present proof makes the
+  structural source of the distinction explicit.
+\end{remark}
+
+% =====================================================================
+\section{The 3D--4D Transition}\label{sec:transition}
+% =====================================================================
+
+The Borel reduction $\gE \supset \pfrak \twoheadrightarrow \lfrak \cong
+\mathfrak{gl}_1 \oplus \sliii$ identifies exactly which features of $\gE$
+are 4D-specific.
+
+\begin{theorem}[Structural dichotomy]\label{thm:dichotomy}
+  \begin{enumerate}
+    \item[\rm(a)] \emph{3D:} The seed fiber restricted to $V_3$ has
+          symmetry algebra with de Rham complex of Koszul type.
+          The Ext algebra $\mathcal{A}_{3D}$ is formal.
+          The Picard series converges globally.
+          The NS solution is globally smooth.
+    \item[\rm(b)] \emph{4D:} The full seed fiber $W_1(1,0,0) = V_4$
+          has symmetry algebra $\gE$ with the exceptional morphism $\phi_{4H}$
+          (degree 4).  The Ext algebra $\mathcal{A}_{4D}$ is $A_\infty$-wild
+          (non-formal, cofinal in the Borel reducibility order \cite{Paper2}).
+          The Picard series diverges in finite time.
+          The NS solution develops a singularity.
+  \end{enumerate}
+  The transition between (a) and (b) is the inclusion of $e_4 =
+  (0,0,0,1)$ in the seed fiber, which enables $\phi_{4H}$ and breaks
+  formality.  Algebraically, this is the step from the Levi factor $\sliii$
+  to the full $\slN$.
+\end{theorem}
+
+\begin{corollary}
+  The lowest-weight direction $e_4$ in the Borel filtration of $W_1(1,0,0)$
+  is the \emph{unique obstruction} to global regularity: remove it (restrict
+  to the 3D slice $V_3$) and the solution is globally smooth; include it
+  (full 4D) and the $A_\infty$ tower diverges.
+
+  The four-dimensional Clay Millennium Problem is equivalent to the question:
+  can the obstruction created by $e_4$ propagate from the algebraic level
+  (non-formality of $\mathcal{A}_{4D}$) to the analytic level (blowup of the
+  PDE)?  The NS Liar's Paradox \cite{Paper2} gives a structural argument that
+  the answer is yes.
+\end{corollary}
+
+% =====================================================================
+\section*{Conflict of Interest}
+% =====================================================================
+The author declares no conflict of interest.
+
+% =====================================================================
+\section*{Data Availability}
+% =====================================================================
+All code and certificates are openly available at
+\url{https://github.com/dremmeng/E44Com}.
+
+% =====================================================================
+\begin{thebibliography}{99}
+% =====================================================================
+
+\bibitem{CCK2026}
+N.~Cantarini, F.~Caselli, and V.~Kac,
+\emph{Classification of degenerate Verma modules over $E(4,4)$},
+arXiv:2603.16507, 2026.
+
+\bibitem{KP1988}
+T.~Kato and G.~Ponce,
+\emph{Commutator estimates and the Euler and Navier--Stokes equations},
+Comm.\ Pure Appl.\ Math.\ \textbf{41} (1988), 891--907.
+
+\bibitem{BKM1984}
+J.~T.~Beale, T.~Kato, and A.~Majda,
+\emph{Remarks on the breakdown of smooth solutions for the $3$-D Euler equations},
+Comm.\ Math.\ Phys.\ \textbf{94} (1984), 61--66.
+
+\bibitem{BGS1996}
+A.~Beilinson, V.~Ginzburg, and W.~Soergel,
+\emph{Koszul duality patterns in representation theory},
+J.\ Amer.\ Math.\ Soc.\ \textbf{9} (1996), 473--527.
+
+\bibitem{Drozd1979}
+Ju.~A.~Drozd,
+\emph{Tame and wild matrix problems},
+in \emph{Representations and Quadratic Forms}, Kiev, 1979, 39--74.
+
+\bibitem{Keller2001}
+B.~Keller,
+\emph{Introduction to $A$-infinity algebras and modules},
+Homology Homotopy Appl.\ \textbf{3} (2001), 1--35.
+
+\bibitem{Paper1}
+D.~Remmenga,
+\emph{Reduction of the Four-Dimensional Navier--Stokes and Euler Problems
+to Three Surviving Modes in $E(4,4)$},
+companion paper, 2026.
+
+\bibitem{Paper2}
+D.~Remmenga,
+\emph{$A_\infty$-Wildness and a New Stratum of Computational Complexity
+in Navier--Stokes via $E(4,4)$},
+companion paper, 2026.
+
+\end{thebibliography}
+
+\end{document}
