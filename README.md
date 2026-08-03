@@ -5,7 +5,8 @@ This repository collects a formal, algebraic route from the incompressible Navie
 The current working picture is:
 
 - The relevant cohomology in the lowest-weight sector is nonzero.
-- The next computable step is therefore to kill or excite selected basis vectors in that sector and observe how the induced obstruction changes.
+- In particular, there appear to be three seeds in $H^1$ that are not yet killed; these are the ones to focus on next.
+- The next computable step is therefore to kill or excite those seed directions and observe whether the induced obstruction disappears or persists.
 - The PDE-to-superfield map is
   $\Phi = \sum_{i=1}^4 u_i\,\partial_i + \sum_{i=1}^4 (\partial_i p)\,dx_i$.
 - The main theorem-style target is: if the relevant lowest-weight cohomology vanishes after such a reduction, then the corresponding formal obstruction to regularity disappears.
@@ -18,10 +19,11 @@ The current working picture is:
 
 ## What to compute next
 
-1. Choose a lowest-weight basis in the degree-1 seed sector.
-2. Kill or excite one or two basis vectors and recompute the resulting cohomology.
-3. Track whether the obstruction to regularity is removed or shifted.
-4. Compare the resulting pattern with the formal PDE-to-superfield map.
+1. Choose the lowest-weight basis in the degree-1 seed sector.
+2. Focus on the three surviving $H^1$ seeds that have not yet been killed.
+3. Kill or excite those seed directions and recompute the resulting cohomology.
+4. If killing them removes the obstruction, that supports the regularity route; if exciting them preserves or amplifies the obstruction, that settles the issue negatively.
+5. Compare the resulting pattern with the formal PDE-to-superfield map.
 
 ## Papers and source files
 
@@ -109,11 +111,11 @@ pdflatex paper2_complexity.tex && pdflatex paper2_complexity.tex
 
 ## Next computable step
 
-The current computation is not “prove regularity” but “probe the obstruction.” Since the relevant cohomology is nonzero, the next thing to test is to kill or excite basis vectors in the lowest-weight sector and see whether the corresponding cohomology class disappears or is moved to a higher-weight component.
+The current computation is not “prove regularity” but “probe the obstruction.” Since the relevant cohomology is nonzero, the next thing to test is to focus on the three surviving $H^1$ seeds and decide whether killing them removes the obstruction or exciting them confirms it.
 
 A concise form of the working claim is:
 
-**Working claim.** If the relevant lowest-weight cohomology classes vanish after a chosen basis-vector reduction (killing or exciting the appropriate generators), then the associated formal obstruction to regularity disappears.
+**Working claim.** If the three surviving $H^1$ seeds are killed and the relevant lowest-weight cohomology classes vanish, then the associated formal obstruction to regularity disappears; if exciting them preserves or strengthens the obstruction, then the route is settled negatively.
 
 ---
 
