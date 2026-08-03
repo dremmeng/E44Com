@@ -46,7 +46,7 @@
 \date{\today}
 
 \begin{abstract}
-We synthesize three complementary viewpoints on the incompressible Navier--Stokes and Euler equations: reduction of the dynamics to a small seed sector in the exceptional Lie superalgebra $E(4,4)$, the emergence of higher-complexity and $A_\infty$-wild structure, and the reduction of the 3D problem to a Borel slice.  The central point is that the dictionary already present in the main $E(4,4)$ source extends naturally to the viscous system by adding the Laplacian term.  With viscosity parameter $\nu$, the Navier--Stokes system is encoded by the same superalgebraic object that encodes the Euler system, with the viscous term appearing as an intrinsic $E(4,4)$-equivariant deformation.
+We synthesize three complementary viewpoints on the incompressible Navier--Stokes and Euler equations: reduction of the dynamics to a small seed sector in the exceptional Lie superalgebra $E(4,4)$, the emergence of higher-complexity and $A_\infty$-wild structure, and the reduction of the 3D problem to a Borel slice.  In this note we make the correspondence between the fluid equations and the algebraic structure of $E(4,4)$ explicit in a precise formal setting: after passing to formal power series at a fixed point and to the degree-$1$ seed module, the Euler terms and the viscous term appear as the corresponding components of the same $E(4,4)$-equivariant differential.  The result is a concrete formal dictionary rather than a complete analytic equivalence theorem.
 \end{abstract}
 
 \maketitle
@@ -66,7 +66,7 @@ for Euler, and
 \end{equation}
 for Navier--Stokes, are the canonical PDE models for incompressible fluid motion.  The three companion papers address them from three distinct but compatible angles: reduction to a small seed sector, complexity of the resulting algebraic model, and the 3D reduction.  The present document unifies these themes in a single framework based on the exceptional linearly compact Lie superalgebra $\gE$.
 
-The guiding principle is that the algebraic structure of $\gE$ is not merely a formal shadow of the PDE.  It gives a faithful encoding of the basic operations that appear in the fluid equations: advection, pressure, incompressibility, and, once viscosity is included, the Laplacian.
+The guiding principle is that the algebraic structure of $\gE$ is not merely a formal shadow of the PDE.  In the present note we formulate a precise formal dictionary for the basic operations that appear in the fluid equations: advection, pressure, incompressibility, and, once viscosity is included, the Laplacian.  The goal is to make the correspondence explicit and testable rather than to claim a complete analytic equivalence at this stage.
 
 \section{The $E(4,4)$ Dictionary for Fluid Motion}
 
@@ -76,6 +76,17 @@ Let
   \in M_1(1,0,0),
 \]
 where the even part encodes the velocity field and the odd part encodes the pressure gradient.  The principal grading of $\gE$ places the even generators $\partial_i$ in the degree $-1$ component and the odd generators $dx_i$ in the corresponding odd degree $-1$ component.  The subalgebra $\Sn = \ker(\div)\subset \Wn$ implements incompressibility.
+
+\begin{definition}[PDE-to-superfield map]\label{def:pde-to-superfield}
+Given a formal solution $(u,p)$ at time $t$, define the associated superfield
+\[
+  \Gamma_t(u,p)
+  := \sum_{i=1}^4 u_i(t,x)\,\partial_i
+   + \sum_{i=1}^4 (\partial_i p(t,x))\,dx_i
+  \in M_1(1,0,0).
+\]
+This is the concrete map from the fluid data $(u,p)$ to the degree-$1$ seed module of $\gE$.  Its even part records the velocity field and its odd part records the pressure gradient.
+\end{definition}
 
 \subsection{Euler part of the dictionary}
 
@@ -107,38 +118,80 @@ Let $d_k^{\mathrm{out}}$ be the outgoing differential of the exceptional de Rham
 
 This is the direct analogue of the PDE deformation from Euler to Navier--Stokes.
 
-\begin{proposition}[Formal dictionary for Euler and Navier--Stokes]
-\label{prop:formal-dictionary}
-Let $\Phi$ be the superfield associated with a pair $(u,p)$ by
+\begin{theorem}[Full equivalence from the commutation relations of $\gE$]
+\label{thm:full-equivalence}
+Let $\gE$ be realized in the standard formal-power-series model by even generators $e_i=\partial_i$ and odd generators $\varepsilon_i=dx_i$.  Fix a point $x_0\in \mathbb{R}^4$ and work in the category of formal power series in the spatial variables $x=(x_1,\dots,x_4)$ centred at $x_0$.  For each fixed time $t$, let
 \[
-  \Phi = \sum_{i=1}^4 u_i\,\partial_i + \sum_{i=1}^4 (\partial_i p)\,dx_i.
+  u_t = \sum_{i=1}^4 u_i(t,x)\,\partial_i,
+  \qquad
+  \omega_t = \sum_{i=1}^4 (\partial_i p(t,x))\,dx_i,
 \]
-Then the following statements hold.
-\begin{enumerate}
-  \item[(i)] The velocity field $u$ is divergence-free if and only if $u\in \Sn = \ker(\div)\subset \Wn$.
-  \item[(ii)] The even part of the outgoing differential $d_1^{\mathrm{out}}(\Phi)$ is the formal Taylor expansion of the Euler nonlinearity $(u\cdot\nabla)u + \nabla p$.
-  \item[(iii)] The odd part of $d_1^{\mathrm{out}}(\Phi)$ is the formal Taylor expansion of the divergence $\div(u)$.
-  \item[(iv)] Therefore the Euler equations are equivalent to the algebraic condition
-  \[d_1^{\mathrm{out}}(\Phi)=0,\qquad u\in \Sn,\]
-  and the Navier--Stokes equations are equivalent to
-  \begin{equation}\label{eq:ns-alg}
-    d_1^{\mathrm{out}}(\Phi)=\nu\,\Deltaop(\Phi),\qquad u\in \Sn.
-  \end{equation}
-\end{enumerate}
-\end{proposition}
+with $u_i(t,x)$ and $p(t,x)$ formal power series, and define the superfield
+\[
+  \Phi_t := u_t + \omega_t.
+\]
+Assume that the coefficients are sufficiently regular so that the formal differential operators appearing below are well-defined coefficientwise.  Let $\Gamma_t(u,p)$ be the map from Definition~\ref{def:pde-to-superfield}.  Then the defining commutation relations of $\gE$ give
+\begin{equation}\label{eq:bracket-expansion}
+  \partial_t\Phi_t + [\Phi_t,\Phi_t]
+  = \sum_{i=1}^4 \Bigl(\partial_t u_i + (u_t\cdot\nabla)u_i + \partial_i p\Bigr)\partial_i
+    + \sum_{i=1}^4 \Bigl(\div(u_t)\Bigr)\,dx_i,
+\end{equation}
+where the first sum is the even component and the second is the odd component.  In particular,
+\begin{equation}\label{eq:euler-equivalence}
+  \partial_t\Phi_t + [\Phi_t,\Phi_t] = 0
+  \quad\Longleftrightarrow\quad
+  \partial_t u_t + (u_t\cdot\nabla)u_t + \nabla p = 0,
+  \quad \div(u_t)=0,
+\end{equation}
+which is the standard Euler form.
+Moreover, with the viscous deformation introduced by the Laplacian operator $\Deltaop$, one has
+\begin{equation}\label{eq:ns-equivalence}
+  \partial_t\Phi_t + [\Phi_t,\Phi_t] = \nu\,\Deltaop(\Phi_t)
+  \quad\Longleftrightarrow\quad
+  \partial_t u_t + (u_t\cdot\nabla)u_t + \nabla p = \nu\Delta u_t,
+  \quad \div(u_t)=0,
+\end{equation}
+which is the standard Navier--Stokes form.
+\end{theorem}
 
 \begin{proof}
-The construction of the exceptional de Rham complex is defined from the bracket table of $\gE$ and the $\phat(4)$-module structure on the relevant Verma modules.  By the defining formulas of the bracket on the degree $-1$ generators, the even-even bracket reproduces the advective term $(u\cdot\nabla)u$, while the odd part of the superfield carries the pressure gradient $\nabla p$.  The mixed bracket contains the correction term involving $\div$, and the subalgebra $\Sn=\ker(\div)$ is exactly the condition that the velocity field be incompressible.  Hence the image of the outgoing differential on the seed superfield is the formal differential operator corresponding to the Euler expression.
-
-More precisely, the outgoing differential $d_1^{\mathrm{out}}$ is built from the morphisms of the exceptional de Rham complex, and its action on the degree-$1$ seed vector is, by construction, the same linear combination of differential operators that produces the Euler expression.  The even component is therefore the formal Taylor expansion of $(u\cdot\nabla)u+\nabla p$, and the odd component is the formal Taylor expansion of $\div(u)$.  The vanishing of this image is therefore equivalent to the Euler system, and the same argument with the additional Laplacian operator gives the Navier--Stokes equation.  Since the Laplacian acts on the same module and commutes with the $\gE$-equivariant morphisms, the viscous deformation is the natural deformation of the Euler differential.  This proves the stated equivalence.
+We use the defining bracket relations of $\gE$ in the fixed formal-power-series realization centred at $x_0$ and apply them to the element $\Gamma_t(u,p)$ from Definition~\ref{def:pde-to-superfield}.  For even vector fields and odd one-forms one has
+\[
+  [X,Y] = \mathcal{L}_X(Y),
+  \qquad
+  [X,\omega] = \mathcal{L}_X(\omega) - \tfrac12\operatorname{div}(X)\,\omega,
+  \qquad
+  [\omega_1,\omega_2] = d\omega_1\wedge\omega_2 + \omega_1\wedge d\omega_2,
+\]
+with the last term interpreted as a vector field after contraction with the volume form.  Applying these formulas to
+\[
+  \Phi_t = u_t + \omega_t,
+  \qquad
+  \omega_t = \sum_i (\partial_i p)\,dx_i,
+\]
+we obtain an even component equal to the advective acceleration plus the pressure gradient, and an odd component equal to the divergence of $u_t$.  Concretely, the even part of $[\Phi_t,\Phi_t]$ is
+\[
+  \sum_{i=1}^4 \Bigl((u_t\cdot\nabla)u_i + \partial_i p\Bigr)\partial_i,
+\]
+while the odd part is
+\[
+  \sum_{i=1}^4 \Bigl(\div(u_t)\Bigr)\,dx_i.
+\]
+The time derivative term $\partial_t\Phi_t$ contributes the $\partial_t u_i$ component in the even part and no additional odd part.  Under the stated formal-power-series assumptions, the identity $\partial_t\Phi_t + [\Phi_t,\Phi_t]=0$ is equivalent to the pair of equations
+\[
+  \partial_t u_t + (u_t\cdot\nabla)u_t + \nabla p = 0,
+  \qquad
+  \div(u_t)=0,
+\]
+which is exactly the incompressible Euler system.  Replacing the right-hand side by $\nu\Deltaop(\Phi_t)$ adds the viscous term $\nu\Delta u_t$ to the even component and leaves the divergence condition unchanged, giving precisely the incompressible Navier--Stokes system.  This proves the equivalence in the stated formal-power-series realization of $\gE$ centred at $x_0$.
 \end{proof}
 
 \begin{corollary}
-The exceptional Lie superalgebra $\gE$ is the appropriate algebra for the incompressible Navier--Stokes equations in dimension $4$, and by reduction also for the corresponding 3D system.
+Within the formal-power-series framework of the proposition, the exceptional Lie superalgebra $\gE$ provides a natural algebraic environment for the incompressible Navier--Stokes equations in dimension $4$, and by reduction also for the corresponding 3D system.
 \end{corollary}
 
 \begin{proof}
-The proposition shows that the full fluid system is encoded by the same cochain differential that arises from the exceptional de Rham complex of $\gE$.  Since every term in the PDE is represented by the corresponding algebraic operation in that differential, the Navier--Stokes system is not merely loosely modeled by $\gE$ but is represented by the structure of $\gE$ itself.  Hence $\gE$ is the correct algebraic environment for the incompressible Navier--Stokes system.
+The proposition shows that, in the formal setting, the principal terms of the fluid system are represented by the same cochain differential that arises from the exceptional de Rham complex of $\gE$.  Since the basic PDE terms are represented by the corresponding algebraic operations in that differential, $\gE$ provides a natural formal framework for the incompressible Navier--Stokes system.  This is the content of the corollary; no stronger analytic equivalence is claimed here.
 \end{proof}
 
 \section{Reduction to a Small Seed Sector}
@@ -161,6 +214,6 @@ This suggests that the 4D and 3D problems are not separate phenomena but two man
 
 \section{Conclusion}
 
-The three papers can therefore be read as three facets of a single theory.  The reduction to surviving modes identifies the effective finite-dimensional seed sector, the complexity viewpoint explains why the resulting algebraic system is intrinsically wild, and the 3D slice shows how the 4D model specializes to the classical 3D Navier--Stokes problem.  The new theorem above shows that, once the viscosity parameter $\nu$ is inserted, the same $E(4,4)$ dictionary that governs Euler also governs Navier--Stokes.  For this reason, $E(4,4)$ is the appropriate algebra for the incompressible Navier--Stokes equations in the setting of the present construction.
+The three papers can therefore be read as three facets of a single theory.  The reduction to surviving modes identifies the effective finite-dimensional seed sector, the complexity viewpoint explains why the resulting algebraic system is intrinsically rich, and the 3D slice shows how the 4D model specializes to the classical 3D Navier--Stokes problem.  The theorem above shows that, in the stated formal-power-series setting, the same $E(4,4)$ differential that encodes the Euler equations also encodes the Navier--Stokes equations once the viscosity parameter $\nu$ is inserted.  This gives a precise formal dictionary rather than a full analytic equivalence theorem.
 
 \end{document}

@@ -1,130 +1,43 @@
 # E(4,4) and the Four-Dimensional Navier–Stokes Equation
 
-Two papers establishing that 4D NS is undecidable ($\Sigma_1$-hard) and
-$A_\infty$-wild (cofinal in the Borel reducibility order), with all key
-steps certified by interval arithmetic.
+This repository collects a formal, algebraic route from the incompressible Navier–Stokes system to the exceptional Lie superalgebra $E(4,4)$. The goal is to make the dictionary precise enough to test and refine, not to claim a completed analytic proof yet.
 
-**The central conclusion:** No system of logic can make truth statements
-about self-similar singularities or blowups — whether that is a glueball,
-a Navier–Stokes blowup, or an alignment intelligence-explosion.  Each is
-the fixed point of its own description; Lawvere's theorem guarantees no
-consistent external logic can certify it.
+The current working picture is:
 
----
+- The relevant cohomology in the lowest-weight sector is nonzero.
+- The next computable step is therefore to kill or excite selected basis vectors in that sector and observe how the induced obstruction changes.
+- The PDE-to-superfield map is
+  $\Phi = \sum_{i=1}^4 u_i\,\partial_i + \sum_{i=1}^4 (\partial_i p)\,dx_i$.
+- The main theorem-style target is: if the relevant lowest-weight cohomology vanishes after such a reduction, then the corresponding formal obstruction to regularity disappears.
 
-## Paper 1 — Reduction to three surviving modes
-[paper1_reduction.pdf](paper1_reduction.pdf) · [source](paper1_reduction.tex)
+## Current status
 
-The NS equation on the representation category of $E(4,4)$ reduces to
-three seed modes in $M_1(1,0,0)$ (all others killed by morphism constraints
-+ incompressibility).  Those three modes drive an 8-mode Euler ODE that:
+- The formal dictionary from the PDE to the $E(4,4)$ complex is in place.
+- The cohomology is nonzero, so the next concrete computation is basis-vector manipulation in the seed sector.
+- The project remains a precise conjectural route rather than a completed proof of global regularity.
 
-| Certificate | Value | Method |
-|---|---|---|
-| Lyapunov exponent $\lambda_{\max}$ | $\geq 0.246$ | `interval_certificates.py`, mpmath.iv 60 digits |
-| NAND gate margin $\Delta$ | $= 0.007588$ | same |
+## What to compute next
 
-Corollary: NS is $\Sigma_1$-hard (halting-problem equivalent).
+1. Choose a lowest-weight basis in the degree-1 seed sector.
+2. Kill or excite one or two basis vectors and recompute the resulting cohomology.
+3. Track whether the obstruction to regularity is removed or shifted.
+4. Compare the resulting pattern with the formal PDE-to-superfield map.
 
-## Paper 2 — $A_\infty$-wildness and the NS Liar's Paradox
-[paper2_complexity.pdf](paper2_complexity.pdf) · [source](paper2_complexity.tex)
+## Papers and source files
 
-The morphisms $\phi_{1A}$ (degree 1) and $\phi_{4H}$ (degree 4) on
-$M_t(1,0,0)$ force $\mathcal{A} = \mathrm{Ext}^*(M_*(1,0,0),M_*(1,0,0))$
-to be $A_\infty$-wild — cofinal above every $\Sigma_1^n$.
-
-**Triple equivalence** (Theorem, §2.3):
-$$T_{\mathrm{crit}} < \infty \;\iff\; \mathcal{A}\text{ non-formal} \;\iff\; H^k \neq 0\;\forall k \;\iff\; A_\infty\text{-wild}$$
-
-**NS Liar's Paradox** (Theorem, §12): Smoothness → formality → bounded
-$H^k$ → decision procedure $F$ → $F$ = NAND circuit → $F \hookrightarrow$ NS
-→ NS proves own smoothness → Gödel 2nd → ZFC inconsistent.
-Contradiction.  $\Delta = 0.007588 > 0$ is the constructive refutation.
-
-| Certificate | Value | Method |
-|---|---|---|
-| Quiver form $q(2,1,2,2,1)$ | $= -2 < 0$ | `quiver_wildness.py`, exact $\mathbb{Q}$ |
-| Sylvester criterion $D_4$ | $= -3/16 < 0$ | same |
-| $\dim H^k$ | $\geq 142$, all $k$ | `a_infinity_obstruction.py` |
-
----
+- [paper1_reduction.tex](paper1_reduction.tex) and [paper2_complexity.tex](paper2_complexity.tex): source drafts.
+- [unified_ns_e44.tex](unified_ns_e44.tex): a more unified synthesis of the algebraic and PDE-side story.
+- [README_proof_plan.md](README_proof_plan.md): proof-oriented notes and roadmap.
 
 ## Verification scripts
 
 ```bash
-python3 interval_certificates.py   # Gap 1 + Gap 2 (~2 s)
-python3 turing_encoding.py          # NAND cascade, XOR, half-adder (~11 s)
-python3 quiver_wildness.py          # wildness cert, exact rational
-python3 a_infinity_obstruction.py   # phi_4H obstruction, dim H^k
-python3 blowup_formality.py         # triple equivalence
-python3 liars_paradox.py            # 11-step refutation chain
+python3 interval_certificates.py
+python3 quiver_wildness.py
+python3 a_infinity_obstruction.py
+python3 blowup_formality.py
+python3 liars_paradox.py
 ```
-
-```bash
-pdflatex paper1_reduction.tex && pdflatex paper1_reduction.tex
-pdflatex paper2_complexity.tex && pdflatex paper2_complexity.tex
-```
-
-Requires Python 3.12 + mpmath (`pip install mpmath`).
-
----
-
-**Reference:** Cantarini, Caselli, Kac. *Classification of degenerate Verma
-modules over E(4,4).* arXiv:2603.16507, 2026. ([PDF](2603.16507v1.pdf))
-
-## Results
-
-**Paper 1 — Reduction to three surviving modes**
-([paper1_reduction.tex](paper1_reduction.tex) / [paper1_reduction.pdf](paper1_reduction.pdf))
-
-The NS and Euler equations, formulated on the representation category of
-$E(4,4)$, reduce to a three-dimensional phase space spanned by three
-*surviving seed modes* in the Verma module $M_1(1,0,0)$.
-
-- All other $H^1$ seed directions are killed by algebraic constraints:
-  mean-zero normalization eliminates $M_1(0,0,0)$; Casimir eigenvalue
-  mismatch eliminates $M_1(0,0,4)$; the CCK map is structurally disconnected
-  for $M_1(0,0,1)$.
-- The three survivors in $M_1(1,0,0)$ generate an 8-mode ODE on a 4-cycle
-  Fourier lattice.
-- **Gap 1** (interval certificate): the largest Lyapunov exponent satisfies
-  $\lambda_{\max} \geq 0.246 > 0$ — the ODE is chaotic.
-- **Gap 2** (interval certificate): the ODE margin for a NAND gate is
-  $\Delta = 0.007588 > 0$ — the ODE simulates NAND.
-- Corollary: NS simulates every Boolean circuit, hence every Turing machine.
-  The regularity problem is $\Sigma_1$-hard (equivalent to the halting problem).
-
-**Paper 2 — $A_\infty$-wildness and the NS Liar's Paradox**
-([paper2_complexity.tex](paper2_complexity.tex) / [paper2_complexity.pdf](paper2_complexity.pdf))
-
-The complexity sits strictly above every fixed level of the projective
-hierarchy.  The morphisms $\phi_{1A}$ (degree 1) and $\phi_{4H}$ (degree 4)
-on $M_t(1,0,0)$ force the Ext algebra
-$\mathcal{A} = \mathrm{Ext}^*(M_*(1,0,0), M_*(1,0,0))$
-to be an $A_\infty$-algebra with infinitely many non-trivial higher products.
-This places NS classification at the *$A_\infty$-wild* stratum — cofinal in the
-Borel reducibility order.
-
-The **Blowup-Formality Equivalence** (§2.3) shows that the Picard series
-$\sum_n t^{n-1} C_n(k)$ for NS and the $A_\infty$ deformation tower
-$\sum_n \hbar^{n-1} m_n$ are the *same power series* under the CCK
-identification $B = m_2$.  The radius of convergence is the same in both
-languages:
-$$
-T_{\mathrm{crit}} < \infty
-\;\iff\; \mathcal{A} \text{ non-formal}
-\;\iff\; H^k \neq 0 \text{ for all } k
-\;\iff\; A_\infty\text{-wild.}
-$$
-
-The **NS Liar's Paradox** (§12) sharpens this to a *refutation*: the
-assumption of global smoothness is self-defeating.  Assuming (a) NS is smooth
-leads, via formality → bounded $H^k$ → decision procedure → NAND circuit →
-NS simulates its own smoothness proof → Gödel's Second Incompleteness Theorem
-→ ZFC inconsistent, contradicting our assumption.  The NAND certificate
-$\Delta = 0.007588 > 0$ is the constructive witness.
-
----
 
 ## Key files
 
@@ -191,6 +104,32 @@ To recompile the papers:
 pdflatex paper1_reduction.tex && pdflatex paper1_reduction.tex
 pdflatex paper2_complexity.tex && pdflatex paper2_complexity.tex
 ```
+
+---
+
+## Next computable step
+
+The current computation is not “prove regularity” but “probe the obstruction.” Since the relevant cohomology is nonzero, the next thing to test is to kill or excite basis vectors in the lowest-weight sector and see whether the corresponding cohomology class disappears or is moved to a higher-weight component.
+
+A concise form of the working claim is:
+
+**Working claim.** If the relevant lowest-weight cohomology classes vanish after a chosen basis-vector reduction (killing or exciting the appropriate generators), then the associated formal obstruction to regularity disappears.
+
+---
+
+## Reviewer / arXiv concerns and roadmap
+
+The present draft is best read as a formal dictionary plus a concrete computational strategy. The main tasks are to make the PDE-to-module map explicit, keep the theorem statements at the level of the current proof, and test the effect of killing or exciting the relevant basis vectors in the lowest-weight sector.
+
+The plan is to address these issues one at a time:
+
+- Step 1: sharpen the theorem statements so they are precise and defensible.
+- Step 2: write out the exact PDE-to-module map and the corresponding algebraic condition.
+- Step 3: add the missing assumptions (function spaces, domain, regularity, and solution class).
+- Step 4: tighten the proof so each step is explicit and verifiable.
+- Step 5: revisit the abstract and conclusion to make sure they match the improved technical content.
+
+This roadmap will guide the next round of revisions for [unified_ns_e44.tex](unified_ns_e44.tex).
 
 ---
 
