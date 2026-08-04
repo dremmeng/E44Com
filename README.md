@@ -29,7 +29,6 @@ The current working picture is:
 
 - [paper1_reduction.tex](paper1_reduction.tex) and [paper2_complexity.tex](paper2_complexity.tex): source drafts.
 - [unified_ns_e44.tex](unified_ns_e44.tex): a more unified synthesis of the algebraic and PDE-side story.
-- [README_proof_plan.md](README_proof_plan.md): proof-oriented notes and roadmap.
 
 ## Verification scripts
 
@@ -117,21 +116,6 @@ A concise form of the working claim is:
 
 **Working claim.** If the three surviving $H^1$ seeds are killed and the relevant lowest-weight cohomology classes vanish, then the associated formal obstruction to regularity disappears; if exciting them preserves or strengthens the obstruction, then the route is settled negatively.
 
----
-
-## Reviewer / arXiv concerns and roadmap
-
-The present draft is best read as a formal dictionary plus a concrete computational strategy. The main tasks are to make the PDE-to-module map explicit, keep the theorem statements at the level of the current proof, and test the effect of killing or exciting the relevant basis vectors in the lowest-weight sector.
-
-The plan is to address these issues one at a time:
-
-- Step 1: sharpen the theorem statements so they are precise and defensible.
-- Step 2: write out the exact PDE-to-module map and the corresponding algebraic condition.
-- Step 3: add the missing assumptions (function spaces, domain, regularity, and solution class).
-- Step 4: tighten the proof so each step is explicit and verifiable.
-- Step 5: revisit the abstract and conclusion to make sure they match the improved technical content.
-
-This roadmap will guide the next round of revisions for [unified_ns_e44.tex](unified_ns_e44.tex).
 
 ---
 

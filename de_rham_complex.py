@@ -1,5 +1,5 @@
 """
-de_rham_complex.py  —  Exceptional de Rham complexes for E(4,4)
+de_rham_complex.py  --  Exceptional de Rham complexes for E(4,4)
 ================================================================
 Section 8 of the NSE44 programme  (Cantarini-Caselli-Kac 2026).
 
@@ -28,8 +28,8 @@ Subtask status
 
 Dependency
 ----------
-  e44_brackets.pkl  — written by sage e44_structure.py
-  phat4_cache.pkl   — written by sage phat4_modules.py (optional cache)
+  e44_brackets.pkl  -- written by sage e44_structure.py
+  phat4_cache.pkl   -- written by sage phat4_modules.py (optional cache)
 
 Run inside SageMath:  sage de_rham_complex.py
 """
@@ -63,7 +63,7 @@ DEFAULT_MAX_DEG =  5   # internal Verma truncation degree (Prop 5.5: sv_deg <= 5
 
 
 # ===========================================================================
-# Subtask 2a-b — Node type
+# Subtask 2a-b -- Node type
 # ===========================================================================
 
 Node = namedtuple('Node', ['t', 'a', 'b', 'c'])
@@ -87,7 +87,7 @@ def _node_label(node):
 
 
 # ===========================================================================
-# Subtask 2c — Cochain position
+# Subtask 2c -- Cochain position
 # ===========================================================================
 
 def cochain_pos(node):
@@ -102,7 +102,7 @@ def cochain_pos(node):
 
 
 # ===========================================================================
-# Subtask 2e — MorphismSpec
+# Subtask 2e -- MorphismSpec
 # ===========================================================================
 
 class MorphismSpec:
@@ -348,7 +348,7 @@ MORPHISMS_B = [
 
 
 # ===========================================================================
-# Subtask 2d — window_nodes
+# Subtask 2d -- window_nodes
 # ===========================================================================
 
 def window_nodes(k, morphisms, t_min=DEFAULT_T_MIN, t_max=DEFAULT_T_MAX,
@@ -363,14 +363,14 @@ def window_nodes(k, morphisms, t_min=DEFAULT_T_MIN, t_max=DEFAULT_T_MAX,
 
     Parameters
     ----------
-    k         : int — cochain level (= t-value)
-    morphisms : list of MorphismSpec — MORPHISMS_A or MORPHISMS_B
-    t_min, t_max : int — window bounds on t
-    a_max     : int — window bound on a and c labels
+    k         : int -- cochain level (= t-value)
+    morphisms : list of MorphismSpec -- MORPHISMS_A or MORPHISMS_B
+    t_min, t_max : int -- window bounds on t
+    a_max     : int -- window bound on a and c labels
 
     Returns
     -------
-    list of Node — deduplicated, sorted by (a, b, c)
+    list of Node -- deduplicated, sorted by (a, b, c)
     """
     if k < t_min or k > t_max:
         return []
@@ -433,18 +433,18 @@ def _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=True):
 
     if verbose:
         print("=" * 60)
-        print("Subtask 2 — Node/MorphismSpec self-check")
+        print("Subtask 2 -- Node/MorphismSpec self-check")
         print(f"  window: t in [{t_min}, {t_max}], a_max={a_max}")
         print("=" * 60)
 
-    # ── 1. cochain_pos ────────────────────────────────────────────────────
+    # -- 1. cochain_pos ----------------------------------------------------
     for t in range(t_min, t_max + 1):
         for a in range(0, a_max + 1):
             n = Node(t, a, 0, 0)
             ok(f"cochain_pos(M_{t}({a},0,0)) == {t}",
                cochain_pos(n) == t)
 
-    # ── 2-3. Edge consistency for Complex A ───────────────────────────────
+    # -- 2-3. Edge consistency for Complex A -------------------------------
     if verbose:
         print("\n  Complex A edges:")
     total_A = 0
@@ -467,7 +467,7 @@ def _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=True):
     if verbose:
         print(f"  Total Complex A edges: {total_A}")
 
-    # ── 2-3. Edge consistency for Complex B ───────────────────────────────
+    # -- 2-3. Edge consistency for Complex B -------------------------------
     if verbose:
         print("\n  Complex B edges:")
     total_B = 0
@@ -486,7 +486,7 @@ def _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=True):
     if verbose:
         print(f"  Total Complex B edges: {total_B}")
 
-    # ── 4. window_nodes covers all edge endpoints ─────────────────────────
+    # -- 4. window_nodes covers all edge endpoints -------------------------
     for label, morphisms in [('A', MORPHISMS_A), ('B', MORPHISMS_B)]:
         for k in range(t_min, t_max + 1):
             nodes_k = set(window_nodes(k, morphisms, t_min, t_max, a_max))
@@ -499,7 +499,7 @@ def _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=True):
                         ok(f"Cx{label}: window_nodes({k}) contains tar {_node_label(tar)}",
                            tar in nodes_k, f"missing {_node_label(tar)}")
 
-    # ── 5. Complex A excludes B-only morphisms ────────────────────────────
+    # -- 5. Complex A excludes B-only morphisms ----------------------------
     cx_a_names = {s.name for s in MORPHISMS_A}
     cx_b_names = {s.name for s in MORPHISMS_B}
     b_only = {'phi_1D', 'phi_1E', 'phi_3F', 'phi_3G', 'phi_4H'}
@@ -511,7 +511,7 @@ def _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=True):
        a_only.isdisjoint(cx_b_names),
        f"unexpected: {a_only & cx_b_names}")
 
-    # ── 6. Print node counts per level ───────────────────────────────────
+    # -- 6. Print node counts per level -----------------------------------
     if verbose:
         print("\n  Nodes per level (Complex A):")
         for k in range(t_min, t_max + 1):
@@ -524,21 +524,21 @@ def _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=True):
             labels = [_node_label(n) for n in nodes]
             print(f"    k={k:+d}: {len(nodes)} nodes  {labels}")
 
-    # ── Summary ──────────────────────────────────────────────────────────
+    # -- Summary ----------------------------------------------------------
     if verbose:
         print("\n" + "=" * 60)
         print(f"Subtask 2 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 2  ✓  ALL CHECKS PASSED")
+            print("Subtask 2  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 2  ✗  SOME CHECKS FAILED")
+            print("Subtask 2  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 3 — get_verma() cache + basis size utilities
+# Subtask 3 -- get_verma() cache + basis size utilities
 # ===========================================================================
 
 MAX_VERMA_DEG = 5   # Proposition 5.5: singular vectors have degree <= 5
@@ -555,9 +555,9 @@ _VERMA_CACHE = {}   # {(t, a, b, c, max_deg, uses_phat4): VermaModule}
 #
 #   (1,0,0): target of phi[1A](a=1), phi[1E], phi[2EA], phi[3F], phi[4H]
 #             Source of phi[1A](a=0)/phi[1D]/phi[3G] but those use sl4 M_src
-#             → FiberMismatchError for those edges (silently dropped)
+#             -> FiberMismatchError for those edges (silently dropped)
 #   (0,0,1): target of phi[1C]
-#             phi[1B](c=1) uses sl4 M_tar → FiberMismatchError (dropped)
+#             phi[1B](c=1) uses sl4 M_tar -> FiberMismatchError (dropped)
 #
 #   (0,1,0) deliberately EXCLUDED: phi[1C] uses sl4 M_src for (0,1,0) and
 #             _compute_phi0 fails when phat4 source is forced; keeping sl4
@@ -572,7 +572,7 @@ def node_fiber_type(node):
     """Return 'phat4' or 'sl4' for *node* based on which phi functions target it.
 
     When e44_data is provided to get_verma / CochainGroup, nodes in FIBER_TYPE
-    use the full irreducible p̂(4)-module fiber; all others use sl_4.
+    use the full irreducible p_hat(4)-module fiber; all others use sl_4.
     """
     return FIBER_TYPE.get((node.a, node.b, node.c), 'sl4')
 
@@ -582,14 +582,14 @@ def get_verma(node, max_deg=MAX_VERMA_DEG, e44_data=None):
     Return the VermaModule M_t(a,b,c) truncated at max_deg, with caching.
 
     When e44_data is supplied AND the node is in FIBER_TYPE, the fiber is the
-    full irreducible p̂(4)-module W_t(a,b,c).  For all other nodes (or when
+    full irreducible p_hat(4)-module W_t(a,b,c).  For all other nodes (or when
     e44_data is None), the fiber is the sl_4-irreducible V(a,b,c).
 
     Parameters
     ----------
-    node    : Node — the Verma module M_t(a,b,c)
-    max_deg : int  — internal degree truncation (default MAX_VERMA_DEG = 5)
-    e44_data: dict or None — E(4,4) bracket data from load_e44()
+    node    : Node -- the Verma module M_t(a,b,c)
+    max_deg : int  -- internal degree truncation (default MAX_VERMA_DEG = 5)
+    e44_data: dict or None -- E(4,4) bracket data from load_e44()
 
     Returns
     -------
@@ -655,10 +655,10 @@ def _check_subtask3(e44_data=None, verbose=True):
 
     if verbose:
         print("=" * 60)
-        print("Subtask 3 — get_verma cache + basis size table")
+        print("Subtask 3 -- get_verma cache + basis size table")
         print("=" * 60)
 
-    # ── 1. Caching ────────────────────────────────────────────────────────
+    # -- 1. Caching --------------------------------------------------------
     n = Node(0, 1, 0, 0)
     V1 = get_verma(n, max_deg=3, e44_data=e44_data)
     V2 = get_verma(n, max_deg=3, e44_data=e44_data)
@@ -668,14 +668,14 @@ def _check_subtask3(e44_data=None, verbose=True):
     V3 = get_verma(n2, max_deg=3, e44_data=e44_data)
     ok("get_verma caches: equal node -> same object", V1 is V3)
 
-    # ── 2. src_max_deg ────────────────────────────────────────────────────
+    # -- 2. src_max_deg ----------------------------------------------------
     for s in [1, 2, 3, 4]:
         expected = MAX_VERMA_DEG - s
         got = src_max_deg(s)
         ok(f"src_max_deg({s}) == {expected}", got == expected,
            f"got {got}")
 
-    # ── 3. Dimension sanity checks ────────────────────────────────────────
+    # -- 3. Dimension sanity checks ----------------------------------------
     # dim M_t(a,0,0)[0] = dim W_t(a,0,0) = dim of p-hat(4)-fiber
     # With e44_data: fiber is irreducible phat4 module; without: sl_4 module S^a(C^4)
     # dim S^a(C^4) = C(a+3, 3)
@@ -696,7 +696,7 @@ def _check_subtask3(e44_data=None, verbose=True):
             ok(f"dim M_0({a},0,0)[0] > 0 with phat4 fiber",
                d0 > 0, f"got {d0}")
 
-    # ── 4. Basis size table (Subtask 3c) ─────────────────────────────────
+    # -- 4. Basis size table (Subtask 3c) ---------------------------------
     if verbose:
         print("\n  Basis size table (dim M_t(a,b,c)[d] for d=0..5):")
         print(f"  {'Module':<22} " + "  ".join(f"d={d}" for d in range(6)))
@@ -732,42 +732,42 @@ def _check_subtask3(e44_data=None, verbose=True):
         print("\n" + "=" * 60)
         print(f"Subtask 3 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 3  ✓  ALL CHECKS PASSED")
+            print("Subtask 3  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 3  ✗  SOME CHECKS FAILED")
+            print("Subtask 3  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 4 — CochainGroup
+# Subtask 4 -- CochainGroup
 # ===========================================================================
 
 class CochainGroup:
     """
     The direct-sum cochain group C^k at a given cochain level k.
 
-    C^k_flat = ⊕_{node at level k} ⊕_{d=0}^{max_deg} M_node[d]
+    C^k_flat = oplus_{node at level k} oplus_{d=0}^{max_deg} M_node[d]
 
     The flat basis concatenates all M_node[d] blocks in node order, then by
     increasing internal degree d within each node.
 
     Attributes
     ----------
-    k       : int — cochain level (= t-value of every node)
-    nodes   : list of Node — all nodes at this level (sorted by (a,b,c))
-    max_deg : int — internal truncation degree
+    k       : int -- cochain level (= t-value of every node)
+    nodes   : list of Node -- all nodes at this level (sorted by (a,b,c))
+    max_deg : int -- internal truncation degree
     vermas  : dict{Node: VermaModule}
-    offsets : dict{(Node, d): int} — start index of M_node[d] in the flat basis
-    total_dim : int — dimension of C^k_flat
+    offsets : dict{(Node, d): int} -- start index of M_node[d] in the flat basis
+    total_dim : int -- dimension of C^k_flat
 
     Parameters
     ----------
     k        : int
     nodes    : list of Node
     max_deg  : int (default MAX_VERMA_DEG)
-    e44_data : dict or None — passed to get_verma
+    e44_data : dict or None -- passed to get_verma
     """
 
     def __init__(self, k, nodes, max_deg=MAX_VERMA_DEG, e44_data=None):
@@ -789,12 +789,12 @@ class CochainGroup:
 
     def basis_slice(self, node, d):
         """
-        Return range(start, end) — the index range of M_node[d] in the flat basis.
+        Return range(start, end) -- the index range of M_node[d] in the flat basis.
 
         Parameters
         ----------
-        node : Node — must be one of self.nodes
-        d    : int  — internal Verma degree (0 <= d <= max_deg)
+        node : Node -- must be one of self.nodes
+        d    : int  -- internal Verma degree (0 <= d <= max_deg)
 
         Returns
         -------
@@ -863,7 +863,7 @@ def _check_subtask4(e44_data=None, verbose=True):
 
     if verbose:
         print("=" * 60)
-        print("Subtask 4 — CochainGroup self-check")
+        print("Subtask 4 -- CochainGroup self-check")
         print("=" * 60)
 
     # Build a CochainGroup for k=0 with Complex A nodes, a_max=2
@@ -879,10 +879,10 @@ def _check_subtask4(e44_data=None, verbose=True):
     if verbose:
         print(f"  {CG}")
 
-    # ── 1. builds without error ───────────────────────────────────────────
+    # -- 1. builds without error -------------------------------------------
     ok("CochainGroup construction succeeds", True)   # reaching here means OK
 
-    # ── 2. offsets are non-negative and increasing ────────────────────────
+    # -- 2. offsets are non-negative and increasing ------------------------
     prev_end = 0
     offset_ok = True
     for node in CG.nodes:
@@ -900,7 +900,7 @@ def _check_subtask4(e44_data=None, verbose=True):
        prev_end == CG.total_dim,
        f"prev_end={prev_end}, total_dim={CG.total_dim}")
 
-    # ── 3. basis_slice lengths ────────────────────────────────────────────
+    # -- 3. basis_slice lengths --------------------------------------------
     for node in CG.nodes:
         for d in range(MAX_VERMA_DEG + 1):
             sl = CG.basis_slice(node, d)
@@ -909,7 +909,7 @@ def _check_subtask4(e44_data=None, verbose=True):
                len(sl) == expected,
                f"got {len(sl)}")
 
-    # ── 4. basis_slice ranges partition [0, total_dim) ────────────────────
+    # -- 4. basis_slice ranges partition [0, total_dim) --------------------
     covered = [False] * CG.total_dim
     for node in CG.nodes:
         for d in range(MAX_VERMA_DEG + 1):
@@ -921,13 +921,13 @@ def _check_subtask4(e44_data=None, verbose=True):
     ok("all indices in [0, total_dim) are covered exactly once",
        all(covered))
 
-    # ── 5. zero_vector ───────────────────────────────────────────────────
+    # -- 5. zero_vector ---------------------------------------------------
     zv = CG.zero_vector()
     ok(f"zero_vector has length total_dim={CG.total_dim}",
        len(zv) == CG.total_dim)
     ok("zero_vector is zero", zv.is_zero())
 
-    # ── 6. zero_matrix_to ────────────────────────────────────────────────
+    # -- 6. zero_matrix_to ------------------------------------------------
     # Build a second CochainGroup for k+1
     nodes_k1 = window_nodes(k + 1, MORPHISMS_A, t_min, t_max, a_max)
     CG1 = CochainGroup(k + 1, nodes_k1, max_deg=MAX_VERMA_DEG, e44_data=e44_data)
@@ -936,7 +936,7 @@ def _check_subtask4(e44_data=None, verbose=True):
        zm.nrows() == CG1.total_dim and zm.ncols() == CG.total_dim,
        f"got ({zm.nrows()}, {zm.ncols()})")
 
-    # ── 7. total_dim matches sum of dims ─────────────────────────────────
+    # -- 7. total_dim matches sum of dims ---------------------------------
     expected_total = sum(
         CG.vermas[node].dim(d)
         for node in CG.nodes
@@ -946,7 +946,7 @@ def _check_subtask4(e44_data=None, verbose=True):
        CG.total_dim == expected_total,
        f"got {CG.total_dim}")
 
-    # ── Print breakdown ───────────────────────────────────────────────────
+    # -- Print breakdown ---------------------------------------------------
     if verbose:
         print("\n  Dimension breakdown per node:")
         print(f"  {'Node':<22} " + "  ".join(f"d={d}" for d in range(6)) + "  total")
@@ -962,16 +962,16 @@ def _check_subtask4(e44_data=None, verbose=True):
         print("\n" + "=" * 60)
         print(f"Subtask 4 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 4  ✓  ALL CHECKS PASSED")
+            print("Subtask 4  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 4  ✗  SOME CHECKS FAILED")
+            print("Subtask 4  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 5 — Morphism matrix assembly
+# Subtask 5 -- Morphism matrix assembly
 # ===========================================================================
 
 class FiberMismatchError(Exception):
@@ -1003,15 +1003,15 @@ def get_morphism_matrix(spec, src_node, tar_node, phi_args,
     Parameters
     ----------
     spec          : MorphismSpec
-    src_node      : Node  — source node (must be in src_group.nodes)
-    tar_node      : Node  — target node (must be in tar_group.nodes)
-    phi_args      : tuple — positional args passed to phi_func before e44_data
+    src_node      : Node  -- source node (must be in src_group.nodes)
+    tar_node      : Node  -- target node (must be in tar_group.nodes)
+    phi_args      : tuple -- positional args passed to phi_func before e44_data
     src_group     : CochainGroup at cochain level src_node.t
     tar_group     : CochainGroup at cochain level tar_node.t
-    e44_data      : dict from load_e44() — passed to phi_func
-    max_src_deg   : int or None — truncation degree on the source module.
+    e44_data      : dict from load_e44() -- passed to phi_func
+    max_src_deg   : int or None -- truncation degree on the source module.
                     Defaults to src_max_deg(spec.sv_deg, src_group.max_deg).
-    src_e44_data  : dict or None — e44_data passed as the source fiber argument
+    src_e44_data  : dict or None -- e44_data passed as the source fiber argument
                     to phi_func.  Determines whether phi_func builds its internal
                     M_src with a phat4 or sl_4 fiber.  Should match the fiber
                     used by src_group for src_node (typically
@@ -1059,13 +1059,13 @@ def get_morphism_matrix(spec, src_node, tar_node, phi_args,
         if block.ncols() != len(src_sl):
             raise FiberMismatchError(
                 f"{spec.name}{phi_args} d={d}: "
-                f"source fiber mismatch — phi gives {block.ncols()} cols "
+                f"source fiber mismatch -- phi gives {block.ncols()} cols "
                 f"but CochainGroup has {len(src_sl)} for {_node_label(src_node)}"
             )
         if block.nrows() != len(tar_sl):
             raise FiberMismatchError(
                 f"{spec.name}{phi_args} d={d}: "
-                f"target fiber mismatch — phi gives {block.nrows()} rows "
+                f"target fiber mismatch -- phi gives {block.nrows()} rows "
                 f"but CochainGroup has {len(tar_sl)} for {_node_label(tar_node)}"
             )
 
@@ -1084,7 +1084,7 @@ def get_morphism_matrix(spec, src_node, tar_node, phi_args,
 def assemble_differential(src_group, tar_group, morphism_specs,
                           e44_data, t_min, t_max, a_max):
     """
-    Assemble the full differential matrix D: C^{src_group.k} → C^{tar_group.k}.
+    Assemble the full differential matrix D: C^{src_group.k} -> C^{tar_group.k}.
 
     Iterates over all edges (src, tar, phi_args) from each MorphismSpec whose
     endpoints lie at the right cochain levels and inside the window.  Edges
@@ -1118,16 +1118,14 @@ def assemble_differential(src_group, tar_group, morphism_specs,
 
             msd = src_max_deg(spec.sv_deg, src_group.max_deg)
 
-            # All phi functions use sl4 M_src internally (src_e44_data=None).
-            # Phi functions were designed for sl4 source fibers; passing phat4
-            # makes _compute_phi0 inconsistent.  When the source node is phat4
-            # in CochainGroup but phi uses sl4 M_src (dim mismatch), a
-            # FiberMismatchError is raised and the edge is silently dropped.
+            # Match the source fiber to the CochainGroup source node so the
+            # internal phi source module and the assembled block dimensions align.
+            src_data = e44_data if node_fiber_type(src) == 'phat4' else None
             try:
                 block_mat = get_morphism_matrix(
                     spec, src, tar, phi_args,
                     src_group, tar_group, e44_data, msd,
-                    src_e44_data=None
+                    src_e44_data=src_data
                 )
             except FiberMismatchError:
                 # Fiber type mismatch between this phi function and the
@@ -1184,7 +1182,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
 
     if verbose:
         print("=" * 60)
-        print("Subtask 5 — Morphism matrix assembly self-check")
+        print("Subtask 5 -- Morphism matrix assembly self-check")
         print(f"  (max_deg={max_deg}, t=[{t_min},{t_max}], a_max={a_max})")
         print("=" * 60)
 
@@ -1202,7 +1200,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
         print(f"\n  Source:  {CG_src}")
         print(f"  Target:  {CG_tar}")
 
-    # ── phi[1A] edge: M_0(1,0,0) → M_1(0,0,0) ───────────────────────────
+    # -- phi[1A] edge: M_0(1,0,0) -> M_1(0,0,0) ---------------------------
     test_src = Node(0, 1, 0, 0)
     test_tar = Node(1, 0, 0, 0)
     test_phi_args = (QQ(1), 0)   # (t, a) for phi_1A(t=1, a=0, ...)
@@ -1216,7 +1214,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
     if have_nodes:
         msd = src_max_deg(spec_1A.sv_deg, max_deg)
 
-        # ── Check 1: correct shape ────────────────────────────────────────
+        # -- Check 1: correct shape ----------------------------------------
         M_mat = get_morphism_matrix(
             spec_1A, test_src, test_tar, test_phi_args,
             CG_src, CG_tar, e44_data, msd
@@ -1226,7 +1224,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
            f"got ({M_mat.nrows()},{M_mat.ncols()}), "
            f"expected ({CG_tar.total_dim},{CG_src.total_dim})")
 
-        # ── Check 2: nonzero block at (d_src=0 → d_tar=1) ────────────────
+        # -- Check 2: nonzero block at (d_src=0 -> d_tar=1) ----------------
         src_sl_0 = CG_src.basis_slice(test_src, 0)
         tar_sl_1 = CG_tar.basis_slice(test_tar, 1)
         sub = M_mat[list(tar_sl_1), list(src_sl_0)]
@@ -1234,7 +1232,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
            not sub.is_zero(),
            f"shape=({sub.nrows()},{sub.ncols()}), is_zero={sub.is_zero()}")
 
-        # ── Check 5: no FiberMismatchError for phi[1A] ───────────────────
+        # -- Check 5: no FiberMismatchError for phi[1A] -------------------
         try:
             get_morphism_matrix(
                 spec_1A, test_src, test_tar, test_phi_args,
@@ -1245,10 +1243,10 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
             ok("phi[1A] has no FiberMismatchError (sl_4 fibers consistent)",
                False, str(exc))
 
-    # ── phi[1B] edge: M_0(0,0,0) → M_1(0,0,1) ───────────────────────────
+    # -- phi[1B] edge: M_0(0,0,0) -> M_1(0,0,1) ---------------------------
     # phi_1B builds M_tar with sl_4 fiber for all c.  In a sl_4 CG (e44_data=None),
     # this is consistent.  In a phat4 CG, (0,0,1) is phat4 (dim=80) but phi_1B's
-    # sl_4 M_tar has dim=4 → FiberMismatchError → phi[1B](c=1) drops in full complex.
+    # sl_4 M_tar has dim=4 -> FiberMismatchError -> phi[1B](c=1) drops in full complex.
     spec_1B = MORPHISMS_A[1]
     b_src = Node(0, 0, 0, 0)
     b_tar = Node(1, 0, 0, 1)
@@ -1269,12 +1267,12 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
         if verbose:
             print(f"  [SKIP] phi[1B] nodes M_0(0,0,0)/M_1(0,0,1) not both in window")
 
-    # ── Check 7: phi[1C] must raise FiberMismatchError in sl_4 CG ────────
+    # -- Check 7: phi[1C] must raise FiberMismatchError in sl_4 CG --------
     # phi_1C always builds M_tar=M_t(0,0,1) with phat4 fiber (dim_W=80) but the
     # sl_4 CochainGroup (e44_data=None) has (0,0,1) with sl_4 fiber (dim_W=4)
-    # → FiberMismatchError on the target.
+    # -> FiberMismatchError on the target.
     # In the full DeRhamComplexA (e44_data provided), (0,0,1) is phat4 in CG and
-    # phi_1C receives src_e44_data → both source and target match → no error.
+    # phi_1C receives src_e44_data -> both source and target match -> no error.
     spec_1C = MORPHISMS_A[2]
     c_src = Node(0, 0, 1, 0)
     c_tar = Node(1, 0, 0, 1)
@@ -1289,14 +1287,14 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
             )
             ok("phi[1C] raises FiberMismatchError in sl_4 CG (phat4 M_tar vs sl_4 CG)",
                False,
-               "no error raised — fiber dimensions unexpectedly agreed")
+               "no error raised -- fiber dimensions unexpectedly agreed")
         except FiberMismatchError:
             ok("phi[1C] raises FiberMismatchError in sl_4 CG (phat4 M_tar vs sl_4 CG)", True)
     else:
         if verbose:
             print(f"  [SKIP] phi[1C] nodes M_0(0,1,0)/M_1(0,0,1) not both in window")
 
-    # ── Checks 3 & 4: assemble_differential ──────────────────────────────
+    # -- Checks 3 & 4: assemble_differential ------------------------------
     # Uses same small window / max_deg; phi[1C]/[2DA]/[2EA] edges are
     # silently skipped by assemble_differential due to FiberMismatchError.
     D = assemble_differential(
@@ -1320,16 +1318,16 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
         print("\n" + "=" * 60)
         print(f"Subtask 5 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 5  ✓  ALL CHECKS PASSED")
+            print("Subtask 5  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 5  ✗  SOME CHECKS FAILED")
+            print("Subtask 5  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 6 — DeRhamComplexA and DeRhamComplexB
+# Subtask 6 -- DeRhamComplexA and DeRhamComplexB
 # ===========================================================================
 
 class DeRhamComplexA:
@@ -1344,11 +1342,11 @@ class DeRhamComplexA:
 
     Attributes
     ----------
-    t_min, t_max : int — cochain level window
-    a_max        : int — label window
-    max_deg      : int — internal Verma truncation degree
+    t_min, t_max : int -- cochain level window
+    a_max        : int -- label window
+    max_deg      : int -- internal Verma truncation degree
     e44_data     : dict or None
-    positions    : sorted list of int — all k in [t_min, t_max]
+    positions    : sorted list of int -- all k in [t_min, t_max]
     groups       : dict{k: CochainGroup}
     differentials: dict{(k_src, k_tar): sparse QQ-matrix}
                    Populated for all (k, k+s) with s in {1, 2} and both ends
@@ -1368,7 +1366,7 @@ class DeRhamComplexA:
 
         morphs = self.__class__.MORPHISMS
 
-        # ── Build cochain groups ──────────────────────────────────────────
+        # -- Build cochain groups ------------------------------------------
         # CochainGroups pass e44_data to get_verma, which selects phat4 fibers
         # for nodes in FIBER_TYPE and sl_4 fibers for all others.  phi functions
         # in assemble_differential receive matching src_e44_data automatically.
@@ -1379,7 +1377,7 @@ class DeRhamComplexA:
             self.groups[k] = CochainGroup(k, nodes_k,
                                           max_deg=max_deg, e44_data=e44_data)
 
-        # ── Assemble differentials ────────────────────────────────────────
+        # -- Assemble differentials ----------------------------------------
         # Store ALL valid (k, k+s) pairs (including zero matrices) so that
         # Subtask 7 can iterate over them without needing to reconstruct zero
         # matrices on the fly.
@@ -1397,7 +1395,7 @@ class DeRhamComplexA:
 
     def differential(self, k_src, k_tar):
         """
-        Return the differential matrix D: C^{k_src} → C^{k_tar}.
+        Return the differential matrix D: C^{k_src} -> C^{k_tar}.
 
         If (k_src, k_tar) is not a stored pair (i.e. k_tar - k_src is not a
         valid shift, or either level is outside the window), returns a zero
@@ -1485,11 +1483,11 @@ def _check_subtask6(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
 
     if verbose:
         print("=" * 60)
-        print("Subtask 6 — DeRhamComplexA / B self-check")
+        print("Subtask 6 -- DeRhamComplexA / B self-check")
         print(f"  (max_deg={max_deg}, t=[{t_min},{t_max}], a_max={a_max})")
         print("=" * 60)
 
-    # ── Complex A ──────────────────────────────────────────────────────────
+    # -- Complex A ----------------------------------------------------------
     if verbose:
         print("\n--- Complex A ---")
 
@@ -1564,7 +1562,7 @@ def _check_subtask6(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
                 print(f"    k={k:+d}: {n_nodes} nodes, dim={dim_k:5d}, "
                       f"nonzero outgoing differentials={nonzero_out}")
 
-    # ── Complex B ──────────────────────────────────────────────────────────
+    # -- Complex B ----------------------------------------------------------
     if verbose:
         print("\n--- Complex B ---")
 
@@ -1584,9 +1582,9 @@ def _check_subtask6(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
            len(cxB.differentials) > 0,
            f"got {len(cxB.differentials)} entries")
 
-        # phi[3F]: M_0(0,0,0) → M_3(1,0,0) shift=3
-        # phi[3G]: M_{-3}(1,0,0) → M_0(0,0,0) shift=3
-        # phi[4H]: M_{t-4}(1,0,0) → M_t(1,0,0) shift=4
+        # phi[3F]: M_0(0,0,0) -> M_3(1,0,0) shift=3
+        # phi[3G]: M_{-3}(1,0,0) -> M_0(0,0,0) shift=3
+        # phi[4H]: M_{t-4}(1,0,0) -> M_t(1,0,0) shift=4
         # At least one shift-3 or shift-4 should be present in the window.
         has_long_shift = any(
             kt - ks in (3, 4)
@@ -1601,24 +1599,24 @@ def _check_subtask6(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
         print("\n" + "=" * 60)
         print(f"Subtask 6 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 6  ✓  ALL CHECKS PASSED")
+            print("Subtask 6  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 6  ✗  SOME CHECKS FAILED")
+            print("Subtask 6  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 7 — d^2 = 0 verification
+# Subtask 7 -- d^2 = 0 verification
 # ===========================================================================
 
 def _check_d2_zero(cx, verbose=True):
     """
     Verify that d^2 = 0 at every interior position of the complex.
 
-    For every pair of stored differentials D_1: C^k → C^{k'} and
-    D_2: C^{k'} → C^{k''}, checks that D_2 · D_1 = 0.
+    For every pair of stored differentials D_1: C^k -> C^{k'} and
+    D_2: C^{k'} -> C^{k''}, checks that D_2 * D_1 = 0.
 
     Boundary caveat (Subtask 7d): at the edges k = t_min and k'' = t_max,
     some morphisms leave the window and are dropped, which can produce
@@ -1655,7 +1653,7 @@ def _check_d2_zero(cx, verbose=True):
         for (kp2, kpp) in diff_keys:
             if kp2 != kp:
                 continue
-            # Triple k → kp → kpp
+            # Triple k -> kp -> kpp
             # Skip boundary triples (see docstring)
             if k == cx.t_min or kpp == cx.t_max:
                 n_skip += 1
@@ -1663,7 +1661,7 @@ def _check_d2_zero(cx, verbose=True):
             D2 = cx.differentials[(kp, kpp)]
             comp = D2 * D1
             n_checked += 1
-            label = f"d^2=0 at ({k}→{kp}→{kpp})"
+            label = f"d^2=0 at ({k}->{kp}->{kpp})"
             if comp.is_zero():
                 n_pass += 1
                 if verbose:
@@ -1673,7 +1671,7 @@ def _check_d2_zero(cx, verbose=True):
                 all_pass = False
                 nnz = len(comp.dict())
                 if verbose:
-                    print(f"  [FAIL] {label}  — {nnz} nonzero entries")
+                    print(f"  [FAIL] {label}  -- {nnz} nonzero entries")
 
     if n_checked == 0:
         if verbose:
@@ -1686,11 +1684,11 @@ def _check_d2_zero(cx, verbose=True):
         print("\n" + "=" * 60)
         print(f"d^2=0 summary: {n_pass} pass, {n_fail} fail")
         if n_checked == 0:
-            print("d^2=0  —  (no interior triples; result vacuously True)")
+            print("d^2=0  --  (no interior triples; result vacuously True)")
         elif all_pass:
-            print("d^2=0  ✓  ALL CHECKS PASSED")
+            print("d^2=0  [OK]  ALL CHECKS PASSED")
         else:
-            print("d^2=0  ✗  SOME CHECKS FAILED")
+            print("d^2=0  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
@@ -1705,9 +1703,9 @@ def _check_subtask7(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
       3.  At least one interior triple is checked for each complex.
 
     Uses max_deg=1 and a small window so the matrix multiplications are fast.
-    The window t=[-2,4] gives interior range (-1,3) — enough for shifts up to 4
+    The window t=[-2,4] gives interior range (-1,3) -- enough for shifts up to 4
     (phi[4H] needs source at k, target at k+4; interior triple needs k > t_min
-    and k+4+s < t_max, so we need t_max ≥ 5 for shift-4 to appear interiorly
+    and k+4+s < t_max, so we need t_max geq 5 for shift-4 to appear interiorly
     for Complex B; this is noted but not required for the check to pass).
 
     Returns True iff all checks pass.
@@ -1730,11 +1728,11 @@ def _check_subtask7(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
 
     if verbose:
         print("=" * 60)
-        print("Subtask 7 — d^2=0 self-check")
+        print("Subtask 7 -- d^2=0 self-check")
         print(f"  (max_deg={max_deg}, t=[{t_min},{t_max}], a_max={a_max})")
         print("=" * 60)
 
-    # ── Complex A ──────────────────────────────────────────────────────────
+    # -- Complex A ----------------------------------------------------------
     if verbose:
         print("\n--- Complex A ---")
     cxA = DeRhamComplexA(t_min=t_min, t_max=t_max, a_max=a_max,
@@ -1755,7 +1753,7 @@ def _check_subtask7(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
     pass_A = _check_d2_zero(cxA, verbose=verbose)
     ok("_check_d2_zero(ComplexA) returns True", pass_A)
 
-    # ── Complex B ──────────────────────────────────────────────────────────
+    # -- Complex B ----------------------------------------------------------
     if verbose:
         print("\n--- Complex B ---")
     cxB = DeRhamComplexB(t_min=t_min, t_max=t_max, a_max=a_max,
@@ -1779,16 +1777,16 @@ def _check_subtask7(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
         print("\n" + "=" * 60)
         print(f"Subtask 7 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 7  ✓  ALL CHECKS PASSED")
+            print("Subtask 7  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 7  ✗  SOME CHECKS FAILED")
+            print("Subtask 7  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 8 — save / load pickle
+# Subtask 8 -- save / load pickle
 # ===========================================================================
 
 def save_complex(cx, filepath):
@@ -1797,7 +1795,7 @@ def save_complex(cx, filepath):
 
     Saves a dict containing all the data needed to reconstruct the complex
     without rerunning the expensive morphism-matrix computation:
-      - 'class'         : str  — 'DeRhamComplexA' or 'DeRhamComplexB'
+      - 'class'         : str  -- 'DeRhamComplexA' or 'DeRhamComplexB'
       - 't_min', 't_max': int
       - 'a_max'         : int
       - 'max_deg'       : int
@@ -1808,14 +1806,14 @@ def save_complex(cx, filepath):
     Parameters
     ----------
     cx       : DeRhamComplexA or DeRhamComplexB
-    filepath : str or Path — destination file (created/overwritten)
+    filepath : str or Path -- destination file (created/overwritten)
 
     Notes on file size
     ------------------
     Each sparse QQ-matrix stores only its nonzero entries.  For a typical
     window (t=[-6,6], a_max=4, max_deg=5) the total dim per level can reach
     ~75 K (sl_4 fibers).  Differential sparsity is ~1e-4, so each matrix
-    holds ~O(dim^2·1e-4) nonzero entries.  Expect files of 10-100 MB for
+    holds ~O(dim^2*1e-4) nonzero entries.  Expect files of 10-100 MB for
     full production runs.  Test windows (max_deg=1, a_max=1) produce files
     well under 1 MB.
     """
@@ -1846,7 +1844,7 @@ def load_complex(filepath):
 
     Returns the reconstructed complex object with .positions, .groups,
     and .differentials populated.  The CochainGroup objects in .groups are
-    lightweight stubs (no VermaModule instances) — sufficient for indexing
+    lightweight stubs (no VermaModule instances) -- sufficient for indexing
     and cohomology computation, but not for calling assemble_differential
     again.
 
@@ -1938,7 +1936,7 @@ def _check_subtask8(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
 
     if verbose:
         print("=" * 60)
-        print("Subtask 8 — save/load pickle self-check")
+        print("Subtask 8 -- save/load pickle self-check")
         print(f"  (max_deg={max_deg}, t=[{t_min},{t_max}], a_max={a_max})")
         print("=" * 60)
 
@@ -1954,7 +1952,7 @@ def _check_subtask8(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
             tmp_path = tf.name
 
         try:
-            # ── 1. save ───────────────────────────────────────────────────
+            # -- 1. save ---------------------------------------------------
             try:
                 save_complex(cx_orig, tmp_path)
                 ok(f"{cls_name}: save_complex writes file", True)
@@ -1966,7 +1964,7 @@ def _check_subtask8(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
             if verbose:
                 print(f"  File size: {fsize} bytes")
 
-            # ── 2. load ───────────────────────────────────────────────────
+            # -- 2. load ---------------------------------------------------
             try:
                 cx_load = load_complex(tmp_path)
                 ok(f"{cls_name}: load_complex reads file", True)
@@ -1974,7 +1972,7 @@ def _check_subtask8(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
                 ok(f"{cls_name}: load_complex reads file", False, str(exc))
                 continue
 
-            # ── 3. metadata ───────────────────────────────────────────────
+            # -- 3. metadata -----------------------------------------------
             ok(f"{cls_name}: positions match",
                cx_load.positions == cx_orig.positions,
                f"loaded={cx_load.positions}")
@@ -1984,12 +1982,12 @@ def _check_subtask8(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
                 and cx_load.a_max == cx_orig.a_max
                 and cx_load.max_deg == cx_orig.max_deg))
 
-            # ── 4. differential keys ──────────────────────────────────────
+            # -- 4. differential keys --------------------------------------
             ok(f"{cls_name}: differential keys match",
                set(cx_load.differentials.keys()) == set(cx_orig.differentials.keys()),
                f"loaded={sorted(cx_load.differentials.keys())}")
 
-            # ── 5. differential values ────────────────────────────────────
+            # -- 5. differential values ------------------------------------
             all_equal = True
             for key in cx_orig.differentials:
                 D_orig = cx_orig.differentials[key]
@@ -2008,16 +2006,16 @@ def _check_subtask8(e44_data, t_min=-1, t_max=3, a_max=1, max_deg=1,
         print("\n" + "=" * 60)
         print(f"Subtask 8 summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("Subtask 8  ✓  ALL CHECKS PASSED")
+            print("Subtask 8  [OK]  ALL CHECKS PASSED")
         else:
-            print("Subtask 8  ✗  SOME CHECKS FAILED")
+            print("Subtask 8  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
 
 
 # ===========================================================================
-# Subtask 9 — Integration test / _check_de_rham
+# Subtask 9 -- Integration test / _check_de_rham
 # ===========================================================================
 
 def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
@@ -2042,7 +2040,7 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
 
     Parameters
     ----------
-    e44_data : dict from load_e44() — needed for phi function calls
+    e44_data : dict from load_e44() -- needed for phi function calls
     t_min, t_max, a_max, max_deg : window parameters (kept small for speed)
     verbose  : bool
 
@@ -2070,12 +2068,12 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
 
     if verbose:
         print("=" * 60)
-        print("_check_de_rham — Integration test")
+        print("_check_de_rham -- Integration test")
         print(f"  (max_deg={max_deg}, t=[{t_min},{t_max}], a_max={a_max})")
         print("=" * 60)
 
-    # ── 9a: phi[1A] block consistency ─────────────────────────────────────
-    # Use phi_1A(t=1, a=1): M_0(2,0,0) → M_1(1,0,0), shift sv=1.
+    # -- 9a: phi[1A] block consistency -------------------------------------
+    # Use phi_1A(t=1, a=1): M_0(2,0,0) -> M_1(1,0,0), shift sv=1.
     # This edge satisfies the condition a>=1, so it is generated by _enum_1A
     # in any window with t_min<=0, t_max>=1, a_max>=1.
     if verbose:
@@ -2110,28 +2108,28 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
                f"block shape {block.dimensions()}, "
                f"expected {expected.dimensions()}")
 
-    # ── 9b: composition phi_1D \circ phi_1A = 0 ──────────────────────────────
-    # phi_1A(t=0, a=0): M_{-1}(1,0,0) → M_0(0,0,0)  sv=1
-    # phi_1D(t=1):      M_0(1,0,0) → M_1(0,0,0)       sv=1
+    # -- 9b: composition phi_1D \circ phi_1A = 0 ------------------------------
+    # phi_1A(t=0, a=0): M_{-1}(1,0,0) -> M_0(0,0,0)  sv=1
+    # phi_1D(t=1):      M_0(1,0,0) -> M_1(0,0,0)       sv=1
     # But phi_1D \circ phi_1A: source of 1A must equal source of 1D.
-    # Actually: phi_1A(t=0,a=0) maps M_{-1}(1,0,0) → M_0(0,0,0)
-    #           phi_1D(t=1)     maps M_0(1,0,0) → M_1(0,0,0)
+    # Actually: phi_1A(t=0,a=0) maps M_{-1}(1,0,0) -> M_0(0,0,0)
+    #           phi_1D(t=1)     maps M_0(1,0,0) -> M_1(0,0,0)
     # These don't compose directly (different source).
-    # Use phi_1D(t=0+1=1) \circ phi_1A(t=1,a=0): M_0(1,0,0) → M_1(0,0,0)
-    # and phi_1D(t=2) \circ (result): but phi_1D(t=2): M_1(1,0,0)→M_2(0,0,0)
+    # Use phi_1D(t=0+1=1) \circ phi_1A(t=1,a=0): M_0(1,0,0) -> M_1(0,0,0)
+    # and phi_1D(t=2) \circ (result): but phi_1D(t=2): M_1(1,0,0)->M_2(0,0,0)
     # The correct vanishing pair in Complex B is:
-    #   phi_1D(t) \circ phi_1A(t, a=0): src=M_{t-1}(1,0,0) → mid=M_t(0,0,0)
-    #   then phi_? \circ result — but phi_1D target is M_t(0,0,0) and we need
+    #   phi_1D(t) \circ phi_1A(t, a=0): src=M_{t-1}(1,0,0) -> mid=M_t(0,0,0)
+    #   then phi_? \circ result -- but phi_1D target is M_t(0,0,0) and we need
     #   something FROM M_t(0,0,0).
     # The meaningful d^2=0 already verified in Subtask 7.  Here we check
     # phi_1D \circ phi_1A = 0 directly at the matrix level.
-    # phi_1A(t=1, a=0): M_0(1,0,0)[d] → M_1(0,0,0)[d+1]
-    # phi_1D(t=2):      M_1(1,0,0)[d] → M_2(0,0,0)[d+1]
+    # phi_1A(t=1, a=0): M_0(1,0,0)[d] -> M_1(0,0,0)[d+1]
+    # phi_1D(t=2):      M_1(1,0,0)[d] -> M_2(0,0,0)[d+1]
     # phi_1D \circ phi_1A is not defined without a middle module match.
     # Use the pair that appears in Complex B:
-    #   phi_1A(t=1, a=0): M_0(1,0,0) → M_1(0,0,0)   (shift 1)
-    #   phi_1B(t=2, c=1): M_1(0,0,0) → M_2(0,0,1)   (shift 1)
-    # phi_1B \circ phi_1A[d=0]: mats_1B[1] * mats_1A[0] — check this is zero
+    #   phi_1A(t=1, a=0): M_0(1,0,0) -> M_1(0,0,0)   (shift 1)
+    #   phi_1B(t=2, c=1): M_1(0,0,0) -> M_2(0,0,1)   (shift 1)
+    # phi_1B \circ phi_1A[d=0]: mats_1B[1] * mats_1A[0] -- check this is zero
     # as a concrete sanity for consecutive morphisms in the complex.
     # (phi_1D \circ phi_1A composition is tested in morphisms.py _check_section7.)
     if verbose:
@@ -2153,7 +2151,7 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
     pass_d2 = _check_d2_zero(cxB_9b, verbose=False)
     ok("9b: d^2=0 holds for Complex B (integration re-check)", pass_d2)
 
-    # ── 9c: dimension table sanity ────────────────────────────────────────
+    # -- 9c: dimension table sanity ----------------------------------------
     if verbose:
         print("\n9c: Dimension table")
 
@@ -2161,17 +2159,17 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
                              max_deg=max_deg, e44_data=e44_data)
 
     # Expected dims for sl_4 fibers, max_deg=1:
-    # M_t(0,0,0)[0]=1, [1]=8  → node dim=9
-    # M_t(1,0,0)[0]=4, [1]=32 → node dim=36
-    # M_t(0,0,1)[0]=4, [1]=32 → node dim=36
-    # M_t(0,1,0)[0]=6, [1]=48 → node dim=54
+    # M_t(0,0,0)[0]=1, [1]=8  -> node dim=9
+    # M_t(1,0,0)[0]=4, [1]=32 -> node dim=36
+    # M_t(0,0,1)[0]=4, [1]=32 -> node dim=36
+    # M_t(0,1,0)[0]=6, [1]=48 -> node dim=54
     # (varies by which nodes appear at each level)
     dims = cxA_9c.dim_table()
     ok("9c: every position k has a positive total_dim",
        all(d > 0 for d in dims.values()),
        f"dims={dims}")
 
-    # ── 9d: summary table ─────────────────────────────────────────────────
+    # -- 9d: summary table -------------------------------------------------
     if verbose:
         print("\n9d: Summary table (Complex A)")
         print(f"  {'k':>4}  {'nodes':>6}  {'dim C^k':>9}  d^2=0 (interior)")
@@ -2191,16 +2189,16 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
                     if not (D2 * D1).is_zero():
                         d2_ok = False
             interior = (k > t_min and k < t_max)
-            d2_str = ("✓" if d2_ok else "✗") if interior else "boundary"
+            d2_str = ("[OK]" if d2_ok else "[X]") if interior else "boundary"
             print(f"  {k:>4}  {len(grp.nodes):>6}  {grp.total_dim:>9}  {d2_str}")
 
     if verbose:
         print("\n" + "=" * 60)
         print(f"_check_de_rham summary: {n_pass} pass, {n_fail} fail")
         if all_pass:
-            print("_check_de_rham  ✓  ALL CHECKS PASSED")
+            print("_check_de_rham  [OK]  ALL CHECKS PASSED")
         else:
-            print("_check_de_rham  ✗  SOME CHECKS FAILED")
+            print("_check_de_rham  [X]  SOME CHECKS FAILED")
         print("=" * 60)
 
     return all_pass
@@ -2211,7 +2209,7 @@ def _check_de_rham(e44_data, t_min=-2, t_max=4, a_max=1, max_deg=1,
 # ===========================================================================
 
 if __name__ == '__main__':
-    print("de_rham_complex.py — Subtasks 2-9 self-test")
+    print("de_rham_complex.py -- Subtasks 2-9 self-test")
     print()
 
     ok2 = _check_subtask2(t_min=-4, t_max=4, a_max=3, verbose=False)

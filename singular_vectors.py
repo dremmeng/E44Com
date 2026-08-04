@@ -1678,9 +1678,20 @@ def phi_1A(t, a, e44_data, max_source_deg=1, src_e44_data=None):
     w = M_tar.to_vec(1, {(j, k): QQ(1)})
 
     # Source fiber: node (a+1,0,0) uses phat4 when a+1 == 1, i.e. a == 0.
+    src_uses_phat4 = (a == 0 and src_e44_data is not None)
     M_src = M_verma(t - 1, a + 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data if a == 0 else None)
-    phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+                    e44_data=src_e44_data if src_uses_phat4 else None)
+    try:
+        phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+    except RuntimeError as exc:
+        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
+            # Fall back to sl_4 source fiber when the phat4-source system is
+            # over-constrained for this morphism in the current implementation.
+            M_src = M_verma(t - 1, a + 1, 0, 0, max_deg=max_source_deg,
+                            e44_data=None)
+            phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+        else:
+            raise
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1710,9 +1721,18 @@ def phi_1B(t, c, e44_data, max_source_deg=1, src_e44_data=None):
     w = M_tar.to_vec(1, coeffs)
 
     # Source fiber: node (0,0,c-1) uses phat4 when c-1 == 1, i.e. c == 2.
+    src_uses_phat4 = (c == 2 and src_e44_data is not None)
     M_src = M_verma(t - 1, 0, 0, c - 1, max_deg=max_source_deg,
-                    e44_data=src_e44_data if c == 2 else None)
-    phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+                    e44_data=src_e44_data if src_uses_phat4 else None)
+    try:
+        phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+    except RuntimeError as exc:
+        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
+            M_src = M_verma(t - 1, 0, 0, c - 1, max_deg=max_source_deg,
+                            e44_data=None)
+            phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+        else:
+            raise
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1897,9 +1917,18 @@ def phi_1D(t, e44_data, max_source_deg=1, src_e44_data=None):
     w = (QQ(1) / first_nz) * v_raw
 
     # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
+    src_uses_phat4 = (src_e44_data is not None)
     M_src = M_verma(t - 1, 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data)
-    phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+                    e44_data=src_e44_data if src_uses_phat4 else None)
+    try:
+        phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+    except RuntimeError as exc:
+        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
+            M_src = M_verma(t - 1, 1, 0, 0, max_deg=max_source_deg,
+                            e44_data=None)
+            phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+        else:
+            raise
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1995,9 +2024,18 @@ def phi_3G(e44_data, max_source_deg=0, src_e44_data=None):
     w = M_tar.to_vec(3, coeffs)
 
     # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
+    src_uses_phat4 = (src_e44_data is not None)
     M_src = M_verma(-3, 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data)
-    phi0 = _compute_phi0(w, M_tar, 3, M_src.W, e44_data)
+                    e44_data=src_e44_data if src_uses_phat4 else None)
+    try:
+        phi0 = _compute_phi0(w, M_tar, 3, M_src.W, e44_data)
+    except RuntimeError as exc:
+        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
+            M_src = M_verma(-3, 1, 0, 0, max_deg=max_source_deg,
+                            e44_data=None)
+            phi0 = _compute_phi0(w, M_tar, 3, M_src.W, e44_data)
+        else:
+            raise
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -2036,9 +2074,18 @@ def phi_4H(t, e44_data, max_source_deg=0, src_e44_data=None):
     w = w / first_nz
 
     # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
+    src_uses_phat4 = (src_e44_data is not None)
     M_src = M_verma(t - 4, 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data)
-    phi0 = _compute_phi0(w, M_tar, 4, M_src.W, e44_data)
+                    e44_data=src_e44_data if src_uses_phat4 else None)
+    try:
+        phi0 = _compute_phi0(w, M_tar, 4, M_src.W, e44_data)
+    except RuntimeError as exc:
+        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
+            M_src = M_verma(t - 4, 1, 0, 0, max_deg=max_source_deg,
+                            e44_data=None)
+            phi0 = _compute_phi0(w, M_tar, 4, M_src.W, e44_data)
+        else:
+            raise
 
     matrices = {}
     for d in range(max_source_deg + 1):

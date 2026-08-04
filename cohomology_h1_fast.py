@@ -84,6 +84,7 @@ from de_rham_complex import (
     CochainGroup, window_nodes,
     MORPHISMS_A, MORPHISMS_B,
     _VERMA_CACHE,
+    node_fiber_type,
 )
 
 # ---------------------------------------------------------------------------
@@ -200,8 +201,9 @@ def precompute_phi_matrices(morphisms, groups, e44_data,
             _log(f'  -> edge {total}: {spec.name}{phi_args} msd={msd} ...')
             t0 = time.time()
             try:
+                src_data = e44_data if node_fiber_type(src_nd) == 'phat4' else None
                 _, _, _sv, _phi0, mats = spec.phi_func(
-                    *phi_args, e44_data, msd, src_e44_data=None
+                    *phi_args, e44_data, msd, src_e44_data=src_data
                 )
                 cache[key] = mats
                 fiber_cache[fiber_key] = mats

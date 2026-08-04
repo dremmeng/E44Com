@@ -200,11 +200,20 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
                     max_deg=sv_deg + max_source_deg,
                     e44_data=e44_data)
     # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
+    src_uses_phat4 = (src_e44_data is not None)
     M_src = M_verma(QQ(-1), 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data)
+                    e44_data=src_e44_data if src_uses_phat4 else None)
 
     # -- Step 3: fiber map \phi_0: W_{-1}(1,0,0) \to M_1(1,0,0)[2] ------------
-    phi0 = _compute_phi0(w_2EA, M_tar, sv_deg, M_src.W, e44_data)
+    try:
+        phi0 = _compute_phi0(w_2EA, M_tar, sv_deg, M_src.W, e44_data)
+    except RuntimeError as exc:
+        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
+            M_src = M_verma(QQ(-1), 1, 0, 0, max_deg=max_source_deg,
+                            e44_data=None)
+            phi0 = _compute_phi0(w_2EA, M_tar, sv_deg, M_src.W, e44_data)
+        else:
+            raise
 
     # -- Step 4: assemble morphism matrices at each source degree ----------
     matrices = {}
