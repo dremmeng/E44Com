@@ -3,7 +3,7 @@
 This repository collects a formal, algebraic route from the incompressible Navier–Stokes system to the exceptional Lie superalgebra $E(4,4)$. The goal is to make the dictionary precise enough to test and refine, not to claim a completed analytic proof yet.
 
 The current working picture is:
-
+- CCK proved singular vectors truncate after degree five meaning calculating the cohomology is a finite computation.
 - The relevant cohomology in the lowest-weight sector is nonzero.
 - In particular, there appear to be three seeds in $H^1$ that are not yet killed; these are the ones to focus on next.
 - The next computable step is therefore to kill or excite those seed directions and observe whether the induced obstruction disappears or persists.
@@ -59,11 +59,11 @@ python3 liars_paradox.py
 ### Algebraic structure (E(4,4) and representation theory)
 | Script | What it computes |
 |--------|-----------------|
-| [de_rham_complex.py](de_rham_complex.py) | Full de Rham complex of $E(4,4)$; all morphisms $\phi_{iX}$ |
-| [verma_modules.py](verma_modules.py) | Verma module construction for $E(4,4)$ |
-| [phat4_modules.py](phat4_modules.py) | $\hat{\mathfrak{p}}(4)$ module data; seed decomposition |
-| [cohomology.py](cohomology.py) | Cohomology $H^k$ of the complex; dimension counts |
-| [morphisms.py](morphisms.py) | Morphism matrices; singular vector degrees |
+| [de_rham_complex.py](de_rham_complex.py) | Full de Rham complex of $E(4,4)$; all morphisms $\phi_{iX}$ | CCK Archeology
+| [verma_modules.py](verma_modules.py) | Verma module construction for $E(4,4)$ | CCK Archeology
+| [phat4_modules.py](phat4_modules.py) | $\hat{\mathfrak{p}}(4)$ module data; seed decomposition | CCK Archeology
+| [cohomology.py](cohomology.py) | Cohomology $H^k$ of the complex; dimension counts | New Work building on CCK
+| [morphisms.py](morphisms.py) | Morphism matrices; singular vector degrees | CCK Archeology
 
 ### Complexity and incompleteness analysis
 | Script | What it proves |
@@ -75,6 +75,7 @@ python3 liars_paradox.py
 | [blowup_formality.py](blowup_formality.py) | Triple equivalence: $T_{\mathrm{crit}}\leftrightarrow$ non-formality $\leftrightarrow H^k\neq 0$ |
 | [liars_paradox.py](liars_paradox.py) | 11-step refutation chain; comparison with Gödel and Tarski |
 
+These are conjectural. The author is begining to suspect that there is self reference and Godellian obstacles at play. These are attempts at making them concrete.
 ---
 
 ## Running the certificates
@@ -103,7 +104,6 @@ python3 liars_paradox.py
 To recompile the papers:
 ```bash
 pdflatex paper1_reduction.tex && pdflatex paper1_reduction.tex
-pdflatex paper2_complexity.tex && pdflatex paper2_complexity.tex
 ```
 
 ---
