@@ -116,6 +116,17 @@ A concise form of the working claim is:
 
 **Working claim.** If the three surviving $H^1$ seeds are killed and the relevant lowest-weight cohomology classes vanish, then the associated formal obstruction to regularity disappears; if exciting them preserves or strengthens the obstruction, then the route is settled negatively.
 
+## Production runs
+
+The near-term production matrix is now split into four tracks:
+
+1. Full $E(4,4)$, Complex A and B: checkpointed by [production_run.py](production_run.py).
+2. Full $E(4,4)$ with $\nu$: governed by [nu_deformation.py](nu_deformation.py), but still needs checkpoint integration.
+3. Borel reduction: currently checked by [borel_chain_map_check.py](borel_chain_map_check.py).
+4. Borel reduction with $\nu$: not yet wired as a runnable pipeline.
+
+The detailed run matrix is in [production_runs_plan.txt](production_runs_plan.txt).
+
 
 ---
 
