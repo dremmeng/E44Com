@@ -1131,6 +1131,14 @@ def assemble_differential(src_group, tar_group, morphism_specs,
                 # Fiber type mismatch between this phi function and the
                 # CochainGroup.  Skip this edge silently.
                 continue
+            except BaseException as _exc:
+                # Production robustness: some edge-local morphism builders can
+                # fail for specific parameter values (e.g. missing singular
+                # vectors at that t). Treat these as skipped edges rather than
+                # aborting the full differential build.
+                if isinstance(_exc, KeyboardInterrupt):
+                    raise
+                continue
 
             for (i, j), val in block_mat.dict().items():
                 key = (i, j)

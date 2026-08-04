@@ -437,7 +437,8 @@ class KacModule:
         action = matrix(QQ, self.dim, self.dim)
         for sec_idx, coeff in coeffs.items():
             full_idx = L0.index(L0_even[sec_idx])
-            action += QQ(coeff) * self.action_mats[full_idx]
+            # Use lazy getter: not all action matrices are pre-built.
+            action += QQ(coeff) * self._get_action_mat(full_idx)
 
         self._b_a_cache[cache_key] = action
         return action
@@ -591,7 +592,7 @@ class Phat4Module:
         # sl_4 raising: x_i \partial_{i+1} for i=1,2,3 (= e_i in Chevalley basis)
         for i in range(1, 4):
             idx = _l0_even_idx(i, i + 1)
-            mats_to_stack.append(K.action_mats[idx])
+            mats_to_stack.append(K._get_action_mat(idx))
 
         # Stack and find kernel
         total_rows = sum(m.nrows() for m in mats_to_stack)
@@ -621,7 +622,7 @@ class Phat4Module:
         if not non_hw_singular:
             # K is already irreducible (no proper submodule)
             self.dim = K.dim
-            self.action_mats = dict(K.action_mats)
+            self.action_mats = {idx: K._get_action_mat(idx) for idx in range(32)}
             self.quotient_proj = identity_matrix(QQ, K.dim)
             self._quotient_basis = list(identity_matrix(QQ, K.dim).rows())
             self.weight_spaces = dict(K.V.weight_spaces)
@@ -634,7 +635,7 @@ class Phat4Module:
         # are hw vectors of composition factors that extend through the
         # irreducible quotient).  We must skip those.  Strategy: add seeds
         # one at a time and verify the orbit stays proper (doesn't contain hw).
-        all_mats = [K.action_mats[idx] for idx in range(32)]
+        all_mats = [K._get_action_mat(idx) for idx in range(32)]
 
         def _orbit_closure(seed_rows):
             """Grow orbit of seed_rows under all_mats. Returns echelonized matrix."""
@@ -686,7 +687,7 @@ class Phat4Module:
         if not good_seeds:
             # No proper submodule found -> K is irreducible
             self.dim = K.dim
-            self.action_mats = dict(K.action_mats)
+            self.action_mats = {idx: K._get_action_mat(idx) for idx in range(32)}
             self.quotient_proj = identity_matrix(QQ, K.dim)
             self._quotient_basis = list(identity_matrix(QQ, K.dim).rows())
             self.weight_spaces = dict(K.V.weight_spaces)
@@ -729,7 +730,7 @@ class Phat4Module:
         #   q circ (action on K) circ incl
         self.action_mats = {}
         for L0_idx in range(32):
-            K_mat = K.action_mats[L0_idx]
+            K_mat = K._get_action_mat(L0_idx)
             quot_mat = Q * K_mat * self._incl.transpose()
             self.action_mats[L0_idx] = quot_mat
 
