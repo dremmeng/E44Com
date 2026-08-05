@@ -109,6 +109,12 @@ def coh_path(cx_type, k):
     return os.path.join(CHECKPOINT_DIR, fname)
 
 
+def linear_data_path(cx_type, k):
+    """Path for optional saved linear algebra data at level k."""
+    fname = f'linear_data_{cx_type}_k{k:+03d}.pkl'
+    return os.path.join(CHECKPOINT_DIR, fname)
+
+
 def all_diff_pairs(cx_type, t_min, t_max):
     """Generate all (k_src, k_tar) pairs for a complex type."""
     for s in SHIFTS[cx_type]:
@@ -270,7 +276,9 @@ def phase_build(cx_type, t_min, t_max, a_max, max_deg, e44_data):
 # Phase: cohomology
 # ===========================================================================
 
-def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max):
+def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max,
+                                save_linear_data=False, cx_type=None,
+                                checkpoint_dir=None):
     """
     Compute H^k given pre-built groups and differential dict.
 
@@ -278,7 +286,12 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max):
     Saves the basis matrices only if dim_H > 0 and dim_H <= 200 (to avoid
     multi-GB dense matrices at large scale; set SAVE_BASES = True to override).
 
-    Returns dict with keys: k, dim_Ck, dim_ker, dim_im, dim_H, im_subset_ker.
+        Returns dict with keys: k, dim_Ck, dim_ker, dim_im, dim_H, im_subset_ker.
+
+        Optional persistence:
+            If save_linear_data=True, also saves a sparse-matrix payload containing
+            O_k, I_k, and basis-layout metadata to
+            linear_data_{cx_type}_k{level}.pkl inside checkpoint_dir.
     """
     SAVE_BASES = False  # set True to save full cocycle/cobound basis matrices
 
@@ -369,6 +382,40 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max):
         'k': k, 'dim_Ck': dim_k, 'dim_ker': dim_ker,
         'dim_im': dim_im, 'dim_H': dim_H, 'im_subset_ker': im_sub,
     }
+
+    if save_linear_data:
+        if cx_type is None or checkpoint_dir is None:
+            raise ValueError('save_linear_data=True requires cx_type and checkpoint_dir')
+
+        gk = groups[k]
+        basis_layout = [
+            {
+                'node': {'t': nd.t, 'a': nd.a, 'b': nd.b, 'c': nd.c},
+                'd': d,
+                'offset': gk.offsets[(nd, d)],
+                'dim': gk.vermas[nd].dim(d),
+            }
+            for nd in gk.nodes
+            for d in range(gk.max_deg + 1)
+        ]
+
+        lin_payload = {
+            'cx_type': cx_type,
+            'k': k,
+            't_min': t_min,
+            't_max': t_max,
+            'dim_Ck': dim_k,
+            'dim_O_rows': O_k.nrows(),
+            'dim_I_cols': I_k.ncols(),
+            'O_k': O_k,
+            'I_k': I_k,
+            'basis_layout': basis_layout,
+        }
+        out_p = linear_data_path(cx_type, k)
+        with open(out_p, 'wb') as f:
+            pickle.dump(lin_payload, f, protocol=4)
+        kb = os.path.getsize(out_p) // 1024
+        print(f'  [k={k:+d}] saved linear data -> {out_p} ({kb} KB)', flush=True)
     # SAVE_BASES is disabled at large scale (subspace objects not constructed).
     # Set SAVE_BASES = True only for small max_deg runs where subspaces are needed.
 
@@ -376,7 +423,7 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max):
 
 
 def phase_cohomology(cx_type, t_min, t_max, a_max, max_deg, e44_data,
-                     levels=None):
+                     levels=None, save_linear_data=False):
     """
     Load saved differential checkpoints and compute H^k.
 
@@ -433,13 +480,23 @@ def phase_cohomology(cx_type, t_min, t_max, a_max, max_deg, e44_data,
             print(f"  {k:>4}  {r['dim_Ck']:>9}  {r['dim_ker']:>9}  "
                   f"{r['dim_im']:>9}  {r['dim_H']:>9}  "
                   f"{'[OK]' if r['im_subset_ker'] else '[X]':>5}  [cached]")
+            if save_linear_data and not os.path.isfile(linear_data_path(cx_type, k)):
+                print(f"    NOTE: linear_data for k={k:+d} not created because "
+                    f"cohomology result was loaded from cache.")
+                print("    Re-run after removing cached cohomology checkpoint "
+                    "if you need O_k/I_k persisted.")
             all_results[k] = r
             continue
 
         print(f'[{ts()}] Computing H^{k} ...')
         t0 = time.time()
 
-        r = cohomology_at_from_matrices(groups, differentials, k, t_min, t_max)
+        r = cohomology_at_from_matrices(
+            groups, differentials, k, t_min, t_max,
+            save_linear_data=save_linear_data,
+            cx_type=cx_type,
+            checkpoint_dir=CHECKPOINT_DIR,
+        )
 
         elapsed = time.time() - t0
         all_results[k] = r
@@ -482,6 +539,9 @@ def parse_args():
     p.add_argument('--max-deg', type=int, default=MAX_DEG)
     p.add_argument('--level', type=int, nargs='+', metavar='K',
                    help='(cohomology phase only) compute H^k only at these level(s).')
+    p.add_argument('--save-linear-data', action='store_true',
+                   help='(cohomology phase only) save O_k/I_k sparse matrices and '
+                        'basis-layout metadata for each computed level.')
     p.add_argument('--checkpoint-dir', default=CHECKPOINT_DIR,
                    help=f'Directory for pickle files (default: {CHECKPOINT_DIR})')
     return p.parse_args()
@@ -524,7 +584,8 @@ def main():
     elif args.phase == 'cohomology':
         levels = args.level  # None -> all levels
         phase_cohomology(cx_type, t_min, t_max, a_max, max_deg, e44_data,
-                         levels=levels)
+                         levels=levels,
+                         save_linear_data=args.save_linear_data)
 
 
 if __name__ == '__main__':
