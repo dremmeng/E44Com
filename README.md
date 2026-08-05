@@ -100,7 +100,7 @@ pdflatex paper1_reduction.tex && pdflatex paper1_reduction.tex
 
 ## Next computable step
 
-The current computation is run the H^1 computation for fermionic and bosonic complexes of all of the following:
+The current computation is run the H^1 computation for both exceptional complexes of all of the following:
   - E(4,4) (the four dimensional Euler)
   - E(4,4) with \nu morphism (four dimensional NS)
   - Borel Reduced E(4,4) (three dimensional Euler)
