@@ -4,9 +4,6 @@ This repository collects a formal, algebraic route from the incompressible Navie
 
 The current working picture is:
 - CCK proved singular vectors truncate after degree five meaning calculating the cohomology is a finite computation.
-- The relevant cohomology in the lowest-weight sector is nonzero.
-- In particular, there appear to be three seeds in $H^1$ that are not yet killed; these are the ones to focus on next.
-- The next computable step is therefore to kill or excite those seed directions and observe whether the induced obstruction disappears or persists.
 - The PDE-to-superfield map is
   $\Phi = \sum_{i=1}^4 u_i\,\partial_i + \sum_{i=1}^4 (\partial_i p)\,dx_i$.
 - The main theorem-style target is: if the relevant lowest-weight cohomology vanishes after such a reduction, then the corresponding formal obstruction to regularity disappears.
@@ -14,21 +11,20 @@ The current working picture is:
 ## Current status
 
 - The formal dictionary from the PDE to the $E(4,4)$ complex is in place.
-- The cohomology is nonzero, so the next concrete computation is basis-vector manipulation in the seed sector.
 - The project remains a precise conjectural route rather than a completed proof of global regularity.
 
 ## What to compute next
 
 1. Choose the lowest-weight basis in the degree-1 seed sector.
-2. Focus on the three surviving $H^1$ seeds that have not yet been killed.
+2. Focus on the surviving $H^1$ seeds that have not yet been killed.
 3. Kill or excite those seed directions and recompute the resulting cohomology.
 4. If killing them removes the obstruction, that supports the regularity route; if exciting them preserves or amplifies the obstruction, that settles the issue negatively.
 5. Compare the resulting pattern with the formal PDE-to-superfield map.
 
 ## Papers and source files
 
-- [paper1_reduction.tex](paper1_reduction.tex) and [paper2_complexity.tex](paper2_complexity.tex): source drafts.
-- [unified_ns_e44.tex](unified_ns_e44.tex): a more unified synthesis of the algebraic and PDE-side story.
+
+- [unified_ns_e44.tex](unified_ns_e44.tex): a more unified synthesis of the algebraic and PDE-side story containg the E(4,4) \to Euler \to NS dictionaries.
 
 ## Verification scripts
 
@@ -42,13 +38,7 @@ python3 liars_paradox.py
 
 ## Key files
 
-### Papers (LaTeX + compiled PDF)
-| File | Contents |
-|------|----------|
-| [paper1_reduction.tex](paper1_reduction.tex) | Paper 1 source |
-| [paper2_complexity.tex](paper2_complexity.tex) | Paper 2 source |
-| [paper1_reduction.pdf](paper1_reduction.pdf) | Paper 1 compiled (6 pages) |
-| [paper2_complexity.pdf](paper2_complexity.pdf) | Paper 2 compiled (13 pages) |
+
 
 ### Interval arithmetic certificates (ZFC-verifiable, mpmath.iv at 60 digits)
 | Script | What it certifies |
@@ -110,11 +100,16 @@ pdflatex paper1_reduction.tex && pdflatex paper1_reduction.tex
 
 ## Next computable step
 
-The current computation is not “prove regularity” but “probe the obstruction.” Since the relevant cohomology is nonzero, the next thing to test is to focus on the three surviving $H^1$ seeds and decide whether killing them removes the obstruction or exciting them confirms it.
-
+The current computation is run the H^1 computation for fermionic and bosonic complexes of all of the following:
+  - E(4,4) (the four dimensional Euler)
+  - E(4,4) with \nu morphism (four dimensional NS)
+  - Borel Reduced E(4,4) (three dimensional Euler)
+  - Borel Reduced E(4,4) with \nu morphism (three dimsional NS)
 A concise form of the working claim is:
 
-**Working claim.** If the three surviving $H^1$ seeds are killed and the relevant lowest-weight cohomology classes vanish, then the associated formal obstruction to regularity disappears; if exciting them preserves or strengthens the obstruction, then the route is settled negatively.
+**Working claim.** 
+If H^1 = 0 in any of the above we have no topological obstruction to regularity in the cooresponding PDE.
+However, if H^1 != 0 we can still analyze the nature of the blowup modes as seeds which we can then kill or excite.
 
 ## Production runs
 
