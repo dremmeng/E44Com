@@ -118,6 +118,28 @@ Let $d_k^{\mathrm{out}}$ be the outgoing differential of the exceptional de Rham
 
 This is the direct analogue of the PDE deformation from Euler to Navier--Stokes.
 
+\begin{proposition}[Which morphism collapses under generic $\nu$]
+\label{prop:which-morphism-collapses}
+In Complex $B$, the degree-$1$ edge
+\[
+  \phi_{1E}: M_0(0,0,0) \to M_1(1,0,0)
+\]
+is the unique morphism that exists only at the integer Verma parameter $t=1$.
+Hence under the generic deformation $t\mapsto 1+\nu$ with $\nu\neq 0$, the
+appropriate collapsed complex is obtained by removing exactly $\phi_{1E}$ and
+keeping all other Complex $B$ morphisms.
+\end{proposition}
+
+\begin{proof}[Justification used in the production pipeline]
+The CCK edge list for Complex $B$ shows that $\phi_{1E}$ is the only degree-$1$
+map with an integrality condition tied to $t=1$, while the remaining maps in
+degrees $1,3,4$ are present at generic $t$.  Therefore the generic-$\nu$
+cochain differential is the Euler differential with only this edge removed.
+Operationally, this is the model implemented in the scripts
+\texttt{t\_deform\_h1.py} (comparison at fixed window) and
+\texttt{borel\_nu\_h1\_run.py} (checkpointed production run on the Borel slice).
+\end{proof}
+
 \begin{theorem}[Full equivalence from the commutation relations of $\gE$]
 \label{thm:full-equivalence}
 Let $\gE$ be realized in the standard formal-power-series model by even generators $e_i=\partial_i$ and odd generators $\varepsilon_i=dx_i$.  Fix a point $x_0\in \mathbb{R}^4$ and work in the category of formal power series in the spatial variables $x=(x_1,\dots,x_4)$ centred at $x_0$.  For each fixed time $t$, let
