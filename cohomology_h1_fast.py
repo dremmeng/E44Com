@@ -208,15 +208,12 @@ def precompute_phi_matrices(morphisms, groups, e44_data,
                 cache[key] = mats
                 fiber_cache[fiber_key] = mats
             except BaseException as _exc:
-                _log(f'  !! edge {total} FAILED: {type(_exc).__name__}: {_exc}')
-                _log(traceback.format_exc())
                 if isinstance(_exc, KeyboardInterrupt):
                     raise
-                # SystemExit from Sage's sig_on() (SIGSEGV/OOM in GMP arithmetic)
-                # is treated as a skippable edge failure, not a genuine sys.exit().
-                cache[key] = None
-                fiber_cache[fiber_key] = None
-                skipped += 1
+                raise RuntimeError(
+                    f'Failed to construct {spec.name}{phi_args} from '
+                    f'{src_nd} to {tar_nd}'
+                ) from _exc
             elapsed = time.time() - t0
             if elapsed > 5.0:
                 _log(f'    [{ts()}] {spec.name}{phi_args} msd={msd}: '
@@ -285,7 +282,10 @@ def assemble_n_slice(k_src, k_tar, d_src, d_tar,
             cache_key = (spec.name, src_nd, tar_nd, phi_args)
             mats = phi_cache.get(cache_key)
             if mats is None:
-                continue
+                raise RuntimeError(
+                    f'Missing cached morphism matrix for {spec.name}{phi_args} '
+                    f'from {src_nd} to {tar_nd}'
+                )
 
             block = mats.get(d_src)
             if block is None:
@@ -294,7 +294,11 @@ def assemble_n_slice(k_src, k_tar, d_src, d_tar,
             nrows_exp = g_tar.vermas[tar_nd].dim(d_tar)
             ncols_exp = g_src.vermas[src_nd].dim(d_src)
             if block.nrows() != nrows_exp or block.ncols() != ncols_exp:
-                continue  # fiber mismatch -- skip
+                raise RuntimeError(
+                    f'Fiber mismatch for {spec.name}{phi_args} from {src_nd} '
+                    f'to {tar_nd}: matrix is {block.dimensions()}, expected '
+                    f'({nrows_exp}, {ncols_exp})'
+                )
 
             r0 = tar_offs[tar_nd]
             c0 = src_offs[src_nd]

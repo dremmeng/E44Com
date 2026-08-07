@@ -23,10 +23,13 @@ Section layout (mirrors plan-nsLTKMA.md / NSE44.tex sec.S3):
 Run inside SageMath:  sage singular_vectors.py
 """
 
-from sage.all import QQ, vector, matrix
+from sage.all import QQ, vector, matrix, identity_matrix
 import sys as _sys
 import os as _os
 import pickle as _pickle
+import subprocess as _subprocess
+import tempfile as _tempfile
+from math import gcd as _gcd, isqrt as _isqrt
 
 # ---------------------------------------------------------------------------
 # Path: ensure the directory containing verma_modules.py is on sys.path
@@ -50,6 +53,138 @@ from phat4_modules import (
 # ===========================================================================
 # Utilities
 # ===========================================================================
+
+_LINBOX_PRIME = 2147483647
+_LINBOX_HELPER_SOURCE = _os.path.join(_HERE, "linbox_sparse_kernel.cpp")
+_LINBOX_HELPER_BINARY = _os.path.join(_HERE, "linbox_sparse_kernel")
+
+
+def _compile_linbox_sparse_kernel():
+    """Build the local LinBox sparse-kernel helper when it is stale."""
+    if not _os.path.isfile(_LINBOX_HELPER_SOURCE):
+        raise RuntimeError(f"Missing LinBox helper source: {_LINBOX_HELPER_SOURCE}")
+    if (_os.path.isfile(_LINBOX_HELPER_BINARY) and
+            _os.path.getmtime(_LINBOX_HELPER_BINARY) >=
+            _os.path.getmtime(_LINBOX_HELPER_SOURCE)):
+        return _LINBOX_HELPER_BINARY
+    try:
+        flags = _subprocess.check_output(
+            ["linbox-config", "--cflags", "--libs"], text=True
+        ).split()
+        _subprocess.run(
+            ["g++", "-O3", "-std=c++17", _LINBOX_HELPER_SOURCE,
+             "-o", _LINBOX_HELPER_BINARY, *flags],
+            check=True, capture_output=True, text=True,
+        )
+    except (OSError, _subprocess.CalledProcessError) as exc:
+        detail = getattr(exc, "stderr", "")
+        raise RuntimeError(
+            "Could not build the LinBox sparse-kernel helper. "
+            "Install g++, linbox, fflas-ffpack, and givaro in this Sage environment. "
+            f"{detail}"
+        ) from exc
+    return _LINBOX_HELPER_BINARY
+
+
+def _rational_reconstruct(residue, modulus):
+    """Recover a small rational number congruent to ``residue`` modulo ``modulus``."""
+    residue %= modulus
+    if residue == 0:
+        return QQ(0)
+    bound = _isqrt(modulus // 2)
+    remainder0, remainder1 = modulus, residue
+    denominator0, denominator1 = 0, 1
+    while abs(remainder1) > bound:
+        quotient = remainder0 // remainder1
+        remainder0, remainder1 = remainder1, remainder0 - quotient * remainder1
+        denominator0, denominator1 = (
+            denominator1, denominator0 - quotient * denominator1
+        )
+    if (denominator1 == 0 or abs(denominator1) > bound or
+            _gcd(remainder1, denominator1) != 1):
+        raise ValueError("coordinate has no small rational reconstruction")
+    if denominator1 < 0:
+        remainder1, denominator1 = -remainder1, -denominator1
+    return QQ(remainder1) / QQ(denominator1)
+
+
+def _linbox_sparse_kernel(mats, n):
+    """Return an exactly verified QQ kernel basis from sparse modular LinBox output."""
+    helper = _compile_linbox_sparse_kernel()
+    total_rows = sum(mat.nrows() for mat in mats)
+    entries = []
+    row_offset = 0
+    for mat in mats:
+        for (row, col), value in mat.dict().items():
+            coefficient = QQ(value)
+            numerator = int(coefficient.numerator()) % _LINBOX_PRIME
+            denominator = int(coefficient.denominator()) % _LINBOX_PRIME
+            if denominator == 0:
+                raise RuntimeError(
+                    f"LinBox prime {_LINBOX_PRIME} divides an L_1 coefficient denominator"
+                )
+            entries.append((row_offset + row, col,
+                            numerator * pow(denominator, -1, _LINBOX_PRIME) % _LINBOX_PRIME))
+        row_offset += mat.nrows()
+
+    input_path = None
+    try:
+        with _tempfile.NamedTemporaryFile(mode="w", delete=False) as input_file:
+            input_path = input_file.name
+            input_file.write(
+                f"{_LINBOX_PRIME} {total_rows} {n} {len(entries)}\n"
+            )
+            for row, col, value in entries:
+                input_file.write(f"{row} {col} {value}\n")
+        with open(input_path) as input_file:
+            completed = _subprocess.run(
+                [helper], stdin=input_file, check=True, capture_output=True,
+                text=True, timeout=300,
+            )
+    except (OSError, _subprocess.CalledProcessError, _subprocess.TimeoutExpired) as exc:
+        detail = getattr(exc, "stderr", "")
+        raise RuntimeError(f"LinBox sparse kernel computation failed: {detail}") from exc
+    finally:
+        if input_path is not None:
+            try:
+                _os.unlink(input_path)
+            except FileNotFoundError:
+                pass
+
+    lines = completed.stdout.splitlines()
+    if not lines:
+        raise RuntimeError("LinBox sparse kernel helper produced no output")
+    try:
+        rank, nullity = (int(value) for value in lines[0].split())
+    except ValueError as exc:
+        raise RuntimeError("LinBox sparse kernel helper returned an invalid header") from exc
+    if rank + nullity != n or len(lines) != nullity + 1:
+        raise RuntimeError("LinBox sparse kernel helper returned inconsistent dimensions")
+
+    basis = []
+    for line in lines[1:]:
+        residues = [int(value) for value in line.split()]
+        if len(residues) != n:
+            raise RuntimeError("LinBox sparse kernel helper returned a malformed vector")
+        try:
+            candidate = vector(QQ, [
+                _rational_reconstruct(residue, _LINBOX_PRIME)
+                for residue in residues
+            ])
+        except ValueError as exc:
+            raise RuntimeError(
+                "LinBox modular kernel does not lift at the current prime; "
+                "multi-prime reconstruction is required"
+            ) from exc
+        if any(mat * candidate != vector(QQ, mat.nrows()) for mat in mats):
+            raise RuntimeError(
+                "LinBox modular kernel candidate failed exact L_1 verification; "
+                "multi-prime reconstruction is required"
+            )
+        basis.append(candidate)
+    if matrix(QQ, [list(candidate) for candidate in basis]).rank() != nullity:
+        raise RuntimeError("LinBox kernel vectors are not independent over QQ")
+    return basis
 
 def _crystal_idx_by_weight(W_mod, wt):
     """
@@ -556,16 +691,19 @@ def _joint_kernel_deg(M, e44_data, deg):
             if mat.nrows() > 0 and mat.ncols() > 0:
                 mats.append(mat)
     if not mats:
-        from sage.all import identity_matrix
         return list(identity_matrix(QQ, n).rows())
 
-    total_rows = sum(m.nrows() for m in mats)
-    stacked = matrix(QQ, total_rows, n)
-    r = 0
-    for m in mats:
-        for row_idx in range(m.nrows()):
-            stacked[r] = m.row(row_idx)
-            r += 1
+    dense_entries = len(L1) * M.dim(deg - 1) * n
+    if dense_entries > 8_000_000:
+        return _linbox_sparse_kernel(mats, n)
+
+    total_rows = sum(mat.nrows() for mat in mats)
+    stacked = matrix(QQ, total_rows, n, sparse=True)
+    row = 0
+    for mat in mats:
+        for row_idx in range(mat.nrows()):
+            stacked[row] = mat.row(row_idx)
+            row += 1
     return list(stacked.right_kernel().basis())
 
 
@@ -1475,6 +1613,34 @@ def _compute_phi0(w, M_target, sv_deg, W_source, e44_data):
                     phi0[k_prime] = (QQ(1) / h_col[k_prime]) * rhs
                     changed = True
 
+    # Once the even orbit is known, use every generator to propagate any
+    # odd-sector column whose defining relation has a single unknown term.
+    # This preserves the exact relation rather than choosing an arbitrary
+    # solution from the residual coordinate system below.
+    changed = True
+    while changed:
+        changed = False
+        for h_idx in gen_indices:
+            h_W = fiber_acts[h_idx]
+            for k in range(n_src):
+                if phi0[k] is None:
+                    continue
+                h_col = h_W.column(k)
+                for k_prime in range(n_src):
+                    if phi0[k_prime] is not None or h_col[k_prime] == 0:
+                        continue
+                    unknowns = [kp for kp in range(n_src)
+                                if h_col[kp] != 0 and phi0[kp] is None]
+                    if len(unknowns) != 1:
+                        continue
+                    rhs = l0_M[h_idx] * phi0[k]
+                    for kp in range(n_src):
+                        if kp != k_prime and h_col[kp] != 0:
+                            if phi0[kp] is not None:
+                                rhs = rhs - h_col[kp] * phi0[kp]
+                    phi0[k_prime] = (QQ(1) / h_col[k_prime]) * rhs
+                    changed = True
+
     n_found = sum(1 for v in phi0 if v is not None)
     if n_found == n_src:
         return phi0
@@ -1544,6 +1710,84 @@ def _compute_phi0(w, M_target, sv_deg, W_source, e44_data):
         raise RuntimeError(
             f"L_0 orbit solver reached {n_found}/{n_src} fiber elements"
         )
+    return phi0
+
+
+def _compute_full_phi0(M_source, M_target, sv_deg, e44_data):
+    """Construct a full p_hat(4)-equivariant fiber map from singular vectors."""
+    singular_basis = _joint_kernel_deg(M_target, e44_data, sv_deg)
+    if not singular_basis:
+        raise RuntimeError(
+            f"No degree-{sv_deg} singular vectors in "
+            f"M_{M_target.t}({M_target.a},{M_target.b},{M_target.c})"
+        )
+
+    singular_matrix = matrix(QQ, [list(vector) for vector in singular_basis]).transpose()
+    target_dim = singular_matrix.ncols()
+    source_dim = M_source.dim_W
+    source_hw = M_source.W.v_hw
+    source_hw_vector = vector(QQ, source_dim, {source_hw: QQ(1)})
+    highest_weight_constraints = []
+
+    for l0_idx in range(32):
+        target_action = l0_action_matrix(
+            M_target, l0_idx, e44_data, max_d=sv_deg
+        )[sv_deg]
+        try:
+            singular_action = singular_matrix.solve_right(target_action * singular_matrix)
+        except ValueError as exc:
+            raise RuntimeError(
+                f"Degree-{sv_deg} singular space is not L_0[{l0_idx}]-stable"
+            ) from exc
+
+        source_image = M_source.W.action_mats[l0_idx] * source_hw_vector
+        eigenvalue = source_image[source_hw]
+        if source_image == eigenvalue * source_hw_vector:
+            highest_weight_constraints.append(
+                singular_action - eigenvalue * identity_matrix(QQ, target_dim)
+            )
+
+    if not highest_weight_constraints:
+        raise RuntimeError(
+            "Could not derive highest-weight constraints for the full fiber map"
+        )
+
+    stacked = matrix(
+        QQ, sum(action.nrows() for action in highest_weight_constraints),
+        target_dim, sparse=True,
+    )
+    row_offset = 0
+    for action in highest_weight_constraints:
+        for row_idx in range(action.nrows()):
+            stacked[row_offset + row_idx] = action.row(row_idx)
+        row_offset += action.nrows()
+    highest_weight_space = stacked.right_kernel()
+    if highest_weight_space.dimension() != 1:
+        raise RuntimeError(
+            f"Expected one highest-weight singular vector, found "
+            f"{highest_weight_space.dimension()}"
+        )
+
+    seed = singular_matrix * highest_weight_space.basis()[0]
+    phi0 = _compute_phi0(seed, M_target, sv_deg, M_source.W, e44_data)
+    for l0_idx in range(32):
+        target_action = l0_action_matrix(
+            M_target, l0_idx, e44_data, max_d=sv_deg
+        )[sv_deg]
+        source_action = M_source.W.action_mats[l0_idx]
+        for source_idx in range(source_dim):
+            expected = sum(
+                (source_action[target_idx, source_idx] * phi0[target_idx]
+                 for target_idx in range(source_dim)),
+                vector(QQ, M_target.dim(sv_deg)),
+            )
+            if target_action * phi0[source_idx] != expected:
+                raise RuntimeError(
+                    f"Full L_0 equivariance failed for generator {l0_idx} "
+                    f"and source basis vector {source_idx}"
+                )
+    if matrix(QQ, [list(vector) for vector in phi0]).rank() != source_dim:
+        raise RuntimeError("Full-fiber map is not injective")
     return phi0
 
 
@@ -1669,29 +1913,10 @@ def phi_1A(t, a, e44_data, max_source_deg=1, src_e44_data=None):
     src_e44_data : e44_data to use for the source fiber.
                    Pass e44_data when a == 0 (source node (1,0,0) is phat4).
     """
-    # Target fiber: node (a,0,0) uses phat4 when a == 1.
-    tar_e44 = e44_data if a == 1 else None
-    M_tar = M_verma(t, a, 0, 0, max_deg=1 + max_source_deg, e44_data=tar_e44)
-    pbw_d1 = ((0, 0, 0, 0), frozenset({0}))
-    j = M_tar._pbw_idx[1][pbw_d1]
-    k = M_tar.W.v_hw
-    w = M_tar.to_vec(1, {(j, k): QQ(1)})
-
-    # Source fiber: node (a+1,0,0) uses phat4 when a+1 == 1, i.e. a == 0.
-    src_uses_phat4 = (a == 0 and src_e44_data is not None)
+    M_tar = M_verma(t, a, 0, 0, max_deg=1 + max_source_deg, e44_data=e44_data)
     M_src = M_verma(t - 1, a + 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data if src_uses_phat4 else None)
-    try:
-        phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
-    except RuntimeError as exc:
-        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
-            # Fall back to sl_4 source fiber when the phat4-source system is
-            # over-constrained for this morphism in the current implementation.
-            M_src = M_verma(t - 1, a + 1, 0, 0, max_deg=max_source_deg,
-                            e44_data=None)
-            phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
-        else:
-            raise
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 1, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1703,36 +1928,18 @@ def phi_1B(t, c, e44_data, max_source_deg=1, src_e44_data=None):
     """
     Morphism \phi[1B]: M_{t-1}(0,0,c-1) \to M_t(0,0,c), degree 1.
 
-    src_e44_data : e44_data to use for the source fiber.
-                   Pass e44_data when c == 2 (source node (0,0,1) is phat4).
+    CCK excludes the exceptional case (t,c) = (1,1): its Kac-module map
+    does not factor through W_0(0,0,0).
     """
-    # Target M_t(0,0,c) always uses sl_4 fiber -- the crystal weight formula
-    # requires sl_4 weight_spaces which phat4 modules do not expose correctly.
-    M_tar = M_verma(t, 0, 0, c, max_deg=1 + max_source_deg)
-    x_star_weights = [(-1, 0, c-1), (1, -1, c-1), (0, 1, c-2), (0, 0, c)]
-    crystal_coeffs = [QQ(1), QQ(1), QQ(1), QQ(c)]
-    coeffs = {}
-    for gen_idx, wt in enumerate(x_star_weights):
-        kk = _crystal_idx_by_weight(M_tar.W, wt)
-        pbw_mon = ((0, 0, 0, 0), frozenset({gen_idx}))
-        j = M_tar._pbw_idx[1][pbw_mon]
-        sign = QQ((-1) ** gen_idx) * crystal_coeffs[gen_idx]
-        coeffs[(j, kk)] = coeffs.get((j, kk), QQ(0)) + sign
-    w = M_tar.to_vec(1, coeffs)
-
-    # Source fiber: node (0,0,c-1) uses phat4 when c-1 == 1, i.e. c == 2.
-    src_uses_phat4 = (c == 2 and src_e44_data is not None)
+    if QQ(t) == QQ(1) and c == 1:
+        raise ValueError(
+            "phi_1B(1,1) does not descend to the CCK quotient W_0(0,0,0)."
+        )
+    M_tar = M_verma(t, 0, 0, c, max_deg=1 + max_source_deg,
+                    e44_data=e44_data)
     M_src = M_verma(t - 1, 0, 0, c - 1, max_deg=max_source_deg,
-                    e44_data=src_e44_data if src_uses_phat4 else None)
-    try:
-        phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
-    except RuntimeError as exc:
-        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
-            M_src = M_verma(t - 1, 0, 0, c - 1, max_deg=max_source_deg,
-                            e44_data=None)
-            phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
-        else:
-            raise
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 1, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1744,66 +1951,14 @@ def phi_1C(t, e44_data, max_source_deg=1, src_e44_data=None):
     """
     Morphism \phi[1C]: M_{t-1}(0,1,0) \to M_t(0,0,1), degree 1.
 
-    Target uses \hat{p}(4) fiber (dim W_t(0,0,1) = 80) to obtain the full
-    L_1 kernel at degree 1.  w[1C] is extracted via:
-      (1) weight filtering to sl_4 weight (0,1,0);
-      (2) hw condition: f_1\cdotw = f_3\cdotw = 0  (Dynkin a_1=a_3=0 for (0,1,0)).
-
-    src_e44_data : e44_data to use for the source fiber.
-                   Pass e44_data when source node (0,1,0) is phat4.
+    Constructed from the complete degree-one L_1 kernel and the unique
+    injective \hat{p}(4)-intertwiner from the full source fiber.
     """
     M_tar = M_verma(t, 0, 0, 1, max_deg=1 + max_source_deg,
                      e44_data=e44_data)
-    ker = _joint_kernel_deg1(M_tar, e44_data)
-    dim_W = M_tar.dim_W
-    n = M_tar.dim(1)
-
-    # (1) Weight-filter to (0,1,0)
-    fiber_wts = _fiber_weights_from_cartan(M_tar)
-    pbw1 = M_tar.pbw[1]
-    target_wt = (0, 1, 0)
-    non_target = [i for i in range(n)
-                  if _flat_weight(i, pbw1, dim_W, fiber_wts) != target_wt]
-    K_mat = matrix(QQ, ker)
-    K_nt = K_mat[:, non_target]
-    sub_ker = K_nt.left_kernel().basis()
-    wt_vecs = [sum(c * vector(QQ, ker[j]) for j, c in enumerate(row))
-               for row in sub_ker]
-    if not wt_vecs:
-        raise RuntimeError(
-            f"No weight-(0,1,0) vector in {len(ker)}-dim L_1 kernel "
-            f"of M_{t}(0,0,1)[1]"
-        )
-
-    # (2) HW condition: intersect with ker(f_1) cap ker(f_3)
-    # f_1 = E_2_1 (L0 idx 8), f_3 = E_4_3 (L0 idx 2)
-    Kw = matrix(QQ, wt_vecs)
-    for f_idx in [_SL4_LOWER_L0[1], _SL4_LOWER_L0[3]]:
-        f_mat = l0_action_matrix(M_tar, f_idx, e44_data, max_d=1)[1]
-        images = Kw * f_mat.transpose()
-        null = images.left_kernel().basis()
-        if not null:
-            raise RuntimeError(
-                f"HW filter (L0[{f_idx}]) annihilates all weight-(0,1,0) "
-                f"kernel vectors"
-            )
-        Kw = matrix(QQ, [sum(c * vector(QQ, wt_vecs[j])
-                              for j, c in enumerate(row))
-                         for row in null])
-        wt_vecs = list(Kw.rows())
-
-    if len(wt_vecs) != 1:
-        raise RuntimeError(
-            f"Expected 1-dim HW-(0,1,0) kernel; got {len(wt_vecs)}"
-        )
-    w = wt_vecs[0]
-    first_nz = next(c for c in w if c != QQ(0))
-    w = (QQ(1) / first_nz) * w
-
-    # Source fiber: node (0,1,0) uses phat4 when src_e44_data is provided.
     M_src = M_verma(t - 1, 0, 1, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data)
-    phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 1, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1883,15 +2038,11 @@ def phi_2DA(t, e44_data, max_source_deg=0, src_e44_data=None):
     Target uses \hat{p}(4) fiber (dim W_t(0,1,0) = 32).
     Source uses sl_4 fiber V(2,0,0) dim=10.
     """
-    M_tar, w = w2DA(t, e44_data)
-    if M_tar.max_deg < 2 + max_source_deg:
-        M_tar = M_verma(t, 0, 1, 0, e44_data=e44_data,
-                        max_deg=2 + max_source_deg)
-        # Recompute w in the larger module (same vector, padded context)
-        _, w = w2DA(t, e44_data)
-
-    M_src = M_verma(t - 2, 2, 0, 0, max_deg=max_source_deg)
-    phi0 = _compute_phi0(w, M_tar, 2, M_src.W, e44_data)
+    M_tar = M_verma(t, 0, 1, 0, max_deg=2 + max_source_deg,
+                    e44_data=e44_data)
+    M_src = M_verma(t - 2, 2, 0, 0, max_deg=max_source_deg,
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 2, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1908,27 +2059,10 @@ def phi_1D(t, e44_data, max_source_deg=1, src_e44_data=None):
     """
     if QQ(t) == QQ(0):
         raise ValueError("\phi[1D] does not exist for t=0")
-    M_tar = M_verma(t, 0, 0, 0, max_deg=1 + max_source_deg)
-    ker = _joint_kernel_deg1(M_tar, e44_data)
-    if not ker:
-        raise RuntimeError("Empty kernel for w[1D]")
-    v_raw = ker[0]
-    first_nz = next(c for c in v_raw if c != QQ(0))
-    w = (QQ(1) / first_nz) * v_raw
-
-    # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
-    src_uses_phat4 = (src_e44_data is not None)
+    M_tar = M_verma(t, 0, 0, 0, max_deg=1 + max_source_deg, e44_data=e44_data)
     M_src = M_verma(t - 1, 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data if src_uses_phat4 else None)
-    try:
-        phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
-    except RuntimeError as exc:
-        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
-            M_src = M_verma(t - 1, 1, 0, 0, max_deg=max_source_deg,
-                            e44_data=None)
-            phi0 = _compute_phi0(w, M_tar, 1, M_src.W, e44_data)
-        else:
-            raise
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 1, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1974,8 +2108,9 @@ def phi_1E(e44_data, max_source_deg=1, src_e44_data=None):
     first_nz = next(c for c in w if c != QQ(0))
     w = (QQ(1) / first_nz) * w
 
-    M_src = M_verma(0, 0, 0, 0, max_deg=max_source_deg)
-    phi0 = [vector(QQ, w)]
+    M_src = M_verma(0, 0, 0, 0, max_deg=max_source_deg,
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 1, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -1997,8 +2132,9 @@ def phi_3F(e44_data, max_source_deg=0, src_e44_data=None):
         )
     w = ker[0]
 
-    M_src = M_verma(0, 0, 0, 0, max_deg=max_source_deg)
-    phi0 = [vector(QQ, w)]
+    M_src = M_verma(0, 0, 0, 0, max_deg=max_source_deg,
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 3, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -2013,29 +2149,11 @@ def phi_3G(e44_data, max_source_deg=0, src_e44_data=None):
     src_e44_data : e44_data to use for the source fiber.
                    Pass e44_data when source node (1,0,0) is phat4.
     """
-    M_tar = M_verma(0, 0, 0, 0, max_deg=3 + max_source_deg)
-    coeffs = {}
-    for gen in [1, 2, 3]:
-        alpha = [0, 0, 0, 0]
-        alpha[gen] = 1
-        mon = (tuple(alpha), frozenset({0, gen}))
-        j = M_tar._pbw_idx[3][mon]
-        coeffs[(j, 0)] = QQ(-1)
-    w = M_tar.to_vec(3, coeffs)
-
-    # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
-    src_uses_phat4 = (src_e44_data is not None)
+    M_tar = M_verma(0, 0, 0, 0, max_deg=3 + max_source_deg,
+                    e44_data=e44_data)
     M_src = M_verma(-3, 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data if src_uses_phat4 else None)
-    try:
-        phi0 = _compute_phi0(w, M_tar, 3, M_src.W, e44_data)
-    except RuntimeError as exc:
-        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
-            M_src = M_verma(-3, 1, 0, 0, max_deg=max_source_deg,
-                            e44_data=None)
-            phi0 = _compute_phi0(w, M_tar, 3, M_src.W, e44_data)
-        else:
-            raise
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 3, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):
@@ -2053,39 +2171,9 @@ def phi_4H(t, e44_data, max_source_deg=0, src_e44_data=None):
     """
     M_tar = M_verma(t, 1, 0, 0, max_deg=4 + max_source_deg,
                      e44_data=e44_data)
-    # Recompute w[4H] inside M_tar
-    fiber_wts = _fiber_weights_from_cartan(M_tar)
-    ker = _joint_kernel_deg(M_tar, e44_data, deg=4)
-    dim_W = M_tar.dim_W
-    pbw4 = M_tar.pbw[4]
-    n = M_tar.dim(4)
-    target_wt = (1, 0, 0)
-    non_target = [i for i in range(n)
-                  if _flat_weight(i, pbw4, dim_W, fiber_wts) != target_wt]
-    K4_mat = matrix(QQ, ker)
-    K4_nt = K4_mat[:, non_target]
-    cb = K4_nt.left_kernel().basis()
-    if len(cb) != 1:
-        raise RuntimeError(
-            f"Expected 1-dim weight-(1,0,0) intersection; got {len(cb)}"
-        )
-    w = sum(c * vector(QQ, ker[i]) for i, c in enumerate(cb[0]))
-    first_nz = next(c for c in w if c != QQ(0))
-    w = w / first_nz
-
-    # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
-    src_uses_phat4 = (src_e44_data is not None)
     M_src = M_verma(t - 4, 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data if src_uses_phat4 else None)
-    try:
-        phi0 = _compute_phi0(w, M_tar, 4, M_src.W, e44_data)
-    except RuntimeError as exc:
-        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
-            M_src = M_verma(t - 4, 1, 0, 0, max_deg=max_source_deg,
-                            e44_data=None)
-            phi0 = _compute_phi0(w, M_tar, 4, M_src.W, e44_data)
-        else:
-            raise
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, 4, e44_data)
 
     matrices = {}
     for d in range(max_source_deg + 1):

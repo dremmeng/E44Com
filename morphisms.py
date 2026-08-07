@@ -182,38 +182,13 @@ def phi_2EA(e44_data, max_source_deg=0, src_e44_data=None):
 
     sv_deg = 2
 
-    # -- Step 1: build w[2EA] = \phi[1E][degree-1 mat] * w[1A](0,0) --------
-    # \phi[1E] with max_source_deg=1 to expose its degree-1 morphism matrix,
-    # which maps M_0(0,0,0)[1] \to M_1(1,0,0)[2].
-    _, _, _, _, mats_1E = phi_1E(e44_data, max_source_deg=1)
-    _, v_1A_00 = w1A(QQ(0), QQ(0))          # w[1A](t=0,a=0) \in M_0(0,0,0)[1]
-    w_2EA = mats_1E[1] * vector(QQ, v_1A_00)  # lives in M_1(1,0,0)[2]
-
-    if w_2EA.is_zero():
-        raise RuntimeError(
-            "w[2EA] = \phi[1E][1] * w[1A](0,0) is zero; "
-            "expected a nonzero degree-2 singular vector in M_1(1,0,0)."
-        )
-
-    # -- Step 2: set up source and target modules --------------------------
+    # -- Full CCK source and target modules ---------------------------------
     M_tar = M_verma(QQ(1), 1, 0, 0,
                     max_deg=sv_deg + max_source_deg,
                     e44_data=e44_data)
-    # Source fiber: node (1,0,0) uses phat4 when src_e44_data is provided.
-    src_uses_phat4 = (src_e44_data is not None)
     M_src = M_verma(QQ(-1), 1, 0, 0, max_deg=max_source_deg,
-                    e44_data=src_e44_data if src_uses_phat4 else None)
-
-    # -- Step 3: fiber map \phi_0: W_{-1}(1,0,0) \to M_1(1,0,0)[2] ------------
-    try:
-        phi0 = _compute_phi0(w_2EA, M_tar, sv_deg, M_src.W, e44_data)
-    except RuntimeError as exc:
-        if src_uses_phat4 and 'L_0 equivariance system inconsistent' in str(exc):
-            M_src = M_verma(QQ(-1), 1, 0, 0, max_deg=max_source_deg,
-                            e44_data=None)
-            phi0 = _compute_phi0(w_2EA, M_tar, sv_deg, M_src.W, e44_data)
-        else:
-            raise
+                    e44_data=e44_data)
+    phi0 = _compute_full_phi0(M_src, M_tar, sv_deg, e44_data)
 
     # -- Step 4: assemble morphism matrices at each source degree ----------
     matrices = {}

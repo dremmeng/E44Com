@@ -9,17 +9,12 @@ Computes H^k = ker(O_k) / im(I_k) for both Complex A and Complex B, where:
   I_k  =  hstack of all differentials D_{k-s → k}  (incoming to level k)
 
 Computing H^k is an OPEN PROBLEM stated in the introduction of the paper.
-This code produces numerical evidence via truncated Verma modules (sl_4 fibers,
-max_deg controlled by the caller).
-
-Notes on sl_4 vs \hat{p}(4) fibers
-------------------------------
-All cochain groups use sl_4 fibers (e44_data=None in CochainGroup), which is
-consistent with how the phi[1A] and phi[1B] morphisms are computed internally.
-Morphisms that require \hat{p}(4) fibers (phi[1C], phi[2DA], phi[2EA], phi[1D/E],
-phi[3F/G/4H]) are silently skipped during assemble_differential via
-FiberMismatchError.  The resulting complex therefore captures the sl_4-fiber
-contribution to each cochain group.
+This code produces numerical evidence via truncated full \hat{p}(4)-fiber
+Verma modules, with max_deg controlled by the caller.  Morphism matrices are
+checked against their source and target cochain-group blocks during assembly.
+Assembly raises rather than silently omitting an incompatible edge.  The
+full-fiber migration currently awaits CCK-compatible quotient models for the
+phi[1B] and phi[1C] source/target families.
 
 Run inside SageMath:  sage cohomology.py
 """

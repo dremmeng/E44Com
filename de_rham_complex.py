@@ -28,8 +28,16 @@ Subtask status
 
 Dependency
 ----------
-  e44_brackets.pkl  -- written by sage e44_structure.py
-  phat4_cache.pkl   -- written by sage phat4_modules.py (optional cache)
+    e44_brackets.pkl  -- written by sage e44_structure.py
+    phat4_cache.pkl   -- written by sage phat4_modules.py (optional cache)
+
+CCK fiber convention
+--------------------
+By CCK Definition 5.3, every M_t(a,b,c) is induced from the full irreducible
+p_hat(4)-module W_t(a,b,c).  Consequently, production cochain groups always
+use full p_hat(4) fibers when e44_data is available.  The current migration is
+blocked only for phi[1B] and phi[1C], whose W_t(0,0,c) and W_t(0,1,0) quotient
+models still need reconciliation with the CCK quotient maps.
 
 Run inside SageMath:  sage de_rham_complex.py
 """
@@ -182,6 +190,8 @@ def _enum_1B(t_min, t_max, a_max):
         if t_src < t_min:
             continue
         for c in range(1, a_max + 1):
+            if t == 1 and c == 1:
+                continue  # CCK: phi[1B](1,1) does not descend to W_0(0,0,0).
             src = Node(t_src, 0, 0, c - 1)
             tar = Node(t,     0, 0, c)
             phi_args = (QQ(t), c)
@@ -549,41 +559,18 @@ _VERMA_CACHE = {}   # {(t, a, b, c, max_deg, uses_phat4): VermaModule}
 # Fiber-type classification for CochainGroup nodes
 # ===========================================================================
 
-# Nodes that require the full phat4 (W_t(a,b,c)) fiber rather than sl4 (V(a,b,c)).
-# Only nodes that appear as TARGET of phi functions built with phat4 fibers
-# AND whose source-side phi functions use sl4 M_src (so no _compute_phi0 failure).
-#
-#   (1,0,0): target of phi[1A](a=1), phi[1E], phi[2EA], phi[3F], phi[4H]
-#             Source of phi[1A](a=0)/phi[1D]/phi[3G] but those use sl4 M_src
-#             -> FiberMismatchError for those edges (silently dropped)
-#   (0,0,1): target of phi[1C]
-#             phi[1B](c=1) uses sl4 M_tar -> FiberMismatchError (dropped)
-#
-#   (0,1,0) deliberately EXCLUDED: phi[1C] uses sl4 M_src for (0,1,0) and
-#             _compute_phi0 fails when phat4 source is forced; keeping sl4
-#             lets phi[1C] work. phi[2DA] (phat4 target) remains dropped.
-FIBER_TYPE = {
-    (1, 0, 0): 'phat4',
-    (0, 0, 1): 'phat4',
-}
-
-
 def node_fiber_type(node):
-    """Return 'phat4' or 'sl4' for *node* based on which phi functions target it.
-
-    When e44_data is provided to get_verma / CochainGroup, nodes in FIBER_TYPE
-    use the full irreducible p_hat(4)-module fiber; all others use sl_4.
-    """
-    return FIBER_TYPE.get((node.a, node.b, node.c), 'sl4')
+    """Return the CCK fiber type for a generalized Verma-module node."""
+    return 'phat4'
 
 
 def get_verma(node, max_deg=MAX_VERMA_DEG, e44_data=None):
     """
     Return the VermaModule M_t(a,b,c) truncated at max_deg, with caching.
 
-    When e44_data is supplied AND the node is in FIBER_TYPE, the fiber is the
-    full irreducible p_hat(4)-module W_t(a,b,c).  For all other nodes (or when
-    e44_data is None), the fiber is the sl_4-irreducible V(a,b,c).
+    When e44_data is supplied, the fiber is the full irreducible
+    p_hat(4)-module W_t(a,b,c), as in CCK Definition 5.3.  Without e44_data,
+    the sl_4-irreducible V(a,b,c) is used only for legacy diagnostics.
 
     Parameters
     ----------
@@ -595,7 +582,7 @@ def get_verma(node, max_deg=MAX_VERMA_DEG, e44_data=None):
     -------
     VermaModule
     """
-    uses_phat4 = (e44_data is not None) and (node_fiber_type(node) == 'phat4')
+    uses_phat4 = e44_data is not None
     node_e44   = e44_data if uses_phat4 else None
     key = (node.t, node.a, node.b, node.c, max_deg, uses_phat4)
     if key not in _VERMA_CACHE:
@@ -1087,8 +1074,8 @@ def assemble_differential(src_group, tar_group, morphism_specs,
     Assemble the full differential matrix D: C^{src_group.k} -> C^{tar_group.k}.
 
     Iterates over all edges (src, tar, phi_args) from each MorphismSpec whose
-    endpoints lie at the right cochain levels and inside the window.  Edges
-    with a fiber-type mismatch are silently skipped.
+    endpoints lie at the right cochain levels and inside the window.  The
+    cochain groups and each morphism must agree on the fiber at every node.
 
     Parameters
     ----------
@@ -1127,18 +1114,13 @@ def assemble_differential(src_group, tar_group, morphism_specs,
                     src_group, tar_group, e44_data, msd,
                     src_e44_data=src_data
                 )
-            except FiberMismatchError:
-                # Fiber type mismatch between this phi function and the
-                # CochainGroup.  Skip this edge silently.
-                continue
-            except BaseException as _exc:
-                # Production robustness: some edge-local morphism builders can
-                # fail for specific parameter values (e.g. missing singular
-                # vectors at that t). Treat these as skipped edges rather than
-                # aborting the full differential build.
-                if isinstance(_exc, KeyboardInterrupt):
-                    raise
-                continue
+            except KeyboardInterrupt:
+                raise
+            except BaseException as exc:
+                raise RuntimeError(
+                    f"Failed to construct {spec.name}{phi_args} from "
+                    f"{_node_label(src)} to {_node_label(tar)}"
+                ) from exc
 
             for (i, j), val in block_mat.dict().items():
                 key = (i, j)
@@ -1151,7 +1133,13 @@ def assemble_differential(src_group, tar_group, morphism_specs,
 
 def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=True):
     """
-    Subtask 5 checks:
+    Legacy Subtask 5 checks for the pre-CCK mixed-fiber prototype.
+
+    Production complexes now use full p_hat(4) fibers for every node and fail
+    fast on an incompatible morphism; this diagnostic intentionally constructs
+    sl_4-only groups and is not a production-complex validation.
+
+    Checks:
       1.  get_morphism_matrix shape  =  (tar.total_dim, src.total_dim).
       2.  Block for phi[1A] at (tar_node, d_tar=1) \times (src_node, d_src=0) is nonzero.
       3.  assemble_differential shape  =  (tar.total_dim, src.total_dim).
@@ -1167,8 +1155,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
     small (~10-170 per node) and the test runs in seconds.  The explicit
     sl_4-fiber CochainGroup (e44_data=None) is dimension-compatible with
     phi[1A]/phi[1B] (sl_4 M_tar) but incompatible with phi[1C] (phat4 M_tar).
-    In the full DeRhamComplexA (e44_data provided), phat4 CGs are built for
-    nodes in FIBER_TYPE and all phi functions receive matching src_e44_data.
+    It does not validate the current full-fiber CCK complex.
 
     Returns True iff all checks pass.
     """
@@ -1303,8 +1290,7 @@ def _check_subtask5(e44_data, t_min=-1, t_max=2, a_max=1, max_deg=2, verbose=Tru
             print(f"  [SKIP] phi[1C] nodes M_0(0,1,0)/M_1(0,0,1) not both in window")
 
     # -- Checks 3 & 4: assemble_differential ------------------------------
-    # Uses same small window / max_deg; phi[1C]/[2DA]/[2EA] edges are
-    # silently skipped by assemble_differential due to FiberMismatchError.
+    # This legacy call is expected to reject full-fiber-only edges.
     D = assemble_differential(
         CG_src, CG_tar, MORPHISMS_A, e44_data, t_min, t_max, a_max
     )
@@ -1375,9 +1361,8 @@ class DeRhamComplexA:
         morphs = self.__class__.MORPHISMS
 
         # -- Build cochain groups ------------------------------------------
-        # CochainGroups pass e44_data to get_verma, which selects phat4 fibers
-        # for nodes in FIBER_TYPE and sl_4 fibers for all others.  phi functions
-        # in assemble_differential receive matching src_e44_data automatically.
+        # CochainGroups pass e44_data to get_verma, selecting full p_hat(4)
+        # fibers for every CCK generalized Verma-module node.
         self.positions = list(range(t_min, t_max + 1))
         self.groups    = {}
         for k in self.positions:

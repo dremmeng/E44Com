@@ -1087,7 +1087,7 @@ def l0_action_matrix(M, L0_idx, e44_data, max_d=None):
         if dim_d == 0:
             mats.append(matrix(QQ, 0, 0))
             continue
-        mat = matrix(QQ, dim_d, dim_d)
+        mat = matrix(QQ, dim_d, dim_d, sparse=True)
         pbw_d = M.pbw[d]
 
         for j, (alpha, S) in enumerate(pbw_d):
@@ -1280,7 +1280,7 @@ def l1_action_matrix(M, L1_idx, e44_data):
         if rows == 0 or cols == 0:
             mats.append(matrix(QQ, rows, cols))
             continue
-        mat = matrix(QQ, rows, cols)
+        mat = matrix(QQ, rows, cols, sparse=True)
         pbw_d   = M.pbw[d]
         pbw_dm1 = M.pbw[d - 1]
         pbw_dm1_idx = {mon: j for j, mon in enumerate(pbw_dm1)}

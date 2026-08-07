@@ -562,6 +562,39 @@ class Phat4Module:
         3. Generate the submodule from remaining singular vectors
         4. Quotient K by this submodule
         """
+        if self.t != 0 and (self.a, self.b, self.c) == (0, 1, 0):
+            # CCK Proposition 3.8(2): the generic singular-vector heuristic
+            # does not identify this exceptional kernel quotient reliably.
+            theta = _kac_intertwiner(K, KacModule(self.t, 0, 0, 0,
+                                                    self.e44_data))
+            psi = _kac_intertwiner(theta._target,
+                                   KacModule(self.t, 0, 0, 2,
+                                             self.e44_data))
+            kernel = (psi.matrix * theta.matrix).right_kernel().basis()
+            self._install_quotient(K, matrix(QQ, [list(v) for v in kernel]))
+            return
+
+        if self.t != 0 and (self.a, self.b, self.c) == (0, 0, 1):
+            # CCK Proposition 3.8(5), with (a,c) = (0,1).  The sign of the
+            # a_13 term reflects the crystal ordering used by this codebase.
+            eta_seed = vector(QQ, K.dim)
+            for a_idx, weight, coefficient in [
+                (2, (0, 0, 1), QQ(1)),
+                (1, (0, 1, -1), QQ(-1)),
+                (0, (1, -1, 0), QQ(1)),
+            ]:
+                fiber_indices = K.V.weight_spaces.get(weight, [])
+                if len(fiber_indices) != 1:
+                    raise RuntimeError(
+                        f"Cannot identify the eta_1,0 fiber weight {weight}"
+                    )
+                eta_seed[K._flat_idx(K.subset_idx[frozenset({a_idx})],
+                                      fiber_indices[0])] = coefficient
+            eta = _kac_intertwiner(KacModule(self.t, 1, 0, 0,
+                                               self.e44_data), K, eta_seed)
+            self._install_quotient(K, eta.matrix.column_space().basis_matrix())
+            return
+
         # Step 1: Find kernel of all b_{ij} simultaneously
         # The \hat{p}(4)_1 generators are: b_{ij} for (i,j) in BIJ_PAIRS
         # Their action on K is via L_0 odd generators.
@@ -695,8 +728,52 @@ class Phat4Module:
             self.dim_V = K.dim_V
             return
 
-        work = current_orbit  # already computed; no need to redo
+        self._install_quotient(K, current_orbit)
+        if self.t == 0 and (self.a, self.b, self.c) == (0, 1, 0):
+            self._refine_t0_010_quotient(K)
 
+    def _refine_t0_010_quotient(self, K):
+        """Take the remaining maximal submodule of the t=0 (0,1,0) quotient."""
+        def b_action(i, j):
+            if i == j:
+                return 2 * self.action_mats[_l0_odd_idx(i, i)]
+            return (self.action_mats[_l0_odd_idx(i, j)] +
+                    self.action_mats[_l0_odd_idx(j, i)])
+
+        annihilators = [b_action(i, j) for i, j in BIJ_PAIRS]
+        annihilators.extend(
+            self.action_mats[_l0_even_idx(i, i + 1)] for i in range(1, 4)
+        )
+        singular = block_matrix(len(annihilators), 1, annihilators)
+        non_hw = [v for v in singular.right_kernel().basis() if v[0] == 0]
+        if not non_hw:
+            raise RuntimeError("W_0(0,1,0) has no residual singular vectors")
+
+        all_actions_t = [action.transpose() for action in self.action_mats.values()]
+        work = matrix(QQ, non_hw)
+        work.echelonize()
+        old_rank = -1
+        while work.rank() != old_rank:
+            old_rank = work.rank()
+            for action_t in all_actions_t:
+                work = work.stack(work[:old_rank] * action_t)
+            work.echelonize()
+            work = work[:work.rank()]
+
+        hw = vector(QQ, [QQ(1)] + [QQ(0)] * (self.dim - 1))
+        if work.stack(matrix(QQ, [hw])).rank() == work.rank():
+            raise RuntimeError("Residual t=0 submodule contains the highest weight")
+
+        original_kernel = matrix(QQ, [list(v) for v in
+                                      self._proj_coords.right_kernel().basis()])
+        lifted_residual = work * self._incl
+        self._install_quotient(K, original_kernel.stack(lifted_residual))
+
+    def _install_quotient(self, K, submodule_rows):
+        """Install K modulo the submodule spanned by ``submodule_rows``."""
+        work = matrix(QQ, submodule_rows.nrows(), submodule_rows.ncols(),
+                      list(submodule_rows))
+        work.echelonize()
         sub_dim = work.rank()
         quot_dim = K.dim - sub_dim
 
@@ -744,11 +821,107 @@ class Phat4Module:
         return self.t * identity_matrix(QQ, self.dim)
 
 
+class _KacIntertwiner:
+    """A p_hat(4)-map between Kac modules, retained with its target."""
+
+    def __init__(self, matrix_, target):
+        self.matrix = matrix_
+        self._target = target
+
+
+def _kac_intertwiner(K_source, K_target, fiber_seed=None):
+    """Construct the unique induced map K_source -> K_target, when it exists."""
+    singular_matrix = block_matrix(
+        len(BIJ_PAIRS), 1,
+        [K_target._b_action(i, j) for i, j in BIJ_PAIRS]
+    ).right_kernel().basis_matrix().transpose()
+    target_dim = singular_matrix.ncols()
+    source_dim = K_source.dim_V
+    equations = []
+
+    for l0_idx in range(16):
+        target_action = singular_matrix.solve_right(
+            K_target._get_action_mat(l0_idx) * singular_matrix
+        )
+        source_action = K_source._sl4_action_on_V(l0_idx)
+        for target_idx in range(target_dim):
+            for source_idx in range(source_dim):
+                row = [QQ(0)] * (target_dim * source_dim)
+                for inner_target in range(target_dim):
+                    row[inner_target * source_dim + source_idx] += \
+                        target_action[target_idx, inner_target]
+                for inner_source in range(source_dim):
+                    row[target_idx * source_dim + inner_source] -= \
+                        source_action[inner_source, source_idx]
+                equations.append(row)
+
+    intertwiners = matrix(QQ, equations).right_kernel()
+    if fiber_seed is None and intertwiners.dimension() != 1:
+        raise RuntimeError(
+            f"Expected a unique Kac-module intertwiner, found Hom dimension "
+            f"{intertwiners.dimension()}"
+        )
+
+    if fiber_seed is None:
+        coordinates = matrix(QQ, target_dim, source_dim,
+                             list(intertwiners.basis()[0]))
+    else:
+        seed_coordinates = singular_matrix.solve_right(fiber_seed)
+        hw_idx = K_source.V.v_hw
+        hw_images = []
+        for intertwiner in intertwiners.basis():
+            coordinate_map = matrix(QQ, target_dim, source_dim,
+                                    list(intertwiner))
+            hw_images.append(coordinate_map.column(hw_idx))
+        try:
+            hom_coefficients = matrix(QQ, hw_images).transpose().solve_right(
+                seed_coordinates
+            )
+        except ValueError as exc:
+            raise RuntimeError("The prescribed Kac seed is not an intertwiner image") from exc
+        flat_coordinates = sum(
+            coefficient * vector(QQ, intertwiner)
+            for coefficient, intertwiner in zip(hom_coefficients,
+                                                 intertwiners.basis())
+        )
+        coordinates = matrix(QQ, target_dim, source_dim,
+                             list(flat_coordinates))
+    fiber_map = [singular_matrix * coordinates.column(source_idx)
+                 for source_idx in range(source_dim)]
+    result = matrix(QQ, K_target.dim, K_source.dim)
+    for subset_pos, subset in enumerate(K_source.subsets):
+        for source_idx, image in enumerate(fiber_map):
+            source_value = vector(QQ, K_source.dim)
+            source_value[K_source._flat_idx(0, source_idx)] = QQ(1)
+            target_value = image
+            for a_idx in sorted(subset):
+                action_source = K_source._a_action(*AIJ_PAIRS[a_idx])
+                action_target = K_target._a_action(*AIJ_PAIRS[a_idx])
+                source_value = action_source * source_value
+                target_value = action_target * target_value
+            basis_idx = K_source._flat_idx(subset_pos, source_idx)
+            coefficient = source_value[basis_idx]
+            if coefficient == 0:
+                raise RuntimeError("Kac a-word does not reach its PBW basis vector")
+            lower_terms = vector(QQ, K_target.dim)
+            for source_col, source_coeff in enumerate(source_value):
+                if source_col != basis_idx and source_coeff != 0:
+                    lower_terms += source_coeff * result.column(source_col)
+            result.set_column(basis_idx, (target_value - lower_terms) / coefficient)
+
+    for l0_idx in range(32):
+        if K_target._get_action_mat(l0_idx) * result != \
+                result * K_source._get_action_mat(l0_idx):
+            raise RuntimeError(f"Kac-module intertwiner fails L_0[{l0_idx}]")
+    return _KacIntertwiner(result, K_target)
+
+
 # ===========================================================================
 # Module cache  (in-memory + pickle disk cache)
 # ===========================================================================
 
 _phat4_cache = {}
+_PHAT4_CACHE_VERSION = 7
 
 
 def _load_disk_cache():
@@ -801,7 +974,7 @@ def phat4_module(t, a, b, c, e44_data):
 
     Results are cached in memory and on disk (phat4_cache.pkl).
     """
-    key = (QQ(t), int(a), int(b), int(c))
+    key = (_PHAT4_CACHE_VERSION, QQ(t), int(a), int(b), int(c))
 
     # Check in-memory cache
     if key in _phat4_cache:
