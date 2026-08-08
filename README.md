@@ -76,6 +76,46 @@ The near-term production matrix is now split into four tracks:
 
 The detailed run matrix is in [production_runs_plan.txt](production_runs_plan.txt).
 
+## Run Order
+
+Run from the repository root. This Sage launcher compiles a file passed as
+`sage file.py` but does not execute its `if __name__ == '__main__'` block.
+Use the following helper for every script self-test:
+
+```bash
+run_sage_main() {
+  local script="$1"
+  prlimit --as=24000000000 -- timeout 900 \
+   /home/drew/miniforge3/bin/sage -c \
+   "scope={'__name__':'__main__','__file__':'${script}'}; exec(compile(open('${script}').read(), '${script}', 'exec'), scope)"
+}
+```
+
+The order below respects generated data, full-fiber modules, morphisms, and
+complex assembly. A completed command must show its named test banner and a
+final pass/fail summary; warnings alone mean the guarded test did not run.
+
+1. `run_sage_main e44_structure.py` creates or refreshes `e44_brackets.pkl`.
+2. `run_sage_main phat4_modules.py` builds and verifies the full
+  $\hat{\mathfrak p}(4)$ quotient fibers, updating `phat4_cache.pkl`.
+3. `run_sage_main verma_modules.py` checks induced Verma modules.
+4. `run_sage_main singular_vectors.py` verifies singular vectors and exports
+  valid morphism data. The CCK-invalid $\phi_{1B}(1,1)$ is intentionally
+  rejected and not exported.
+5. `run_sage_main morphisms.py` verifies the morphisms and their CCK
+  composition relations.
+6. `run_sage_main de_rham_complex.py` checks group assembly and differential
+  block placement. This is a test run, not a production cohomology result.
+7. Build a production window, certify the chain condition, then compute
+  cohomology:
+
+  ```bash
+  /home/drew/miniforge3/bin/sage -c "import production_run as p; p.CHECKPOINT_DIR='checkpoints'; p.apply_memory_limit(24); data=p.load_e44(); p.phase_build('A', -6, 6, 4, 5, data); assert p.phase_validate('A', -6, 6, 4, 5); p.phase_cohomology('A', -6, 6, 4, 5, data)"
+  ```
+
+  Repeat for `B` only after `phase_validate('B', ...)` passes. The production
+  runner refuses cohomology without a current exact chain certificate.
+
 
 ---
 
