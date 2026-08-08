@@ -161,7 +161,7 @@ class KacModule:
         Even L_0 generator (gl_4) acting on K_t via Leibniz:
             X \cdot (\omega_I \otimes v) = (ad(X)\cdot\omega_I) \otimes v  +  \omega_I \otimes (X\cdotv)
         """
-        mat = matrix(QQ, self.dim, self.dim)
+        mat = matrix(QQ, self.dim, self.dim, sparse=True)
 
         # 1. Fiber action: X\cdotv using crystal matrices
         W_mat = self._sl4_action_on_V(L0_idx)
@@ -225,7 +225,7 @@ class KacModule:
 
         r, s = self._odd_l0_to_rs(L0_idx)  # 1-indexed
 
-        mat = matrix(QQ, self.dim, self.dim)
+        mat = matrix(QQ, self.dim, self.dim, sparse=True)
 
         if r == s:
             # x_r dx_r = b_{rr}/2 -> action = (1/2) * b_{rr}_action
@@ -272,7 +272,7 @@ class KacModule:
             elif m2 == m:
                 B_half[m1] = c_mn * self.t / 2
 
-        mat = matrix(QQ, self.dim, self.dim)
+        mat = matrix(QQ, self.dim, self.dim, sparse=True)
         for si, I in enumerate(self.subsets):
             # Term 1: exterior multiplication  a_m \wedge \omega_I
             if m not in I:
@@ -336,7 +336,7 @@ class KacModule:
             B_half[(m1, m2)] = c_mn * self.t / 2
             B_half[(m2, m1)] = c_mn * self.t / 2
 
-        mat = matrix(QQ, self.dim, self.dim)
+        mat = matrix(QQ, self.dim, self.dim, sparse=True)
         # Process subsets in order of increasing size (self.subsets is
         # already sorted this way by construction).
         for si, I in enumerate(self.subsets):
@@ -434,7 +434,7 @@ class KacModule:
         coeffs = _expand_in_basis(result, L0_even, R_poly)
 
         # Build the FULL action matrix on K = \wedge \otimes V
-        action = matrix(QQ, self.dim, self.dim)
+        action = matrix(QQ, self.dim, self.dim, sparse=True)
         for sec_idx, coeff in coeffs.items():
             full_idx = L0.index(L0_even[sec_idx])
             # Use lazy getter: not all action matrices are pre-built.

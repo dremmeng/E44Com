@@ -179,6 +179,19 @@ def _enum_1A(t_min, t_max, a_max):
     return edges
 
 
+def _enum_1A_B(t_min, t_max, a_max):
+    """
+    Figure 8 branch of phi[1A]: M_{t-1}(a+1,0,0) -> M_t(a,0,0) for a>=2.
+
+    CCK Section 7 replaces the nonzero low-a compositions through a=0,1 by
+    the degree-3 and degree-4 arrows of the second exceptional complex.
+    Keeping those low-a phi[1A] edges alongside phi[1D]/phi[1E] would not be
+    a complex.
+    """
+    return [edge for edge in _enum_1A(t_min, t_max, a_max)
+            if edge[1].a >= 2]
+
+
 def _enum_1B(t_min, t_max, a_max):
     """
     phi[1B]: M_{t-1}(0,0,c-1) -> M_t(0,0,c)  for c>=1
@@ -346,7 +359,7 @@ MORPHISMS_A = [
 ]
 
 MORPHISMS_B = [
-    MorphismSpec('phi_1A',  sv_deg=1, phi_func=phi_1A,  enumerate_fn=_enum_1A),
+    MorphismSpec('phi_1A',  sv_deg=1, phi_func=phi_1A,  enumerate_fn=_enum_1A_B),
     MorphismSpec('phi_1B',  sv_deg=1, phi_func=phi_1B,  enumerate_fn=_enum_1B),
     MorphismSpec('phi_1C',  sv_deg=1, phi_func=phi_1C,  enumerate_fn=_enum_1C),
     MorphismSpec('phi_1D',  sv_deg=1, phi_func=phi_1D,  enumerate_fn=_enum_1D),

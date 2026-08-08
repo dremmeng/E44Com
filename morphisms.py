@@ -105,7 +105,7 @@ from singular_vectors import (
     # Singular-vector helpers used in phi_2EA and tests
     w1A, w1B, w1C, w1D, w1E, w3G, w4H,
     # Internal phi-map building helpers
-    _compute_phi0, _phi_at_degree,
+    _compute_phi0, _compute_full_phi0, _phi_at_degree,
     # Verification helper
     annihilator_check, _verify_morphism_equivariance,
     # Export helpers (re-exported)
@@ -367,11 +367,13 @@ def _check_section7(e44_data=None, verbose=True):
         {'max_source_deg': 1},
     )
 
-    # \phi[1B](t=1, c=1)
-    _build_and_verify(
-        "phi_1B(1,1)", phi_1B, (QQ(1), 1, e44_data),
-        {'max_source_deg': 1},
-    )
+    # CCK quotient exception: phi[1B](1,1) does not descend.
+    try:
+        phi_1B(QQ(1), 1, e44_data, max_source_deg=1)
+    except ValueError:
+        _check("phi_1B(1,1) rejected by CCK quotient exception", True, True)
+    else:
+        _check("phi_1B(1,1) rejected by CCK quotient exception", False, True)
 
     # \phi[1C](t=1)   [p_hat(4) target fiber]
     _build_and_verify(
@@ -561,42 +563,35 @@ def _check_section7(e44_data=None, verbose=True):
         if verbose:
             print(f"  [(SKIP)] (4): {exc}")
 
-    # (5) \phi[1D](1) \circ \phi[1A](0,1) = 0  at degree 2
-    #     M_{-1}(2,0,0) \to^{\phi[1A](0,1)} M_0(1,0,0) \to^{\phi[1D](1)} M_1(0,0,0)
+    # These are nonzero CCK classification compositions.  Figure 8 excludes
+    # the corresponding low-a phi[1A] inputs, so they are not d^2 relations.
     if cache.get("phi_1D(1)") is not None:
         _, _, _, _, mats_1D_1 = cache["phi_1D(1)"]
         _, v_1A_01 = w1A(QQ(0), 1)
         comp = mats_1D_1[1] * vector(QQ, v_1A_01)
-        _check_c("(5) phi_1D(1) \circ phi_1A(0,1) = 0", comp.is_zero(), True)
+        _check_c("(5) phi_1D(1) \circ phi_1A(0,1) is nonzero outside Complex B",
+                 not comp.is_zero(), True)
     else:
         try:
             _, _, _, _, mats_1D_1 = phi_1D(QQ(1), e44_data, max_source_deg=1)
             _, v_1A_01 = w1A(QQ(0), 1)
             comp = mats_1D_1[1] * vector(QQ, v_1A_01)
-            _check_c("(5) phi_1D(1) \circ phi_1A(0,1) = 0", comp.is_zero(), True)
+            _check_c("(5) phi_1D(1) \circ phi_1A(0,1) is nonzero outside Complex B",
+                     not comp.is_zero(), True)
         except Exception as exc:
             if verbose:
                 print(f"  [(SKIP)] (5): {exc}")
 
-    # (6) \phi[1B](2,2) \circ \phi[1B](1,1) = 0  at degree 2
-    #     M_0(0,0,0) \to^{\phi[1B](1,1)} M_1(0,0,1) \to^{\phi[1B](2,2)} M_2(0,0,2)
-    try:
-        _, _, _, _, mats_1B_11 = phi_1B(QQ(1), 1, e44_data, max_source_deg=1)
-        _, _, _, _, mats_1B_22 = phi_1B(QQ(2), 2, e44_data, max_source_deg=1)
-        _, v_1B_11 = w1B(QQ(1), 1)
-        comp = mats_1B_22[1] * vector(QQ, v_1B_11)
-        _check_c("(6) phi_1B(2,2) \circ phi_1B(1,1) = 0", comp.is_zero(), True)
-    except Exception as exc:
-        if verbose:
-            print(f"  [(SKIP)] (6): {exc}")
+    # (6) phi[1B](1,1) is invalid in the full quotient model; its rejection
+    # was checked in Part A and no composition through it is meaningful.
 
-    # (7) \phi[1D](3) \circ \phi[1A](2,1) = 0  at degree 2
-    #     M_1(2,0,0) \to^{\phi[1A](2,1)} M_2(1,0,0) \to^{\phi[1D](3)} M_3(0,0,0)
+    # (7) is the translated nonzero classification composition.
     try:
         _, _, _, _, mats_1D_3 = phi_1D(QQ(3), e44_data, max_source_deg=1)
         _, v_1A_21 = w1A(QQ(2), 1)
         comp = mats_1D_3[1] * vector(QQ, v_1A_21)
-        _check_c("(7) phi_1D(3) \circ phi_1A(2,1) = 0", comp.is_zero(), True)
+        _check_c("(7) phi_1D(3) \circ phi_1A(2,1) is nonzero outside Complex B",
+             not comp.is_zero(), True)
     except Exception as exc:
         if verbose:
             print(f"  [(SKIP)] (7): {exc}")

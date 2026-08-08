@@ -11,13 +11,15 @@ Phases
     plan        Print the intended production matrix for the full H^1 runs.
   status      Show which checkpoints exist vs. missing.
   build       Compute and save differential matrices one at a time.
-  cohomology  Load saved checkpoints and compute H^k level by level.
+    validate    Certify every composable pair of saved differential matrices is zero.
+    cohomology  Load saved checkpoints and compute H^k level by level.
 
 Usage (inside SageMath, run from the E44Com directory)
 ------
   sage production_run.py status
   sage production_run.py build A          # Complex A differentials
   sage production_run.py build B          # Complex B differentials
+    sage production_run.py validate A       # Required before cohomology
   sage production_run.py cohomology A     # H^k for Complex A
   sage production_run.py cohomology B     # H^k for Complex B
   sage production_run.py cohomology A --level 0   # H^0 only (split across sessions)
@@ -55,6 +57,10 @@ Decomposition hint (advanced)
 
 from __future__ import print_function
 import sys, os, argparse, pickle, time, datetime
+try:
+    import resource
+except ImportError:
+    resource = None
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
@@ -99,6 +105,17 @@ def ts():
     return datetime.datetime.now().strftime('%H:%M:%S')
 
 
+def apply_memory_limit(memory_gb):
+    """Apply a Linux address-space cap inherited by Sage and LinBox children."""
+    if memory_gb is None or resource is None:
+        return
+    requested = int(memory_gb) * 1024 ** 3
+    soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    target = requested if hard == resource.RLIM_INFINITY else min(requested, hard)
+    resource.setrlimit(resource.RLIMIT_AS, (target, hard))
+    print(f'[{ts()}] Address-space limit: {target // 1024 ** 3} GB')
+
+
 def diff_path(cx_type, k_src, k_tar):
     fname = f'diff_{cx_type}_k{k_src:+03d}_to_k{k_tar:+03d}.pkl'
     return os.path.join(CHECKPOINT_DIR, fname)
@@ -115,11 +132,28 @@ def linear_data_path(cx_type, k):
     return os.path.join(CHECKPOINT_DIR, fname)
 
 
+def validation_path(cx_type):
+    """Path for the exact chain-condition certificate of one complex."""
+    return os.path.join(CHECKPOINT_DIR, f'validation_{cx_type}.pkl')
+
+
 def all_diff_pairs(cx_type, t_min, t_max):
     """Generate all (k_src, k_tar) pairs for a complex type."""
     for s in SHIFTS[cx_type]:
         for k in range(t_min, t_max + 1 - s):
             yield k, k + s
+
+
+def _differential_signature(cx_type, t_min, t_max):
+    """Fingerprint the saved differential checkpoints used by validation."""
+    signature = []
+    for k_src, k_tar in sorted(all_diff_pairs(cx_type, t_min, t_max)):
+        path = diff_path(cx_type, k_src, k_tar)
+        if not os.path.isfile(path):
+            return None
+        stat = os.stat(path)
+        signature.append((k_src, k_tar, stat.st_size, stat.st_mtime_ns))
+    return tuple(signature)
 
 
 def build_groups(cx_type, t_min, t_max, a_max, max_deg, e44_data):
@@ -273,6 +307,101 @@ def phase_build(cx_type, t_min, t_max, a_max, max_deg, e44_data):
 
 
 # ===========================================================================
+# Phase: validate
+# ===========================================================================
+
+def phase_validate(cx_type, t_min, t_max, a_max, max_deg):
+    """Exactly verify that every saved composable differential pair is zero."""
+    os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+    signature = _differential_signature(cx_type, t_min, t_max)
+    if signature is None:
+        print(f'[{ts()}] Cannot validate Complex {cx_type}: build every differential first.')
+        return False
+
+    differentials = {}
+    for k_src, k_tar in sorted(all_diff_pairs(cx_type, t_min, t_max)):
+        with open(diff_path(cx_type, k_src, k_tar), 'rb') as checkpoint:
+            payload = pickle.load(checkpoint)
+        expected = (cx_type, k_src, k_tar, t_min, t_max, a_max, max_deg)
+        actual = (payload.get('cx_type'), payload.get('k_src'), payload.get('k_tar'),
+                  payload.get('t_min'), payload.get('t_max'), payload.get('a_max'),
+                  payload.get('max_deg'))
+        if actual != expected:
+            raise RuntimeError(
+                f'Checkpoint {diff_path(cx_type, k_src, k_tar)} has incompatible parameters: '
+                f'expected {expected}, got {actual}'
+            )
+        differentials[(k_src, k_tar)] = payload['D']
+
+    failures = []
+    checks = 0
+    for k_src, k_mid in sorted(differentials):
+        first = differentials[(k_src, k_mid)]
+        for (out_src, k_tar), second in sorted(differentials.items()):
+            if out_src != k_mid:
+                continue
+            if second.ncols() != first.nrows():
+                raise RuntimeError(
+                    f'Incompatible checkpoint dimensions for D[{k_src}->{k_mid}] '
+                    f'and D[{k_mid}->{k_tar}].'
+                )
+            checks += 1
+            print(f'[{ts()}] D[{k_mid:+d}->{k_tar:+d}] * '
+                  f'D[{k_src:+d}->{k_mid:+d}] ...', flush=True)
+            product = second * first
+            nonzero = len(product.dict())
+            if nonzero:
+                failures.append((k_src, k_mid, k_tar, nonzero))
+                print(f'[{ts()}]   FAIL: {nonzero} nonzero entries', flush=True)
+            else:
+                print(f'[{ts()}]   OK', flush=True)
+            del product
+
+    certificate = {
+        'cx_type': cx_type,
+        't_min': t_min, 't_max': t_max, 'a_max': a_max, 'max_deg': max_deg,
+        'signature': signature,
+        'checks': checks,
+        'passed': not failures,
+        'failures': failures,
+    }
+    with open(validation_path(cx_type), 'wb') as checkpoint:
+        pickle.dump(certificate, checkpoint, protocol=4)
+
+    if failures:
+        print(f'[{ts()}] Complex {cx_type} validation FAILED: '
+              f'{len(failures)}/{checks} products are nonzero.')
+        return False
+    print(f'[{ts()}] Complex {cx_type} validation passed: {checks} products are zero.')
+    return True
+
+
+def require_validation(cx_type, t_min, t_max, a_max, max_deg):
+    """Reject cohomology unless the current checkpoints have a passing certificate."""
+    path = validation_path(cx_type)
+    if not os.path.isfile(path):
+        raise RuntimeError(
+            f'No chain-condition certificate for Complex {cx_type}. Run '
+            f'`sage production_run.py validate {cx_type}` after building all differentials.'
+        )
+    with open(path, 'rb') as checkpoint:
+        certificate = pickle.load(checkpoint)
+    expected = (cx_type, t_min, t_max, a_max, max_deg)
+    actual = (certificate.get('cx_type'), certificate.get('t_min'), certificate.get('t_max'),
+              certificate.get('a_max'), certificate.get('max_deg'))
+    if actual != expected or certificate.get('signature') != _differential_signature(cx_type, t_min, t_max):
+        raise RuntimeError(
+            f'Chain-condition certificate for Complex {cx_type} is stale or has incompatible parameters. '
+            f'Run `sage production_run.py validate {cx_type}` again.'
+        )
+    if not certificate.get('passed'):
+        raise RuntimeError(
+            f'Complex {cx_type} failed exact chain validation; cohomology is not defined. '
+            f'Failures: {certificate.get("failures", [])}'
+        )
+
+
+# ===========================================================================
 # Phase: cohomology
 # ===========================================================================
 
@@ -324,44 +453,24 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max,
             c += B.ncols()
 
     # -- Kernel / image ----------------------------------------------------
-    # Since d^2=0 is already verified (Proposition prop:d2zero), we only need
+    # Since d^2=0 is certified by production_run.py validate, we only need
     # dim_ker and dim_im; we do NOT need to build the subspace objects.
     # Strategy:
     #   dim_ker  = dim_k  - rank(O_k)    [rank-nullity]
     #   dim_im   = rank(I_k)             [column rank = row rank]
     #   dim_H    = dim_ker - dim_im
-    # For small matrices (<= _SMALL), use QQ exactly.
-    # For large matrices, use GF(p) for speed (certified by two distinct primes).
-    from sage.all import GF
-    _SMALL = 2000   # dimension threshold below which QQ is fast enough
-    _P1, _P2 = 65521, 65537   # two primes for double-checking rank over GF
-
-    def _rank_qq(M):
+    def _rank_exact(M):
         """Exact rank over QQ using p-adic lifting."""
         if M.nrows() == 0 or M.ncols() == 0:
             return 0
         return M.rank(algorithm='padic')
-
-    def _rank_fast(M, label):
-        """Rank via GF(p) with QQ certification for large matrices."""
-        if M.nrows() == 0 or M.ncols() == 0:
-            return 0
-        if max(M.nrows(), M.ncols()) <= _SMALL:
-            return M.rank(algorithm='padic')
-        r1 = M.change_ring(GF(_P1)).rank()
-        r2 = M.change_ring(GF(_P2)).rank()
-        if r1 != r2:
-            print(f'  {label}: GF rank mismatch ({r1} vs {r2}), '
-                  f'falling back to QQ padic', flush=True)
-            return M.rank(algorithm='padic')
-        return r1  # certified: two primes agree, no p-torsion at either
 
     print(f'  [k={k:+d}] rank of outgoing {O_k.nrows()}times{O_k.ncols()} ...', flush=True)
     t0 = time.time()
     if O_k.nrows() == 0:
         rank_out = 0
     else:
-        rank_out = _rank_fast(O_k, f'O_k[{k:+d}]')
+        rank_out = _rank_exact(O_k)
     dim_ker = dim_k - rank_out
     print(f'  [k={k:+d}] rank_out={rank_out}, dim_ker={dim_ker} ({time.time()-t0:.1f}s)', flush=True)
 
@@ -370,7 +479,7 @@ def cohomology_at_from_matrices(groups, differentials, k, t_min, t_max,
     if I_k.ncols() == 0:
         dim_im = 0
     else:
-        dim_im = _rank_fast(I_k, f'I_k[{k:+d}]')
+        dim_im = _rank_exact(I_k)
     print(f'  [k={k:+d}] dim_im={dim_im} ({time.time()-t0:.1f}s)', flush=True)
 
     # im subseteq ker is guaranteed by d^2=0; record it as True without recomputing.
@@ -429,6 +538,8 @@ def phase_cohomology(cx_type, t_min, t_max, a_max, max_deg, e44_data,
 
     levels : list of int or None -- if given, compute only those cochain levels.
     """
+    require_validation(cx_type, t_min, t_max, a_max, max_deg)
+
     # Check which differentials are available
     missing = [(k, k_tar) for k, k_tar in all_diff_pairs(cx_type, t_min, t_max)
                if not os.path.isfile(diff_path(cx_type, k, k_tar))]
@@ -529,14 +640,16 @@ def parse_args():
         description='Production E(4,4) de Rham cohomology computation.',
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument('phase', choices=['plan', 'status', 'build', 'cohomology'],
+    p.add_argument('phase', choices=['plan', 'status', 'build', 'validate', 'cohomology'],
                    help='Which phase to run.')
     p.add_argument('complex', nargs='?', choices=['A', 'B'],
-                   help='Which complex (required for build and cohomology).')
+                   help='Which complex (required for build, validate, and cohomology).')
     p.add_argument('--t-min',   type=int, default=T_MIN)
     p.add_argument('--t-max',   type=int, default=T_MAX)
     p.add_argument('--a-max',   type=int, default=A_MAX)
     p.add_argument('--max-deg', type=int, default=MAX_DEG)
+    p.add_argument('--memory-gb', type=int, default=24,
+                   help='Linux address-space limit in GB (default: 24; use 0 to disable).')
     p.add_argument('--level', type=int, nargs='+', metavar='K',
                    help='(cohomology phase only) compute H^k only at these level(s).')
     p.add_argument('--save-linear-data', action='store_true',
@@ -556,6 +669,7 @@ def main():
     t_max   = args.t_max
     a_max   = args.a_max
     max_deg = args.max_deg
+    apply_memory_limit(args.memory_gb if args.memory_gb > 0 else None)
 
     if args.phase == 'plan':
         phase_plan()
@@ -566,7 +680,7 @@ def main():
         return
 
     if args.complex is None:
-        print('ERROR: --complex A or B required for build/cohomology phases.')
+        print('ERROR: --complex A or B required for build/validate/cohomology phases.')
         sys.exit(1)
 
     cx_type = args.complex
@@ -580,6 +694,10 @@ def main():
 
     if args.phase == 'build':
         phase_build(cx_type, t_min, t_max, a_max, max_deg, e44_data)
+
+    elif args.phase == 'validate':
+        if not phase_validate(cx_type, t_min, t_max, a_max, max_deg):
+            sys.exit(1)
 
     elif args.phase == 'cohomology':
         levels = args.level  # None -> all levels
