@@ -41,8 +41,14 @@ The current working picture is:
 | [phat4_modules.py](phat4_modules.py) | $\hat{\mathfrak{p}}(4)$ module data; seed decomposition | CCK Archeology
 | [cohomology.py](cohomology.py) | Cohomology $H^k$ of the complex; dimension counts | New Work building on CCK
 | [morphisms.py](morphisms.py) | Morphism matrices; singular vector degrees | CCK Archeology
+| [singular_vectors.py] (singular_vectors.py) | Singular vectors | CCK Archeology
 
+### nu morphism and borel reduction
 
+| Script | What it computes |
+|--------|-----------------|
+| [borel_chain_map_check.py] | Reduction of PBW basis to the three dimensional case.
+| [nu_deformation.py] | Reduction by morphism from Euler to NS.
 
 ---
 
