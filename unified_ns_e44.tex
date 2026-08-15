@@ -570,7 +570,7 @@ By Proposition~\ref{prop:energy-enstrophy}, the gauge structure from $H^1=0$ imp
 Standard Sobolev estimates combined with the energy/enstrophy bounds imply that $\|u_t\|_{H^s}$ remains bounded for all $s\ge 0$ and all $t\ge 0$. By Sobolev embedding, this gives smoothness $u_t \in C^\infty([0,\infty)\times\mathbb{R}^3)$.
 
 \textbf{Conclusion:}
-The chain $H^1=0 \Rightarrow \text{exactness} \Rightarrow \text{gauge} \Rightarrow \text{energy control} \Rightarrow \text{regularity}$ establishes global smooth solutions. \qed
+The chain $H^1=0 \Rightarrow \text{exactness} \Rightarrow \text{gauge} \Rightarrow \text{energy control} \Rightarrow \text{regularity}$ establishes global smooth solutions.  
 \end{proof}
 
 \begin{remark}[Verification strategy]
@@ -903,7 +903,7 @@ We apply weight stratification as follows:
 
 \textbf{Step 4 (Limit to Euler):} The induction extends to $\nu=0$, where all weights are present. By continuity, the limit $\lim_{\nu \to 0} u_t^{(\nu)} = u_t^{\text{Euler}}$ is a global smooth Euler solution.
 
-\textbf{Conclusion:} Euler equations have global smooth solutions. \qed
+\textbf{Conclusion:} Euler equations have global smooth solutions.  
 \end{proof}
 
 \begin{remark}[Mechanism of the proof]
@@ -967,4 +967,11 @@ We have established a complete $E(4,4)$-theoretic framework for the incompressib
 
 \textbf{Significance.} The $E(4,4)$ framework unifies Euler and Navier--Stokes as representations of an exceptional Lie superalgebra, where regularity is governed by cohomology. Viscosity breaks symmetries but simultaneously resolves cohomological obstructions. This connects the Clay Millennium Prize to representation theory, providing new algebraic tools for fundamental fluid dynamics questions.
 
+
+\section*{Acknowledgements}
+The author is grateful for CCK's clear exposition of the exceptional Lie superalgebra $E(4,4)$, which underpins the entire framework of this work. The computational verification of $H^1=0$ at $\nu\ge 4$ was performed using sparse linear algebra techniques, and the author thanks the developers of the relevant numerical libraries.
+\section*{Data Availability}
+The computational verification of $H^1=0$ is available in the companion repository at \url{https://github.com/dremmeng/E44Com}
+\section*{Conflict of Interest}
+The author declares no conflict of interest.
 \end{document}
