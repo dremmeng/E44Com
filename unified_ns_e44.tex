@@ -63,7 +63,7 @@ where $u:\mathbb{R}\times\mathbb{R}^n\to\mathbb{R}^n$ is the velocity field and 
 
 The purpose of this note is to prove that when $n=4$, the Euler system \eqref{eq:euler-intro} is \emph{invariant under the action of the exceptional Lie superalgebra} $E(4,4)$. More precisely, we show that the Euler equations can be reformulated as an evolution equation in the degree-1 seed module of $\gE$, where the dynamics are given by a bracket that is manifestly $\gE$-equivariant.
 
-The exceptional Lie superalgebra $\gE$ is the linearly compact Lie superalgebra with even part isomorphic to the Lie algebra of vector fields $W(4)$ and odd part given by differential one-forms $\Omega^1(4)$. Its defining bracket relations encode a natural supersymmetric extension of the classical Lie derivative. The key insight is that the incompressible Euler system can be encoded in a single superfield
+The exceptional Lie superalgebra $\gE$ is the linearly compact Lie superalgebra with even part isomorphic to the Lie algebra of vector fields $W(4)$ and odd part given by differential one-forms $\Omega^1(4)$. Its defining bracket relations encode a natural supersymmetric extension of the classical Lie derivative. The key observation is that the incompressible Euler system can be encoded in a single superfield
 \[
   \Phi = u + \omega_p \in M_1(1,0,0),
 \]
@@ -850,7 +850,7 @@ At $\nu \geq \nu_0$, the cohomological obstruction space $H^1$ is dominated by t
 
 \subsection{Continuity of regularity under weight re-addition}
 
-The key insight is to establish that if NS is regular at viscosity $\nu_1$ and we decrease viscosity to $\nu_0 < \nu_1$, adding back weights one at a time, regularity is preserved under the continuous deformation.
+The insight is to establish that if NS is regular at viscosity $\nu_1$ and we decrease viscosity to $\nu_0 < \nu_1$, adding back weights one at a time, regularity is preserved under the continuous deformation.
 
 \begin{lemma}[Regularity stability under weight addition]\label{lem:weight-stability}
 Let $\nu_1 > \nu_0$ and assume that Navier--Stokes admits global smooth solutions at viscosity $\nu_1$. Let $\lambda$ be a single weight with $\nu_{\text{crit}}(\lambda) \in (\nu_0, \nu_1)$. Then for all $\nu \in [\nu_0, \nu_1]$, the NS system with viscosity $\nu$ admits global smooth solutions, even though the weight $\lambda$ is re-entering the cohomology as $\nu$ decreases.
@@ -970,6 +970,7 @@ We have established a complete $E(4,4)$-theoretic framework for the incompressib
 
 \section*{Acknowledgements}
 The author is grateful for CCK's clear exposition of the exceptional Lie superalgebra $E(4,4)$, which underpins the entire framework of this work. The computational verification of $H^1=0$ at $\nu\ge 4$ was performed using sparse linear algebra techniques, and the author thanks the developers of the relevant numerical libraries.
+The paper used various Claude models for verification of results.
 \section*{Data Availability}
 The computational verification of $H^1=0$ is available in the companion repository at \url{https://github.com/dremmeng/E44Com}
 \section*{Conflict of Interest}
@@ -1012,11 +1013,6 @@ Clay Mathematics Institute,
 L.~C.~Evans,
 \textit{Partial Differential Equations} (Graduate Studies in Mathematics vol. 19).
 American Mathematical Society, 2nd ed., 2010.
-
-\bibitem{CCK2016}
-K.~Cederwall, J.~Creutz, and B.~Kåhre,
-``Exceptional F(4) superalgebra,"
-\textit{Journal of High Energy Physics}, vol.~2016, no.~78, 2016.
 
 \bibitem{Beirao2009}
 P.~Beirão da Veiga,
@@ -1139,7 +1135,14 @@ J.~T.~Beale, T.~Kato, and A.~Majda,
 J.~W.~Gibbs,
 \textit{The Scientific Papers of J. Willard Gibbs, Vol. II: Dynamics, Vector Analysis, Multiple Algebra, etc.}
 Dover Publications, 1957.
-
+\bibitem{CCK2026}
+{
+  Nicoletta Cantarini and Fabrizio Caselli and Victor Kac.
+      Classification of degenerate Verma modules over $E(4,4)$, 
+      2026.
+      url={https://arxiv.org/abs/2603.16507}, 
+}
+\newblock Preprint.
 \end{thebibliography}
 
 \end{document}
